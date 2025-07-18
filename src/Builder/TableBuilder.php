@@ -4,20 +4,23 @@ namespace Egmond\InertiaTables\Builder;
 
 use Egmond\InertiaTables\Columns\BaseColumn;
 use Egmond\InertiaTables\Filters\BaseFilter;
-use Egmond\InertiaTables\Serialization\Serializer;
 use Egmond\InertiaTables\TableResult;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Collection;
 
 class TableBuilder
 {
     protected array $columns = [];
+
     protected array $filters = [];
+
     protected int $perPage = 25;
+
     protected array $defaultSort = [];
+
     protected bool $searchable = false;
+
     protected ?Request $request = null;
 
     public function __construct(?Request $request = null)
@@ -35,12 +38,14 @@ class TableBuilder
         foreach ($columns as $column) {
             $this->addColumn($column);
         }
+
         return $this;
     }
 
     public function addColumn(BaseColumn $column): static
     {
         $this->columns[$column->getKey()] = $column;
+
         return $this;
     }
 
@@ -49,30 +54,35 @@ class TableBuilder
         foreach ($filters as $filter) {
             $this->addFilter($filter);
         }
+
         return $this;
     }
 
     public function addFilter(BaseFilter $filter): static
     {
         $this->filters[$filter->getKey()] = $filter;
+
         return $this;
     }
 
     public function paginate(int $perPage): static
     {
         $this->perPage = $perPage;
+
         return $this;
     }
 
     public function sortBy(string $column, string $direction = 'asc'): static
     {
         $this->defaultSort[$column] = $direction;
+
         return $this;
     }
 
     public function searchable(bool $searchable = true): static
     {
         $this->searchable = $searchable;
+
         return $this;
     }
 
@@ -106,13 +116,13 @@ class TableBuilder
     protected function applySearch(Builder $query): Builder
     {
         $search = $this->getSearchQuery();
-        
-        if (!$search || !$this->searchable) {
+
+        if (! $search || ! $this->searchable) {
             return $query;
         }
 
         $searchableColumns = collect($this->columns)
-            ->filter(fn($column) => $column->isSearchable())
+            ->filter(fn ($column) => $column->isSearchable())
             ->keys()
             ->toArray();
 
@@ -122,7 +132,7 @@ class TableBuilder
 
         return $query->where(function ($query) use ($searchableColumns, $search) {
             foreach ($searchableColumns as $column) {
-                $query->orWhere($column, 'like', '%' . $search . '%');
+                $query->orWhere($column, 'like', '%'.$search.'%');
             }
         });
     }
@@ -133,7 +143,7 @@ class TableBuilder
 
         foreach ($this->filters as $filter) {
             $value = $filterValues[$filter->getKey()] ?? null;
-            
+
             if ($value !== null && $value !== '') {
                 $query = $filter->apply($query, $value);
             }
@@ -178,8 +188,8 @@ class TableBuilder
     protected function getConfig(): array
     {
         return [
-            'columns' => array_values(array_map(fn($column) => $column->toArray(), $this->columns)),
-            'filters' => array_values(array_map(fn($filter) => $filter->toArray(), $this->filters)),
+            'columns' => array_values(array_map(fn ($column) => $column->toArray(), $this->columns)),
+            'filters' => array_values(array_map(fn ($filter) => $filter->toArray(), $this->filters)),
             'searchable' => $this->searchable,
             'perPage' => $this->perPage,
             'defaultSort' => $this->defaultSort,
@@ -207,9 +217,10 @@ class TableBuilder
     protected function getSortData(): array
     {
         $sort = $this->request->get('sort', []);
-        
+
         if (is_string($sort)) {
             $direction = $this->request->get('direction', 'asc');
+
             return [$sort => $direction];
         }
 

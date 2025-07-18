@@ -5,20 +5,26 @@ namespace Egmond\InertiaTables\Columns;
 class ActionColumn extends BaseColumn
 {
     protected string $type = 'action';
+
     protected array $actions = [];
+
     protected string $alignment = 'right';
+
     protected bool $dropdown = false;
+
     protected ?string $dropdownLabel = null;
 
     public function actions(array $actions): static
     {
         $this->actions = $actions;
+
         return $this;
     }
 
     public function alignment(string $alignment): static
     {
         $this->alignment = $alignment;
+
         return $this;
     }
 
@@ -26,6 +32,7 @@ class ActionColumn extends BaseColumn
     {
         $this->dropdown = $dropdown;
         $this->dropdownLabel = $label ?? 'Actions';
+
         return $this;
     }
 

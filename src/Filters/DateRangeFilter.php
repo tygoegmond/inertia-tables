@@ -2,51 +2,61 @@
 
 namespace Egmond\InertiaTables\Filters;
 
-use Illuminate\Database\Eloquent\Builder;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 
 class DateRangeFilter extends BaseFilter
 {
     protected string $type = 'date_range';
+
     protected ?string $format = null;
+
     protected ?string $startPlaceholder = null;
+
     protected ?string $endPlaceholder = null;
+
     protected ?Carbon $minDate = null;
+
     protected ?Carbon $maxDate = null;
 
     public function format(string $format): static
     {
         $this->format = $format;
+
         return $this;
     }
 
     public function startPlaceholder(string $placeholder): static
     {
         $this->startPlaceholder = $placeholder;
+
         return $this;
     }
 
     public function endPlaceholder(string $placeholder): static
     {
         $this->endPlaceholder = $placeholder;
+
         return $this;
     }
 
     public function minDate(Carbon $date): static
     {
         $this->minDate = $date;
+
         return $this;
     }
 
     public function maxDate(Carbon $date): static
     {
         $this->maxDate = $date;
+
         return $this;
     }
 
     public function apply(Builder $query, mixed $value): Builder
     {
-        if (!is_array($value)) {
+        if (! is_array($value)) {
             return $query;
         }
 

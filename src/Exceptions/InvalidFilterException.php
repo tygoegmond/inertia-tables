@@ -19,6 +19,7 @@ class InvalidFilterException extends Exception
     public static function invalidFilterValue(string $key, mixed $value): self
     {
         $valueType = gettype($value);
+
         return new self("Invalid value of type '{$valueType}' provided for filter '{$key}'.");
     }
 }

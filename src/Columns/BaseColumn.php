@@ -8,7 +8,7 @@ use Egmond\InertiaTables\Concerns\HasState;
 
 abstract class BaseColumn
 {
-    use CanBeSorted, CanBeSearched, HasState;
+    use CanBeSearched, CanBeSorted, HasState;
 
     protected string $type;
 

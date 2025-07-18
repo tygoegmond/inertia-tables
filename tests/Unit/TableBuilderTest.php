@@ -3,12 +3,10 @@
 namespace Egmond\InertiaTables\Tests\Unit;
 
 use Egmond\InertiaTables\Builder\TableBuilder;
-use Egmond\InertiaTables\Columns\TextColumn;
 use Egmond\InertiaTables\Columns\BadgeColumn;
+use Egmond\InertiaTables\Columns\TextColumn;
 use Egmond\InertiaTables\Filters\SelectFilter;
 use Egmond\InertiaTables\Tests\TestCase;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class TableBuilderTest extends TestCase

@@ -178,8 +178,8 @@ class TableBuilder
     protected function getConfig(): array
     {
         return [
-            'columns' => array_map(fn($column) => $column->toArray(), $this->columns),
-            'filters' => array_map(fn($filter) => $filter->toArray(), $this->filters),
+            'columns' => array_values(array_map(fn($column) => $column->toArray(), $this->columns)),
+            'filters' => array_values(array_map(fn($filter) => $filter->toArray(), $this->filters)),
             'searchable' => $this->searchable,
             'perPage' => $this->perPage,
             'defaultSort' => $this->defaultSort,

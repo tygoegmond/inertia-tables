@@ -1,0 +1,52 @@
+{
+  "name": "@tygoegmond/inertia-tables-react",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "React components for Inertia Tables with shadcn/ui",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "test": "jest",
+    "lint": "eslint src --ext .ts,.tsx",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "react",
+    "inertia",
+    "tables",
+    "shadcn",
+    "ui",
+    "data-table"
+  ],
+  "author": "Tygo Egmond",
+  "license": "MIT",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "peerDependencies": {
+    "react": ">=16.8.0",
+    "react-dom": ">=16.8.0"
+  },
+  "dependencies": {
+    "@tanstack/react-table": "^8.20.5",
+    "lucide-react": "^0.475.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.0.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@rollup/plugin-commonjs": "^25.0.8",
+    "@rollup/plugin-node-resolve": "^15.2.4",
+    "@rollup/plugin-typescript": "^11.1.6",
+    "rollup": "^4.22.4",
+    "rollup-plugin-peer-deps-external": "^2.2.4",
+    "typescript": "^5.6.2",
+    "tslib": "^2.7.0"
+  }
+}

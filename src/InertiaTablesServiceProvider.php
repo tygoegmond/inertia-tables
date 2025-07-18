@@ -2,9 +2,9 @@
 
 namespace Egmond\InertiaTables;
 
+use Egmond\InertiaTables\Commands\InertiaTablesCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use Egmond\InertiaTables\Commands\InertiaTablesCommand;
 
 class InertiaTablesServiceProvider extends PackageServiceProvider
 {

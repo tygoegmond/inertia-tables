@@ -2,9 +2,9 @@
 
 namespace Egmond\InertiaTables\Tests;
 
+use Egmond\InertiaTables\InertiaTablesServiceProvider;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Orchestra\Testbench\TestCase as Orchestra;
-use Egmond\InertiaTables\InertiaTablesServiceProvider;
 
 class TestCase extends Orchestra
 {

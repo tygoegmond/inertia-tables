@@ -39,46 +39,46 @@ class ConfigurationSerializer
         $columnTypes = static::generateColumnTypes($columns);
         $filterTypes = static::generateFilterTypes($filters);
 
-        return "// Auto-generated TypeScript types\n\n" .
-            "export interface TableConfig {\n" .
-            "  columns: ColumnConfig[];\n" .
-            "  filters: FilterConfig[];\n" .
-            "  searchable: boolean;\n" .
-            "  perPage: number;\n" .
-            "  defaultSort: Record<string, 'asc' | 'desc'>;\n" .
-            "}\n\n" .
-            $columnTypes . "\n\n" .
+        return "// Auto-generated TypeScript types\n\n".
+            "export interface TableConfig {\n".
+            "  columns: ColumnConfig[];\n".
+            "  filters: FilterConfig[];\n".
+            "  searchable: boolean;\n".
+            "  perPage: number;\n".
+            "  defaultSort: Record<string, 'asc' | 'desc'>;\n".
+            "}\n\n".
+            $columnTypes."\n\n".
             $filterTypes;
     }
 
     protected static function generateColumnTypes(array $columns): string
     {
-        $types = "export type ColumnConfig = ";
+        $types = 'export type ColumnConfig = ';
         $columnTypes = [];
 
         foreach ($columns as $column) {
             $columnTypes[] = static::getColumnTypeInterface($column);
         }
 
-        return $types . implode(' | ', $columnTypes) . ';';
+        return $types.implode(' | ', $columnTypes).';';
     }
 
     protected static function generateFilterTypes(array $filters): string
     {
-        $types = "export type FilterConfig = ";
+        $types = 'export type FilterConfig = ';
         $filterTypes = [];
 
         foreach ($filters as $filter) {
             $filterTypes[] = static::getFilterTypeInterface($filter);
         }
 
-        return $types . implode(' | ', $filterTypes) . ';';
+        return $types.implode(' | ', $filterTypes).';';
     }
 
     protected static function getColumnTypeInterface(BaseColumn $column): string
     {
         $type = $column->getType();
-        $interfaceName = ucfirst($type) . 'ColumnConfig';
+        $interfaceName = ucfirst($type).'ColumnConfig';
 
         return $interfaceName;
     }
@@ -86,7 +86,7 @@ class ConfigurationSerializer
     protected static function getFilterTypeInterface(BaseFilter $filter): string
     {
         $type = $filter->getType();
-        $interfaceName = ucfirst(str_replace('_', '', $type)) . 'FilterConfig';
+        $interfaceName = ucfirst(str_replace('_', '', $type)).'FilterConfig';
 
         return $interfaceName;
     }

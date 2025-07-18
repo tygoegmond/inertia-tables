@@ -39,6 +39,7 @@ class Serializer
             if ($column instanceof BaseColumn) {
                 return $column->toArray();
             }
+
             return $column;
         }, $columns);
     }
@@ -49,6 +50,7 @@ class Serializer
             if ($filter instanceof BaseFilter) {
                 return $filter->toArray();
             }
+
             return $filter;
         }, $filters);
     }
@@ -62,6 +64,7 @@ class Serializer
             if ($item instanceof Jsonable) {
                 return json_decode($item->toJson(), true);
             }
+
             return $item;
         }, $data);
     }

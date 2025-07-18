@@ -10,6 +10,7 @@ abstract class BaseFilter
     use HasState;
 
     protected string $type;
+
     protected mixed $defaultValue = null;
 
     public function __construct(string $key)
@@ -31,6 +32,7 @@ abstract class BaseFilter
     public function default(mixed $value): static
     {
         $this->defaultValue = $value;
+
         return $this;
     }
 

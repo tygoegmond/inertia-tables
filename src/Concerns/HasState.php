@@ -5,8 +5,11 @@ namespace Egmond\InertiaTables\Concerns;
 trait HasState
 {
     protected string $key;
+
     protected string $label;
+
     protected bool $visible = true;
+
     protected array $state = [];
 
     public function getKey(): string
@@ -22,12 +25,14 @@ trait HasState
     public function label(string $label): static
     {
         $this->label = $label;
+
         return $this;
     }
 
     public function visible(bool $visible = true): static
     {
         $this->visible = $visible;
+
         return $this;
     }
 
@@ -44,6 +49,7 @@ trait HasState
     public function state(array $state): static
     {
         $this->state = array_merge($this->state, $state);
+
         return $this;
     }
 

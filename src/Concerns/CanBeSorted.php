@@ -5,11 +5,13 @@ namespace Egmond\InertiaTables\Concerns;
 trait CanBeSorted
 {
     protected bool $sortable = false;
+
     protected ?string $sortDirection = null;
 
     public function sortable(bool $sortable = true): static
     {
         $this->sortable = $sortable;
+
         return $this;
     }
 
@@ -21,6 +23,7 @@ trait CanBeSorted
     public function defaultSort(string $direction = 'asc'): static
     {
         $this->sortDirection = $direction;
+
         return $this;
     }
 

@@ -9,6 +9,7 @@ class BulkAction extends Action
     public function deselectRecordsAfterCompletion(bool $condition = true): static
     {
         $this->deselectRecordsAfterCompletion = $condition;
+
         return $this;
     }
 

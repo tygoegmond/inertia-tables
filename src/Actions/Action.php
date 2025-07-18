@@ -5,12 +5,19 @@ namespace Egmond\InertiaTables\Actions;
 class Action
 {
     protected string $name;
+
     protected string $label;
+
     protected ?string $icon = null;
+
     protected string $color = 'primary';
+
     protected ?string $url = null;
+
     protected bool $requiresConfirmation = false;
+
     protected ?string $confirmationTitle = null;
+
     protected ?string $confirmationText = null;
 
     public function __construct(string $name)
@@ -27,27 +34,30 @@ class Action
     public function label(string $label): static
     {
         $this->label = $label;
+
         return $this;
     }
 
     public function icon(string $icon): static
     {
         $this->icon = $icon;
+
         return $this;
     }
 
     public function color(string $color): static
     {
         $this->color = $color;
+
         return $this;
     }
 
     public function url(string $url): static
     {
         $this->url = $url;
+
         return $this;
     }
-
 
     public function requireConfirmation(
         ?string $title = null,
@@ -56,6 +66,7 @@ class Action
         $this->requiresConfirmation = true;
         $this->confirmationTitle = $title;
         $this->confirmationText = $text;
+
         return $this;
     }
 
@@ -83,7 +94,6 @@ class Action
     {
         return $this->url;
     }
-
 
     public function requiresConfirmation(): bool
     {

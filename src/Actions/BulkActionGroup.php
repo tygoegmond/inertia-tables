@@ -19,6 +19,7 @@ class BulkActionGroup
     public function actions(array $actions): static
     {
         $this->actions = $actions;
+
         return $this;
     }
 
@@ -30,7 +31,7 @@ class BulkActionGroup
     public function toArray(): array
     {
         return [
-            'actions' => array_map(fn($action) => $action->toArray(), $this->actions),
+            'actions' => array_map(fn ($action) => $action->toArray(), $this->actions),
         ];
     }
 }

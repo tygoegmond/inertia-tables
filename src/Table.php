@@ -8,9 +8,6 @@ class Table
 {
     protected array $columns = [];
 
-
-
-
     protected ?Builder $query = null;
 
     protected int $perPage = 25;
@@ -32,9 +29,6 @@ class Table
 
         return $this;
     }
-
-
-
 
     public function searchable(bool $searchable = true): static
     {
@@ -61,9 +55,6 @@ class Table
     {
         return $this->columns;
     }
-
-
-
 
     public function getQuery(): ?Builder
     {

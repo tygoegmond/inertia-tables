@@ -117,7 +117,6 @@ class TextColumn extends BaseColumn
             'limit' => $this->limit,
             'wrap' => $this->wrap,
             'badge' => $this->badge,
-            'badgeVariant' => $this->badgeVariant,
         ]);
     }
 }

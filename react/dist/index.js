@@ -6322,7 +6322,7 @@ function TextColumn({ column, value, record }) {
     const wrapClass = column.wrap === 'truncate' ? 'truncate' : 'break-words';
     // If badge is enabled, render as Badge component
     if (column.badge) {
-        const variant = column.badgeVariant || "default";
+        const variant = record.meta?.badgeVariant?.[column.key] || "default";
         return (jsxRuntime.jsx(Badge, { variant: variant, className: column.copyable ? 'cursor-pointer select-all' : '', children: formatted }));
     }
     // Otherwise render as normal text
@@ -6344,7 +6344,7 @@ function DataTable({ result, onSort, className }) {
             .filter(column => column.visible)
             .map((column) => ({
             id: column.key,
-            accessorKey: column.key,
+            accessorFn: (row) => row[column.key],
             header: ({ column: tanstackColumn }) => {
                 const isActive = Object.keys(result.sort || {}).includes(column.key);
                 const direction = result.sort?.[column.key];

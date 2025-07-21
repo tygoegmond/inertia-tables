@@ -31,7 +31,7 @@ export function TextColumn({ column, value, record }: TextColumnProps) {
 
   // If badge is enabled, render as Badge component
   if (column.badge) {
-    const variant = (column.badgeVariant as "default" | "secondary" | "destructive" | "outline") || "default";
+    const variant = (record.meta?.badgeVariant?.[column.key] as "default" | "secondary" | "destructive" | "outline") || "default";
     
     return (
       <Badge 

@@ -142,11 +142,24 @@ class TableBuilder
         return $results->getCollection()->map(function ($record) {
             $recordArray = $record->toArray();
             $transformedRecord = [];
+            $badgeVariants = [];
 
             foreach ($this->columns as $column) {
                 $key = $column->getKey();
                 $value = data_get($record, $key);
                 $transformedRecord[$key] = $column->formatValue($value, $recordArray);
+                
+                // Add badge variant to meta for TextColumn with badge enabled
+                if ($column instanceof \Egmond\InertiaTables\Columns\TextColumn && $column->toArray()['badge']) {
+                    $badgeVariants[$key] = $column->resolveBadgeVariant($value, $recordArray);
+                }
+            }
+
+            // Add meta data if it has badge variants
+            if (!empty($badgeVariants)) {
+                $transformedRecord['meta'] = [
+                    'badgeVariant' => $badgeVariants
+                ];
             }
 
             return $transformedRecord;

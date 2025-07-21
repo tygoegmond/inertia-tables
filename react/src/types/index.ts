@@ -14,7 +14,6 @@ export interface TableColumn {
   limit?: number;
   wrap?: string;
   badge?: boolean;
-  badgeVariant?: string;
   icon?: string;
   size?: number;
   rounded?: boolean;

@@ -42,7 +42,7 @@ export function DataTable({ result, onSort, className }: DataTableProps) {
       .filter(column => column.visible)
       .map((column): ColumnDef<any> => ({
         id: column.key,
-        accessorKey: column.key,
+        accessorFn: (row) => row[column.key],
         header: ({ column: tanstackColumn }) => {
           const isActive = Object.keys(result.sort || {}).includes(column.key);
           const direction = result.sort?.[column.key];

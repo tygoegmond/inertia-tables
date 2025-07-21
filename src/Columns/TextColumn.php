@@ -102,7 +102,7 @@ class TextColumn extends BaseColumn
         }
 
         if ($this->badgeVariant instanceof \Closure) {
-            return call_user_func($this->badgeVariant, $value, $record);
+            return ($this->badgeVariant)($value, $record);
         }
 
         return $this->badgeVariant;

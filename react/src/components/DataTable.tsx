@@ -40,7 +40,7 @@ export function DataTable({ result, onSort, className }: TableProps) {
         header: ({ column: tanstackColumn }) => {
           const isActive = Object.keys(result.sort || {}).includes(column.key);
           const direction = result.sort?.[column.key];
-          
+
           return (
             <div
               className={`flex items-center gap-2 ${
@@ -56,15 +56,15 @@ export function DataTable({ result, onSort, className }: TableProps) {
               {column.label}
               {column.sortable && (
                 <div className="flex flex-col">
-                  <ChevronUp 
+                  <ChevronUp
                     className={`h-3 w-3 ${
                       isActive && direction === 'asc' ? 'text-foreground' : 'text-muted-foreground'
-                    }`} 
+                    }`}
                   />
-                  <ChevronDown 
+                  <ChevronDown
                     className={`h-3 w-3 -mt-1 ${
                       isActive && direction === 'desc' ? 'text-foreground' : 'text-muted-foreground'
-                    }`} 
+                    }`}
                   />
                 </div>
               )}
@@ -92,7 +92,7 @@ export function DataTable({ result, onSort, className }: TableProps) {
   });
 
   return (
-    <div className={className}>
+    <div className={`rounded-md border ${className}`}>
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (

@@ -24,12 +24,12 @@ export function InertiaTable({ result, onSearch, onSort, onPageChange, className
           className="max-w-sm"
         />
       )}
-      
+
       <DataTable
         result={result}
         onSort={onSort}
       />
-      
+
       <TablePagination
         pagination={result.pagination}
         onPageChange={onPageChange || (() => {})}

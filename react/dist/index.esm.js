@@ -6286,7 +6286,7 @@ function DataTable({ result, onSort, className }) {
         onSortingChange: setSorting,
         manualSorting: true,
     });
-    return (jsx("div", { className: className, children: jsxs(Table, { children: [jsx(TableHeader, { children: table.getHeaderGroups().map((headerGroup) => (jsx(TableRow, { children: headerGroup.headers.map((header) => (jsx(TableHead, { children: header.isPlaceholder
+    return (jsx("div", { className: `rounded-md border ${className}`, children: jsxs(Table, { children: [jsx(TableHeader, { children: table.getHeaderGroups().map((headerGroup) => (jsx(TableRow, { children: headerGroup.headers.map((header) => (jsx(TableHead, { children: header.isPlaceholder
                                 ? null
                                 : flexRender(header.column.columnDef.header, header.getContext()) }, header.id))) }, headerGroup.id))) }), jsx(TableBody, { children: table.getRowModel().rows?.length ? (table.getRowModel().rows.map((row) => (jsx(TableRow, { "data-state": row.getIsSelected() && "selected", children: row.getVisibleCells().map((cell) => (jsx(TableCell, { children: flexRender(cell.column.columnDef.cell, cell.getContext()) }, cell.id))) }, row.id)))) : (jsx(TableRow, { children: jsx(TableCell, { colSpan: columns.length, className: "h-24 text-center", children: "No results." }) })) })] }) }));
 }

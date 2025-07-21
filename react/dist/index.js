@@ -6308,7 +6308,7 @@ function DataTable({ result, onSort, className }) {
         onSortingChange: setSorting,
         manualSorting: true,
     });
-    return (jsxRuntime.jsx("div", { className: className, children: jsxRuntime.jsxs(Table, { children: [jsxRuntime.jsx(TableHeader, { children: table.getHeaderGroups().map((headerGroup) => (jsxRuntime.jsx(TableRow, { children: headerGroup.headers.map((header) => (jsxRuntime.jsx(TableHead, { children: header.isPlaceholder
+    return (jsxRuntime.jsx("div", { className: `rounded-md border ${className}`, children: jsxRuntime.jsxs(Table, { children: [jsxRuntime.jsx(TableHeader, { children: table.getHeaderGroups().map((headerGroup) => (jsxRuntime.jsx(TableRow, { children: headerGroup.headers.map((header) => (jsxRuntime.jsx(TableHead, { children: header.isPlaceholder
                                 ? null
                                 : flexRender(header.column.columnDef.header, header.getContext()) }, header.id))) }, headerGroup.id))) }), jsxRuntime.jsx(TableBody, { children: table.getRowModel().rows?.length ? (table.getRowModel().rows.map((row) => (jsxRuntime.jsx(TableRow, { "data-state": row.getIsSelected() && "selected", children: row.getVisibleCells().map((cell) => (jsxRuntime.jsx(TableCell, { children: flexRender(cell.column.columnDef.cell, cell.getContext()) }, cell.id))) }, row.id)))) : (jsxRuntime.jsx(TableRow, { children: jsxRuntime.jsx(TableCell, { colSpan: columns.length, className: "h-24 text-center", children: "No results." }) })) })] }) }));
 }

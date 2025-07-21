@@ -21,7 +21,6 @@ class ConfigurationSerializer
         ];
     }
 
-
     public static function generateTypeScriptTypes(array $columns): string
     {
         $columnTypes = static::generateColumnTypes($columns);
@@ -48,7 +47,6 @@ class ConfigurationSerializer
         return $types.implode(' | ', $columnTypes).';';
     }
 
-
     protected static function getColumnTypeInterface(BaseColumn $column): string
     {
         $type = $column->getType();
@@ -56,5 +54,4 @@ class ConfigurationSerializer
 
         return $interfaceName;
     }
-
 }

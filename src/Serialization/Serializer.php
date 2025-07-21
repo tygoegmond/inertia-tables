@@ -41,7 +41,6 @@ class Serializer
         }, $columns);
     }
 
-
     public static function serializeData(array $data): array
     {
         return array_map(function ($item) {

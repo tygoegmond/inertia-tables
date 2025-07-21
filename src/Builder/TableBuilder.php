@@ -3,7 +3,6 @@
 namespace Egmond\InertiaTables\Builder;
 
 use Egmond\InertiaTables\Columns\BaseColumn;
-use Egmond\InertiaTables\Filters\BaseFilter;
 use Egmond\InertiaTables\TableResult;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -12,8 +11,6 @@ use Illuminate\Pagination\LengthAwarePaginator;
 class TableBuilder
 {
     protected array $columns = [];
-
-    protected array $filters = [];
 
     protected int $perPage = 25;
 
@@ -45,22 +42,6 @@ class TableBuilder
     public function addColumn(BaseColumn $column): static
     {
         $this->columns[$column->getKey()] = $column;
-
-        return $this;
-    }
-
-    public function filters(array $filters): static
-    {
-        foreach ($filters as $filter) {
-            $this->addFilter($filter);
-        }
-
-        return $this;
-    }
-
-    public function addFilter(BaseFilter $filter): static
-    {
-        $this->filters[$filter->getKey()] = $filter;
 
         return $this;
     }
@@ -97,9 +78,6 @@ class TableBuilder
         // Apply search
         $query = $this->applySearch($query);
 
-        // Apply filters
-        $query = $this->applyFilters($query);
-
         // Apply sorting
         $query = $this->applySorting($query);
 
@@ -113,7 +91,6 @@ class TableBuilder
             config: $this->getConfig(),
             data: $transformedData,
             pagination: $this->getPaginationData($results),
-            filters: $this->getFilterData(),
             sort: $this->getSortData(),
             search: $this->getSearchQuery(),
         );
@@ -141,21 +118,6 @@ class TableBuilder
                 $query->orWhere($column, 'like', '%'.$search.'%');
             }
         });
-    }
-
-    protected function applyFilters(Builder $query): Builder
-    {
-        $filterValues = $this->getFilterValues();
-
-        foreach ($this->filters as $filter) {
-            $value = $filterValues[$filter->getKey()] ?? null;
-
-            if ($value !== null && $value !== '') {
-                $query = $filter->apply($query, $value);
-            }
-        }
-
-        return $query;
     }
 
     protected function applySorting(Builder $query): Builder
@@ -195,7 +157,6 @@ class TableBuilder
     {
         return [
             'columns' => array_values(array_map(fn ($column) => $column->toArray(), $this->columns)),
-            'filters' => array_values(array_map(fn ($filter) => $filter->toArray(), $this->filters)),
             'searchable' => $this->searchable,
             'perPage' => $this->perPage,
             'defaultSort' => $this->defaultSort,
@@ -215,11 +176,6 @@ class TableBuilder
         ];
     }
 
-    protected function getFilterData(): array
-    {
-        return $this->getFilterValues();
-    }
-
     protected function getSortData(): array
     {
         $sort = $this->request->get('sort', []);
@@ -236,11 +192,6 @@ class TableBuilder
     protected function getSearchQuery(): ?string
     {
         return $this->request->get('search');
-    }
-
-    protected function getFilterValues(): array
-    {
-        return $this->request->get('filters', []);
     }
 
     protected function applyRelationshipAggregations(Builder $query): Builder

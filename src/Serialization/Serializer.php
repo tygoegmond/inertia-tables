@@ -3,7 +3,6 @@
 namespace Egmond\InertiaTables\Serialization;
 
 use Egmond\InertiaTables\Columns\BaseColumn;
-use Egmond\InertiaTables\Filters\BaseFilter;
 use Egmond\InertiaTables\TableResult;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Jsonable;
@@ -16,7 +15,6 @@ class Serializer
             'config' => static::serializeConfig($result->config),
             'data' => static::serializeData($result->data),
             'pagination' => static::serializePagination($result->pagination),
-            'filters' => static::serializeFilters($result->filters),
             'sort' => static::serializeSort($result->sort),
             'search' => $result->search,
         ];
@@ -26,7 +24,6 @@ class Serializer
     {
         return [
             'columns' => static::serializeColumns($config['columns'] ?? []),
-            'filters' => static::serializeFilters($config['filters'] ?? []),
             'searchable' => $config['searchable'] ?? false,
             'perPage' => $config['perPage'] ?? 25,
             'defaultSort' => $config['defaultSort'] ?? [],
@@ -44,16 +41,6 @@ class Serializer
         }, $columns);
     }
 
-    public static function serializeFilters(array $filters): array
-    {
-        return array_map(function ($filter) {
-            if ($filter instanceof BaseFilter) {
-                return $filter->toArray();
-            }
-
-            return $filter;
-        }, $filters);
-    }
 
     public static function serializeData(array $data): array
     {

@@ -17,23 +17,10 @@ import {
   TableRow,
 } from "./ui/table";
 import { TableProps, TableColumn } from "../types";
-import { TextColumn, BadgeColumn, IconColumn, ImageColumn, ActionColumn } from "./columns";
+import { TextColumn } from "./columns";
 
 function renderColumnValue(column: TableColumn, value: any, record: any) {
-  switch (column.type) {
-    case 'text':
-      return <TextColumn column={column} value={value} record={record} />;
-    case 'badge':
-      return <BadgeColumn column={column} value={value} record={record} />;
-    case 'icon':
-      return <IconColumn column={column} value={value} record={record} />;
-    case 'image':
-      return <ImageColumn column={column} value={value} record={record} />;
-    case 'action':
-      return <ActionColumn column={column} value={value} record={record} />;
-    default:
-      return <TextColumn column={column} value={value} record={record} />;
-  }
+  return <TextColumn column={column} value={value} record={record} />;
 }
 
 export function DataTable({ result, onSort, className }: TableProps) {

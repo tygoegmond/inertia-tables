@@ -8,11 +8,8 @@ class Table
 {
     protected array $columns = [];
 
-    protected array $filters = [];
 
-    protected array $actions = [];
 
-    protected array $bulkActions = [];
 
     protected ?Builder $query = null;
 
@@ -36,26 +33,8 @@ class Table
         return $this;
     }
 
-    public function filters(array $filters): static
-    {
-        $this->filters = $filters;
 
-        return $this;
-    }
 
-    public function actions(array $actions): static
-    {
-        $this->actions = $actions;
-
-        return $this;
-    }
-
-    public function bulkActions(array $bulkActions): static
-    {
-        $this->bulkActions = $bulkActions;
-
-        return $this;
-    }
 
     public function searchable(bool $searchable = true): static
     {
@@ -83,20 +62,8 @@ class Table
         return $this->columns;
     }
 
-    public function getFilters(): array
-    {
-        return $this->filters;
-    }
 
-    public function getActions(): array
-    {
-        return $this->actions;
-    }
 
-    public function getBulkActions(): array
-    {
-        return $this->bulkActions;
-    }
 
     public function getQuery(): ?Builder
     {
@@ -126,7 +93,6 @@ class Table
 
         $builder = InertiaTables::table()
             ->columns($this->columns)
-            ->filters($this->filters)
             ->searchable($this->searchable)
             ->paginate($this->perPage);
 

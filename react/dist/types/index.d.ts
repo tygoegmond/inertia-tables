@@ -1,7 +1,7 @@
 export interface TableColumn {
     key: string;
     label: string;
-    type: 'text' | 'badge' | 'icon' | 'image' | 'action';
+    type: 'text';
     visible: boolean;
     sortable: boolean;
     searchable: boolean;
@@ -18,27 +18,9 @@ export interface TableColumn {
     icon?: string;
     size?: number;
     rounded?: boolean;
-    actions?: Array<{
-        label: string;
-        icon?: string;
-        color?: string;
-        onClick: (record: any) => void;
-    }>;
-}
-export interface TableFilter {
-    key: string;
-    label: string;
-    type: 'search' | 'select' | 'date_range' | 'number_range';
-    options?: Array<{
-        value: string;
-        label: string;
-    }>;
-    placeholder?: string;
-    multiple?: boolean;
 }
 export interface TableConfig {
     columns: TableColumn[];
-    filters: TableFilter[];
     searchable: boolean;
     perPage: number;
     defaultSort: Record<string, 'asc' | 'desc'>;
@@ -60,14 +42,12 @@ export interface TableResult {
     config: TableConfig;
     data: any[];
     pagination: TablePagination;
-    filters: Record<string, any>;
     sort: Record<string, 'asc' | 'desc'>;
     search: string | null;
 }
 export interface TableProps {
     result: TableResult;
     onSearch?: (query: string) => void;
-    onFilter?: (filters: Record<string, any>) => void;
     onSort?: (column: string, direction: 'asc' | 'desc') => void;
     onPageChange?: (page: number) => void;
     className?: string;

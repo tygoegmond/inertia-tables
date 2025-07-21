@@ -6242,69 +6242,8 @@ function TextColumn({ column, value, record }) {
     return (jsx("div", { className: `${wrapClass} ${column.copyable ? 'cursor-pointer select-all' : ''}`, children: formatted }));
 }
 
-function BadgeColumn({ column, value, record }) {
-    if (value === null || value === undefined) {
-        return jsx("span", { className: "text-muted-foreground", children: "\u2014" });
-    }
-    const getVariantClasses = (variant = 'default') => {
-        const variants = {
-            default: 'bg-secondary text-secondary-foreground',
-            primary: 'bg-primary text-primary-foreground',
-            secondary: 'bg-secondary text-secondary-foreground',
-            destructive: 'bg-destructive text-destructive-foreground',
-            outline: 'border border-input bg-background',
-            success: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
-            warning: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
-            info: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-        };
-        return variants[variant] || variants.default;
-    };
-    return (jsx("span", { className: `inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getVariantClasses(column.variant)}`, children: String(value) }));
-}
-
-function IconColumn({ column, value, record }) {
-    if (value === null || value === undefined) {
-        return jsx("span", { className: "text-muted-foreground", children: "\u2014" });
-    }
-    const size = column.size || 16;
-    const iconName = column.icon || String(value);
-    return (jsx("div", { className: "flex items-center justify-center", children: jsx("span", { className: "text-muted-foreground", style: { fontSize: `${size}px` }, title: String(value), children: iconName }) }));
-}
-
-function ImageColumn({ column, value, record }) {
-    if (value === null || value === undefined) {
-        return jsx("span", { className: "text-muted-foreground", children: "\u2014" });
-    }
-    const size = column.size || 32;
-    const rounded = column.rounded ? 'rounded-full' : 'rounded';
-    return (jsx("div", { className: "flex items-center justify-center", children: jsx("img", { src: String(value), alt: "", className: `${rounded} object-cover`, style: { width: `${size}px`, height: `${size}px` }, onError: (e) => {
-                const target = e.target;
-                target.style.display = 'none';
-            } }) }));
-}
-
-function ActionColumn({ column, value, record }) {
-    if (!column.actions || column.actions.length === 0) {
-        return null;
-    }
-    return (jsx("div", { className: "flex items-center gap-2", children: column.actions.map((action, index) => (jsxs("button", { onClick: () => action.onClick(record), className: "inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded hover:bg-muted transition-colors", title: action.label, children: [action.icon && jsx("span", { children: action.icon }), action.label] }, index))) }));
-}
-
 function renderColumnValue(column, value, record) {
-    switch (column.type) {
-        case 'text':
-            return jsx(TextColumn, { column: column, value: value, record: record });
-        case 'badge':
-            return jsx(BadgeColumn, { column: column, value: value, record: record });
-        case 'icon':
-            return jsx(IconColumn, { column: column, value: value, record: record });
-        case 'image':
-            return jsx(ImageColumn, { column: column, value: value, record: record });
-        case 'action':
-            return jsx(ActionColumn, { column: column, value: value, record: record });
-        default:
-            return jsx(TextColumn, { column: column, value: value, record: record });
-    }
+    return jsx(TextColumn, { column: column, value: value, record: record });
 }
 function DataTable({ result, onSort, className }) {
     const [sorting, setSorting] = React.useState([]);
@@ -6387,5 +6326,5 @@ function InertiaTable({ result, onSearch, onSort, onPageChange, className }) {
     return (jsxs("div", { className: `space-y-4 ${className}`, children: [result.config?.searchable && (jsx(TableSearch, { value: searchValue, onChange: handleSearchChange, placeholder: "Search...", className: "max-w-sm" })), jsx(DataTable, { result: result, onSort: onSort }), jsx(TablePagination, { pagination: result.pagination, onPageChange: onPageChange || (() => { }) })] }));
 }
 
-export { ActionColumn, BadgeColumn, DataTable, IconColumn, ImageColumn, InertiaTable, TablePagination, TableSearch, TextColumn, InertiaTable as default };
+export { DataTable, InertiaTable, TablePagination, TableSearch, TextColumn, InertiaTable as default };
 //# sourceMappingURL=index.esm.js.map

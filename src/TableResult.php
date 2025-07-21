@@ -13,7 +13,6 @@ class TableResult implements Arrayable, Jsonable, JsonSerializable
         public readonly array $config,
         public readonly array $data,
         public readonly array $pagination,
-        public readonly array $filters,
         public readonly array $sort = [],
         public readonly ?string $search = null,
     ) {}

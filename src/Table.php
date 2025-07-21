@@ -2,6 +2,7 @@
 
 namespace Egmond\InertiaTables;
 
+use Closure;
 use Illuminate\Database\Eloquent\Builder;
 
 class Table
@@ -16,9 +17,13 @@ class Table
 
     protected bool $searchable = false;
 
-    public function query(Builder $query): static
+    public function query(Builder|Closure $query): static
     {
-        $this->query = $query;
+        if ($query instanceof Closure) {
+            $this->query = $query($this->query);
+        } else {
+            $this->query = $query;
+        }
 
         return $this;
     }

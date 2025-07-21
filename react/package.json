@@ -1,6 +1,6 @@
 {
   "name": "@tygoegmond/inertia-tables-react",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "React components for Inertia Tables with shadcn/ui",
   "main": "dist/index.js",

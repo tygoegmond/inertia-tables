@@ -13,8 +13,8 @@ export interface TableColumn {
     copyable?: boolean;
     limit?: number;
     wrap?: string;
-    color?: string;
-    variant?: string;
+    badge?: boolean;
+    badgeVariant?: string;
     icon?: string;
     size?: number;
     rounded?: boolean;

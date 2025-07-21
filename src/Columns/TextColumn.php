@@ -16,6 +16,10 @@ class TextColumn extends BaseColumn
 
     protected string $wrap = 'truncate';
 
+    protected bool $badge = false;
+
+    protected string|\Closure|null $badgeVariant = null;
+
     public function prefix(string $prefix): static
     {
         $this->prefix = $prefix;
@@ -51,6 +55,20 @@ class TextColumn extends BaseColumn
         return $this;
     }
 
+    public function badge(bool $badge = true): static
+    {
+        $this->badge = $badge;
+
+        return $this;
+    }
+
+    public function badgeVariant(string|\Closure $badgeVariant): static
+    {
+        $this->badgeVariant = $badgeVariant;
+
+        return $this;
+    }
+
     public function formatValue(mixed $value, array $record): mixed
     {
         if ($value === null) {
@@ -77,6 +95,19 @@ class TextColumn extends BaseColumn
         return $formatted;
     }
 
+    public function resolveBadgeVariant(mixed $value, array $record): ?string
+    {
+        if ($this->badgeVariant === null) {
+            return 'default';
+        }
+
+        if ($this->badgeVariant instanceof \Closure) {
+            return call_user_func($this->badgeVariant, $value, $record);
+        }
+
+        return $this->badgeVariant;
+    }
+
     public function toArray(): array
     {
         return array_merge(parent::toArray(), [
@@ -85,6 +116,8 @@ class TextColumn extends BaseColumn
             'copyable' => $this->copyable,
             'limit' => $this->limit,
             'wrap' => $this->wrap,
+            'badge' => $this->badge,
+            'badgeVariant' => $this->badgeVariant,
         ]);
     }
 }

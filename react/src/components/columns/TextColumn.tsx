@@ -1,5 +1,6 @@
 import * as React from "react";
 import { TableColumn } from "../../types";
+import { Badge } from "../ui/badge";
 
 interface TextColumnProps {
   column: TableColumn;
@@ -28,6 +29,21 @@ export function TextColumn({ column, value, record }: TextColumnProps) {
 
   const wrapClass = column.wrap === 'truncate' ? 'truncate' : 'break-words';
 
+  // If badge is enabled, render as Badge component
+  if (column.badge) {
+    const variant = (column.badgeVariant as "default" | "secondary" | "destructive" | "outline") || "default";
+    
+    return (
+      <Badge 
+        variant={variant}
+        className={column.copyable ? 'cursor-pointer select-all' : ''}
+      >
+        {formatted}
+      </Badge>
+    );
+  }
+
+  // Otherwise render as normal text
   return (
     <div className={`${wrapClass} ${column.copyable ? 'cursor-pointer select-all' : ''}`}>
       {formatted}

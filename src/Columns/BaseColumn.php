@@ -6,6 +6,7 @@ use Egmond\InertiaTables\Concerns\CanBeSearched;
 use Egmond\InertiaTables\Concerns\CanBeSorted;
 use Egmond\InertiaTables\Concerns\HasRelationship;
 use Egmond\InertiaTables\Concerns\HasState;
+use Egmond\InertiaTables\Contracts\HasLabel;
 
 abstract class BaseColumn
 {
@@ -31,6 +32,10 @@ abstract class BaseColumn
 
     public function formatValue(mixed $value, array $record): mixed
     {
+        if ($value instanceof HasLabel) {
+            return $value->getLabel();
+        }
+
         return $value;
     }
 

@@ -49,7 +49,6 @@ abstract class BaseColumn
         return $value;
     }
 
-
     public function toArray(): array
     {
         return [

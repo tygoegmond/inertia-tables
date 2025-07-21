@@ -16,14 +16,20 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
-import { TableProps, TableColumn } from "../types";
+import { TableResult, TableColumn } from "../types";
 import { TextColumn } from "./columns";
+
+interface DataTableProps {
+  result: TableResult;
+  onSort?: (column: string, direction: 'asc' | 'desc') => void;
+  className?: string;
+}
 
 function renderColumnValue(column: TableColumn, value: any, record: any) {
   return <TextColumn column={column} value={value} record={record} />;
 }
 
-export function DataTable({ result, onSort, className }: TableProps) {
+export function DataTable({ result, onSort, className }: DataTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
   const columns: ColumnDef<any>[] = React.useMemo(() => {

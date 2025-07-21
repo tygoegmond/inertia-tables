@@ -1,6 +1,7 @@
 import { jsx, jsxs } from 'react/jsx-runtime';
 import * as React from 'react';
 import { forwardRef, createElement } from 'react';
+import { router } from '@inertiajs/react';
 
 /**
    * table-core
@@ -6315,15 +6316,28 @@ function TablePagination({ pagination, onPageChange, className }) {
                             : 'border border-input bg-background hover:bg-accent hover:text-accent-foreground'}`, children: page }, page))), jsx("button", { onClick: () => onPageChange(current_page + 1), disabled: current_page >= last_page, className: "inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 w-8", children: jsx(ChevronRight, { className: "h-4 w-4" }) })] })] }));
 }
 
-function InertiaTable({ result, onSearch, onSort, onPageChange, className }) {
+function InertiaTable({ result, className }) {
     const [searchValue, setSearchValue] = React.useState(result.search || '');
-    const handleSearchChange = (value) => {
-        setSearchValue(value);
-        if (onSearch) {
-            onSearch(value);
-        }
+    const handleSearch = (query) => {
+        setSearchValue(query);
+        router.get(window.location.pathname, { search: query }, {
+            preserveState: true,
+            preserveScroll: true
+        });
     };
-    return (jsxs("div", { className: `space-y-4 ${className}`, children: [result.config?.searchable && (jsx(TableSearch, { value: searchValue, onChange: handleSearchChange, placeholder: "Search...", className: "max-w-sm" })), jsx(DataTable, { result: result, onSort: onSort }), jsx(TablePagination, { pagination: result.pagination, onPageChange: onPageChange || (() => { }) })] }));
+    const handleSort = (column, direction) => {
+        router.get(window.location.pathname, { sort: column, direction }, {
+            preserveState: true,
+            preserveScroll: true
+        });
+    };
+    const handlePageChange = (page) => {
+        router.get(window.location.pathname, { page }, {
+            preserveState: true,
+            preserveScroll: true
+        });
+    };
+    return (jsxs("div", { className: `space-y-4 ${className}`, children: [result.config?.searchable && (jsx(TableSearch, { value: searchValue, onChange: handleSearch, placeholder: "Search...", className: "max-w-sm" })), jsx(DataTable, { result: result, onSort: handleSort }), jsx(TablePagination, { pagination: result.pagination, onPageChange: handlePageChange })] }));
 }
 
 export { DataTable, InertiaTable, TablePagination, TableSearch, TextColumn, InertiaTable as default };

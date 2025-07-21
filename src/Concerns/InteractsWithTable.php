@@ -5,21 +5,20 @@ namespace Egmond\InertiaTables\Concerns;
 use Closure;
 use Egmond\InertiaTables\Table;
 use Egmond\InertiaTables\TableResult;
-use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
-use Illuminate\Database\Query\Builder;
+use Illuminate\Database\Eloquent\Builder;
 
 trait InteractsWithTable
 {
     protected ?Table $tableInstance = null;
 
-    protected EloquentBuilder|Builder|Closure|null $query = null;
+    protected Builder|Closure|null $query = null;
 
     public static function make(): static
     {
         return new static;
     }
 
-    public function query(EloquentBuilder|Builder|Closure $query): static
+    public function query(Builder|Closure $query): static
     {
         $this->query = $query;
 

@@ -3,14 +3,13 @@
 namespace Egmond\InertiaTables;
 
 use Closure;
-use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
-use Illuminate\Database\Query\Builder;
+use Illuminate\Database\Eloquent\Builder;
 
 class Table
 {
     protected array $columns = [];
 
-    protected EloquentBuilder|Builder|null $query = null;
+    protected ?Builder $query = null;
 
     protected int $perPage = 25;
 
@@ -18,7 +17,7 @@ class Table
 
     protected bool $searchable = false;
 
-    public function query(EloquentBuilder|Builder|Closure $query): static
+    public function query(Builder|Closure $query): static
     {
         if ($query instanceof Closure) {
             $this->query = $query($this->query);
@@ -62,7 +61,7 @@ class Table
         return $this->columns;
     }
 
-    public function getQuery(): EloquentBuilder|Builder|null
+    public function getQuery(): ?Builder
     {
         return $this->query;
     }

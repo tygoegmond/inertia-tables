@@ -4,8 +4,7 @@ namespace Egmond\InertiaTables\Builder;
 
 use Egmond\InertiaTables\Columns\BaseColumn;
 use Egmond\InertiaTables\TableResult;
-use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
-use Illuminate\Database\Query\Builder;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -68,7 +67,7 @@ class TableBuilder
         return $this;
     }
 
-    public function build(EloquentBuilder|Builder $query): TableResult
+    public function build(Builder $query): TableResult
     {
         // Apply relationship aggregations
         $query = $this->applyRelationshipAggregations($query);
@@ -97,7 +96,7 @@ class TableBuilder
         );
     }
 
-    protected function applySearch(EloquentBuilder|Builder $query): EloquentBuilder|Builder
+    protected function applySearch(Builder $query): Builder
     {
         $search = $this->getSearchQuery();
 
@@ -121,7 +120,7 @@ class TableBuilder
         });
     }
 
-    protected function applySorting(EloquentBuilder|Builder $query): EloquentBuilder|Builder
+    protected function applySorting(Builder $query): Builder
     {
         $sortData = $this->getSortData();
 
@@ -195,13 +194,8 @@ class TableBuilder
         return $this->request->get('search');
     }
 
-    protected function applyRelationshipAggregations(EloquentBuilder|Builder $query): EloquentBuilder|Builder
+    protected function applyRelationshipAggregations(Builder $query): Builder
     {
-        // Relationship aggregations are only supported for Eloquent Builder
-        if (! $query instanceof EloquentBuilder) {
-            return $query;
-        }
-
         foreach ($this->columns as $column) {
             if ($column->hasRelationship()) {
                 $relationship = $column->getRelationship();
@@ -223,7 +217,7 @@ class TableBuilder
         return $query;
     }
 
-    protected function applyEagerLoading(EloquentBuilder|Builder $query): EloquentBuilder|Builder
+    protected function applyEagerLoading(Builder $query): Builder
     {
         $relationships = [];
 
@@ -236,14 +230,14 @@ class TableBuilder
             }
         }
 
-        if (! empty($relationships) && $query instanceof EloquentBuilder) {
+        if (! empty($relationships)) {
             $query->with(array_unique($relationships));
         }
 
         return $query;
     }
 
-    protected function applyCount(EloquentBuilder $query, string|array $relationship): void
+    protected function applyCount(Builder $query, string|array $relationship): void
     {
         if (is_string($relationship)) {
             $query->withCount($relationship);
@@ -252,7 +246,7 @@ class TableBuilder
         }
     }
 
-    protected function applyExists(EloquentBuilder $query, string|array $relationship): void
+    protected function applyExists(Builder $query, string|array $relationship): void
     {
         if (is_string($relationship)) {
             $query->withExists($relationship);
@@ -261,7 +255,7 @@ class TableBuilder
         }
     }
 
-    protected function applyAvg(EloquentBuilder $query, string|array $relationship, string $column): void
+    protected function applyAvg(Builder $query, string|array $relationship, string $column): void
     {
         if (is_string($relationship)) {
             $query->withAvg($relationship, $column);
@@ -270,7 +264,7 @@ class TableBuilder
         }
     }
 
-    protected function applyMax(EloquentBuilder $query, string|array $relationship, string $column): void
+    protected function applyMax(Builder $query, string|array $relationship, string $column): void
     {
         if (is_string($relationship)) {
             $query->withMax($relationship, $column);
@@ -279,7 +273,7 @@ class TableBuilder
         }
     }
 
-    protected function applyMin(EloquentBuilder $query, string|array $relationship, string $column): void
+    protected function applyMin(Builder $query, string|array $relationship, string $column): void
     {
         if (is_string($relationship)) {
             $query->withMin($relationship, $column);
@@ -288,7 +282,7 @@ class TableBuilder
         }
     }
 
-    protected function applySum(EloquentBuilder $query, string|array $relationship, string $column): void
+    protected function applySum(Builder $query, string|array $relationship, string $column): void
     {
         if (is_string($relationship)) {
             $query->withSum($relationship, $column);

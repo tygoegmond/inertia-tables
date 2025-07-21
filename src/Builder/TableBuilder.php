@@ -272,14 +272,14 @@ class TableBuilder
 
         foreach ($this->columns as $column) {
             $key = $column->getKey();
-            
+
             if (str_contains($key, '.')) {
                 $relationshipName = explode('.', $key)[0];
                 $relationships[] = $relationshipName;
             }
         }
 
-        if (!empty($relationships)) {
+        if (! empty($relationships)) {
             $query->with(array_unique($relationships));
         }
 

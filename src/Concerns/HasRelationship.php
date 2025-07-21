@@ -2,8 +2,6 @@
 
 namespace Egmond\InertiaTables\Concerns;
 
-use Closure;
-
 trait HasRelationship
 {
     protected string|array|null $relationship = null;

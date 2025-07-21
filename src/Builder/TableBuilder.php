@@ -145,7 +145,7 @@ class TableBuilder
 
             foreach ($this->columns as $column) {
                 $key = $column->getKey();
-                $value = data_get($recordArray, $key);
+                $value = data_get($record, $key);
                 $transformedRecord[$key] = $column->formatValue($value, $recordArray);
             }
 

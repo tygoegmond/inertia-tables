@@ -32,8 +32,18 @@ abstract class BaseColumn
 
     public function formatValue(mixed $value, array $record): mixed
     {
+        return $this->formatEnum($value);
+    }
+
+    protected function formatEnum(mixed $value): mixed
+    {
         if ($value instanceof HasLabel) {
             return $value->getLabel();
+        }
+
+        // If it's an enum but doesn't implement HasLabel, return the backing value
+        if ($value instanceof \BackedEnum) {
+            return $value->value;
         }
 
         return $value;

@@ -57,6 +57,9 @@ class TextColumn extends BaseColumn
             return null;
         }
 
+        // Let parent handle formatting first
+        $value = parent::formatValue($value, $record);
+
         $formatted = (string) $value;
 
         if ($this->limit && strlen($formatted) > $this->limit) {

@@ -52,8 +52,5 @@ export interface TableResult {
 
 export interface TableProps {
   result: TableResult;
-  onSearch?: (query: string) => void;
-  onSort?: (column: string, direction: 'asc' | 'desc') => void;
-  onPageChange?: (page: number) => void;
   className?: string;
 }

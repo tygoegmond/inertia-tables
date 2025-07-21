@@ -1,17 +1,33 @@
 import * as React from "react";
+import { router } from "@inertiajs/react";
 import { TableProps } from "../types";
 import { DataTable } from "./DataTable";
 import { TableSearch } from "./TableSearch";
 import { TablePagination } from "./TablePagination";
 
-export function InertiaTable({ result, onSearch, onSort, onPageChange, className }: TableProps) {
+export function InertiaTable({ result, className }: TableProps) {
   const [searchValue, setSearchValue] = React.useState(result.search || '');
 
-  const handleSearchChange = (value: string) => {
-    setSearchValue(value);
-    if (onSearch) {
-      onSearch(value);
-    }
+  const handleSearch = (query: string) => {
+    setSearchValue(query);
+    router.get(window.location.pathname, { search: query }, { 
+      preserveState: true, 
+      preserveScroll: true 
+    });
+  };
+
+  const handleSort = (column: string, direction: 'asc' | 'desc') => {
+    router.get(window.location.pathname, { sort: column, direction }, { 
+      preserveState: true, 
+      preserveScroll: true 
+    });
+  };
+
+  const handlePageChange = (page: number) => {
+    router.get(window.location.pathname, { page }, { 
+      preserveState: true, 
+      preserveScroll: true 
+    });
   };
 
   return (
@@ -19,7 +35,7 @@ export function InertiaTable({ result, onSearch, onSort, onPageChange, className
       {result.config?.searchable && (
         <TableSearch
           value={searchValue}
-          onChange={handleSearchChange}
+          onChange={handleSearch}
           placeholder="Search..."
           className="max-w-sm"
         />
@@ -27,12 +43,12 @@ export function InertiaTable({ result, onSearch, onSort, onPageChange, className
 
       <DataTable
         result={result}
-        onSort={onSort}
+        onSort={handleSort}
       />
 
       <TablePagination
         pagination={result.pagination}
-        onPageChange={onPageChange || (() => {})}
+        onPageChange={handlePageChange}
       />
     </div>
   );

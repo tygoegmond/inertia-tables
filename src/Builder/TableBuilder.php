@@ -88,6 +88,12 @@ class TableBuilder
 
     public function build(Builder $query): TableResult
     {
+        // Apply relationship aggregations
+        $query = $this->applyRelationshipAggregations($query);
+
+        // Apply eager loading for relationship columns
+        $query = $this->applyEagerLoading($query);
+
         // Apply search
         $query = $this->applySearch($query);
 
@@ -235,5 +241,102 @@ class TableBuilder
     protected function getFilterValues(): array
     {
         return $this->request->get('filters', []);
+    }
+
+    protected function applyRelationshipAggregations(Builder $query): Builder
+    {
+        foreach ($this->columns as $column) {
+            if ($column->hasRelationship()) {
+                $relationship = $column->getRelationship();
+                $type = $column->getRelationshipType();
+                $relationshipColumn = $column->getRelationshipColumn();
+
+                match ($type) {
+                    'count' => $this->applyCount($query, $relationship),
+                    'exists' => $this->applyExists($query, $relationship),
+                    'avg' => $this->applyAvg($query, $relationship, $relationshipColumn),
+                    'max' => $this->applyMax($query, $relationship, $relationshipColumn),
+                    'min' => $this->applyMin($query, $relationship, $relationshipColumn),
+                    'sum' => $this->applySum($query, $relationship, $relationshipColumn),
+                    default => null,
+                };
+            }
+        }
+
+        return $query;
+    }
+
+    protected function applyEagerLoading(Builder $query): Builder
+    {
+        $relationships = [];
+
+        foreach ($this->columns as $column) {
+            $key = $column->getKey();
+            
+            if (str_contains($key, '.')) {
+                $relationshipName = explode('.', $key)[0];
+                $relationships[] = $relationshipName;
+            }
+        }
+
+        if (!empty($relationships)) {
+            $query->with(array_unique($relationships));
+        }
+
+        return $query;
+    }
+
+    protected function applyCount(Builder $query, string|array $relationship): void
+    {
+        if (is_string($relationship)) {
+            $query->withCount($relationship);
+        } else {
+            $query->withCount($relationship);
+        }
+    }
+
+    protected function applyExists(Builder $query, string|array $relationship): void
+    {
+        if (is_string($relationship)) {
+            $query->withExists($relationship);
+        } else {
+            $query->withExists($relationship);
+        }
+    }
+
+    protected function applyAvg(Builder $query, string|array $relationship, string $column): void
+    {
+        if (is_string($relationship)) {
+            $query->withAvg($relationship, $column);
+        } else {
+            $query->withAvg($relationship, $column);
+        }
+    }
+
+    protected function applyMax(Builder $query, string|array $relationship, string $column): void
+    {
+        if (is_string($relationship)) {
+            $query->withMax($relationship, $column);
+        } else {
+            $query->withMax($relationship, $column);
+        }
+    }
+
+    protected function applyMin(Builder $query, string|array $relationship, string $column): void
+    {
+        if (is_string($relationship)) {
+            $query->withMin($relationship, $column);
+        } else {
+            $query->withMin($relationship, $column);
+        }
+    }
+
+    protected function applySum(Builder $query, string|array $relationship, string $column): void
+    {
+        if (is_string($relationship)) {
+            $query->withSum($relationship, $column);
+        } else {
+            $query->withSum($relationship, $column);
+        }
     }
 }

@@ -4,11 +4,12 @@ namespace Egmond\InertiaTables\Columns;
 
 use Egmond\InertiaTables\Concerns\CanBeSearched;
 use Egmond\InertiaTables\Concerns\CanBeSorted;
+use Egmond\InertiaTables\Concerns\HasRelationship;
 use Egmond\InertiaTables\Concerns\HasState;
 
 abstract class BaseColumn
 {
-    use CanBeSearched, CanBeSorted, HasState;
+    use CanBeSearched, CanBeSorted, HasRelationship, HasState;
 
     protected string $type;
 

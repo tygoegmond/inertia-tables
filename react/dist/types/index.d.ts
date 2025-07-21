@@ -46,6 +46,6 @@ export interface TableResult {
     search: string | null;
 }
 export interface TableProps {
-    result: TableResult;
+    state: TableResult;
     className?: string;
 }

@@ -6316,8 +6316,8 @@ function TablePagination({ pagination, onPageChange, className }) {
                             : 'border border-input bg-background hover:bg-accent hover:text-accent-foreground'}`, children: page }, page))), jsx("button", { onClick: () => onPageChange(current_page + 1), disabled: current_page >= last_page, className: "inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 w-8", children: jsx(ChevronRight, { className: "h-4 w-4" }) })] })] }));
 }
 
-function InertiaTable({ result, className }) {
-    const [searchValue, setSearchValue] = React.useState(result.search || '');
+function InertiaTable({ state, className }) {
+    const [searchValue, setSearchValue] = React.useState(state.search || '');
     const handleSearch = (query) => {
         setSearchValue(query);
         router.get(window.location.pathname, { search: query }, {
@@ -6337,7 +6337,7 @@ function InertiaTable({ result, className }) {
             preserveScroll: true
         });
     };
-    return (jsxs("div", { className: `space-y-4 ${className}`, children: [result.config?.searchable && (jsx(TableSearch, { value: searchValue, onChange: handleSearch, placeholder: "Search...", className: "max-w-sm" })), jsx(DataTable, { result: result, onSort: handleSort }), jsx(TablePagination, { pagination: result.pagination, onPageChange: handlePageChange })] }));
+    return (jsxs("div", { className: `space-y-4 ${className}`, children: [state.config?.searchable && (jsx(TableSearch, { value: searchValue, onChange: handleSearch, placeholder: "Search...", className: "max-w-sm" })), jsx(DataTable, { result: state, onSort: handleSort }), jsx(TablePagination, { pagination: state.pagination, onPageChange: handlePageChange })] }));
 }
 
 export { DataTable, InertiaTable, TablePagination, TableSearch, TextColumn, InertiaTable as default };

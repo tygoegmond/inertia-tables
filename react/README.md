@@ -61,7 +61,7 @@ function MyComponent() {
 
   return (
     <InertiaTable 
-      result={tableResult}
+      state={tableResult}
       onSearch={(query) => console.log('Search:', query)}
       onSort={(column, direction) => console.log('Sort:', column, direction)}
       onPageChange={(page) => console.log('Page:', page)}
@@ -87,7 +87,7 @@ function CustomTable() {
       />
       
       <DataTable 
-        result={tableResult}
+        state={tableResult}
         onSort={handleSort}
       />
       
@@ -151,7 +151,7 @@ ActionColumn::make('actions')
 
 | Prop | Type | Description |
 |------|------|-------------|
-| `result` | `TableResult` | The table data from PHP backend |
+| `state` | `TableResult` | The table data from PHP backend |
 | `onSearch` | `(query: string) => void` | Search handler |
 | `onSort` | `(column: string, direction: 'asc' \| 'desc') => void` | Sort handler |
 | `onPageChange` | `(page: number) => void` | Page change handler |
@@ -213,7 +213,7 @@ import { InertiaTable } from '@tygoegmond/inertia-tables-react';
 export default function Users({ table }) {
   return (
     <InertiaTable 
-      result={table}
+      state={table}
       onSearch={(query) => router.get('/users', { search: query })}
       onSort={(column, direction) => router.get('/users', { sort: column, direction })}
       onPageChange={(page) => router.get('/users', { page })}

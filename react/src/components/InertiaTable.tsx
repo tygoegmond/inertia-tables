@@ -5,8 +5,8 @@ import { DataTable } from "./DataTable";
 import { TableSearch } from "./TableSearch";
 import { TablePagination } from "./TablePagination";
 
-export function InertiaTable({ result, className }: TableProps) {
-  const [searchValue, setSearchValue] = React.useState(result.search || '');
+export function InertiaTable({ state, className }: TableProps) {
+  const [searchValue, setSearchValue] = React.useState(state.search || '');
 
   const handleSearch = (query: string) => {
     setSearchValue(query);
@@ -32,7 +32,7 @@ export function InertiaTable({ result, className }: TableProps) {
 
   return (
     <div className={`space-y-4 ${className}`}>
-      {result.config?.searchable && (
+      {state.config?.searchable && (
         <TableSearch
           value={searchValue}
           onChange={handleSearch}
@@ -42,12 +42,12 @@ export function InertiaTable({ result, className }: TableProps) {
       )}
 
       <DataTable
-        result={result}
+        result={state}
         onSort={handleSort}
       />
 
       <TablePagination
-        pagination={result.pagination}
+        pagination={state.pagination}
         onPageChange={handlePageChange}
       />
     </div>

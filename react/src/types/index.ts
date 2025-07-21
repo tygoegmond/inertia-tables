@@ -51,6 +51,6 @@ export interface TableResult {
 }
 
 export interface TableProps {
-  result: TableResult;
+  state: TableResult;
   className?: string;
 }

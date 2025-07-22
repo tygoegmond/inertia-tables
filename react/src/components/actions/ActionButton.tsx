@@ -2,15 +2,12 @@ import * as React from "react";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { cn } from "../../lib/utils";
-import * as Icons from "lucide-react";
 
 interface ActionButtonProps {
   action: {
     name: string;
     label: string;
-    icon?: string;
     color: string;
-    size: string;
     style: 'button' | 'link' | 'iconButton';
     outlined: boolean;
     tooltip?: string;
@@ -27,11 +24,6 @@ interface ActionButtonProps {
 export const ActionButton = React.forwardRef<HTMLButtonElement, ActionButtonProps>(
   ({ action, onClick, disabled = false, className, ...props }, ref) => {
     const isDisabled = disabled || action.disabled;
-
-    // Get the icon component
-    const IconComponent = action.icon
-      ? (Icons as any)[action.icon] || Icons.Circle
-      : null;
 
     // Determine variant based on color and style
     const getVariant = () => {
@@ -56,39 +48,12 @@ export const ActionButton = React.forwardRef<HTMLButtonElement, ActionButtonProp
       }
     };
 
-    // Determine size
-    const getSize = () => {
-      switch (action.size) {
-        case 'sm':
-          return 'sm';
-        case 'lg':
-          return 'lg';
-        case 'icon':
-          return 'icon';
-        default:
-          return 'default';
-      }
-    };
-
-    const buttonContent = () => {
-      if (action.style === 'iconButton') {
-        return IconComponent ? <IconComponent className="h-4 w-4" /> : null;
-      }
-
-      return (
-        <>
-          {IconComponent && <IconComponent className="h-4 w-4 mr-2" />}
-          {action.label}
-        </>
-      );
-    };
-
     return (
       <div className="relative inline-block">
         <Button
           ref={ref}
           variant={getVariant()}
-          size={action.style === 'iconButton' ? 'icon' : getSize()}
+          size="sm"
           disabled={isDisabled}
           onClick={onClick}
           className={cn(className)}
@@ -96,7 +61,7 @@ export const ActionButton = React.forwardRef<HTMLButtonElement, ActionButtonProp
           {...action.extraAttributes}
           {...props}
         >
-          {buttonContent()}
+          {action.label}
         </Button>
 
         {/* Badge */}

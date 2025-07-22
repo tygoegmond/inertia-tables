@@ -44,9 +44,7 @@ export interface TablePagination {
 export interface TableAction {
   name: string;
   label: string;
-  icon?: string;
   color: string;
-  size: string;
   style: 'button' | 'link' | 'iconButton';
   outlined: boolean;
   tooltip?: string;
@@ -71,9 +69,7 @@ export interface TableAction {
 export interface TableBulkAction {
   name: string;
   label: string;
-  icon?: string;
   color: string;
-  size: string;
   style: 'button' | 'link' | 'iconButton';
   outlined: boolean;
   tooltip?: string;

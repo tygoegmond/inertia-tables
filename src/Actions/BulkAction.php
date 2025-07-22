@@ -14,9 +14,7 @@ class BulkAction implements Arrayable
     use Concerns\HasAuthorization;
     use Concerns\HasColor;
     use Concerns\HasConfirmation;
-    use Concerns\HasIcon;
     use Concerns\HasLabel;
-    use Concerns\HasSize;
     use Concerns\InteractsWithTable;
 
     protected string $name;
@@ -184,9 +182,7 @@ class BulkAction implements Arrayable
         $data = [
             'name' => $this->name,
             'label' => $this->getLabel(),
-            'icon' => $this->getIcon(),
             'color' => $this->getColor(),
-            'size' => $this->getSize(),
             'style' => $this->style,
             'outlined' => $this->outlined,
             'tooltip' => $this->tooltip,

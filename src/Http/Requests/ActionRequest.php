@@ -64,7 +64,7 @@ class ActionRequest extends FormRequest
             }
 
             $tableInstance = app($tableClass);
-            
+
             if ($tableInstance instanceof HasTable) {
                 $this->table = $tableInstance->getTable();
             } else {
@@ -88,12 +88,12 @@ class ActionRequest extends FormRequest
                 $table->getHeaderActions() ?? []
             );
 
-            $action = collect($allActions)->first(fn($a) => $a->getName() === $actionName);
+            $action = collect($allActions)->first(fn ($a) => $a->getName() === $actionName);
 
             if (! $action) {
                 // Debug information
-                $availableActions = collect($allActions)->map(fn($a) => $a->getName())->toArray();
-                throw new \InvalidArgumentException("Action {$actionName} not found. Available actions: " . implode(', ', $availableActions));
+                $availableActions = collect($allActions)->map(fn ($a) => $a->getName())->toArray();
+                throw new \InvalidArgumentException("Action {$actionName} not found. Available actions: ".implode(', ', $availableActions));
             }
 
             $this->action = $action;

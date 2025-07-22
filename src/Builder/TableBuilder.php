@@ -208,6 +208,7 @@ class TableBuilder
 
         if (is_string($sort)) {
             $direction = $tableParams['direction'] ?? 'asc';
+
             return [$sort => $direction];
         }
 
@@ -217,6 +218,7 @@ class TableBuilder
     protected function getSearchQuery(): ?string
     {
         $tableParams = $this->request->get($this->name, []);
+
         return $tableParams['search'] ?? null;
     }
 

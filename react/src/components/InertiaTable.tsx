@@ -7,12 +7,12 @@ import { DeferredTableLoader } from "./DeferredTableLoader";
 import { BulkActions, ActionConfirmationDialog } from "./actions";
 import { useInertiaTable, useTableActions } from "../hooks";
 
-const InertiaTableComponent = <T extends Record<string, any> = Record<string, any>>({ 
-  state, 
-  className = "" 
+const InertiaTableComponent = <T extends Record<string, any> = Record<string, any>>({
+  state,
+  className = ""
 }: TableProps<T>) => {
   const [selectedRecords, setSelectedRecords] = React.useState<T[]>([]);
-  
+
   const {
     searchValue,
     handleSearch,
@@ -51,7 +51,7 @@ const InertiaTableComponent = <T extends Record<string, any> = Record<string, an
   if (!state) {
     return (
       <ErrorBoundary>
-        <div 
+        <div
           className={`flex flex-col gap-4 ${className}`}
           role="region"
           aria-label="Loading data table"
@@ -75,7 +75,7 @@ const InertiaTableComponent = <T extends Record<string, any> = Record<string, an
 
   return (
     <ErrorBoundary>
-      <div 
+      <div
         className={`flex flex-col gap-4 ${className}`}
         role="region"
         aria-label="Interactive data table"

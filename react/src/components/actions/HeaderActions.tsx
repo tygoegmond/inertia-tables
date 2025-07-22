@@ -1,5 +1,5 @@
 import * as React from "react";
-import { ActionButton } from "./ActionButton";
+import { Button } from "../ui/button";
 import { ActionGroup } from "./ActionGroup";
 import type { TableAction, TableActionGroup, TableHeaderActionItem } from "../../types";
 
@@ -20,7 +20,7 @@ export const HeaderActions: React.FC<HeaderActionsProps> = ({
       // For groups, check if any child actions are visible
       return action.actions.some(childAction => !childAction.hidden);
     }
-    
+
     return !action.hidden;
   });
 
@@ -59,14 +59,18 @@ export const HeaderActions: React.FC<HeaderActionsProps> = ({
 
         // Regular header action
         const action = actionItem as TableAction;
-        
+
         return (
-          <ActionButton
+          <Button
             key={action.name}
-            action={action}
+            size="sm"
+            variant={action.color === 'danger' ? 'destructive' : 'default'}
             onClick={() => handleActionClick(action.name)}
             disabled={action.disabled}
-          />
+            title={action.tooltip}
+          >
+            {action.label}
+          </Button>
         );
       })}
     </div>

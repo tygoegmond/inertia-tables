@@ -27,9 +27,9 @@ interface ActionButtonProps {
 export const ActionButton = React.forwardRef<HTMLButtonElement, ActionButtonProps>(
   ({ action, onClick, disabled = false, className, ...props }, ref) => {
     const isDisabled = disabled || action.disabled;
-    
+
     // Get the icon component
-    const IconComponent = action.icon 
+    const IconComponent = action.icon
       ? (Icons as any)[action.icon] || Icons.Circle
       : null;
 
@@ -38,11 +38,11 @@ export const ActionButton = React.forwardRef<HTMLButtonElement, ActionButtonProp
       if (action.style === 'link') {
         return 'link';
       }
-      
+
       if (action.outlined) {
         return 'outline';
       }
-      
+
       switch (action.color) {
         case 'danger':
           return 'destructive';
@@ -98,10 +98,10 @@ export const ActionButton = React.forwardRef<HTMLButtonElement, ActionButtonProp
         >
           {buttonContent()}
         </Button>
-        
+
         {/* Badge */}
         {action.badge && (
-          <Badge 
+          <Badge
             variant={
               action.badgeColor === 'danger' ? "destructive" :
               action.badgeColor === 'success' ? "default" :

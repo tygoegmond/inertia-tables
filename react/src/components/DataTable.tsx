@@ -3,87 +3,45 @@ import {
   useReactTable,
   getCoreRowModel,
   getSortedRowModel,
-  ColumnDef,
-  flexRender,
-  SortingState,
 } from "@tanstack/react-table";
-import { ChevronUp, ChevronDown } from "lucide-react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "./ui/table";
+import { Table } from "./ui/table";
 import { TableResult, TableColumn } from "../types";
 import { TextColumn } from "./columns";
+import { useTableState, useTableColumns } from "../hooks";
+import { ErrorBoundary } from "./ErrorBoundary";
+import { TableHeaderComponent } from "./table/TableHeaderComponent";
+import { TableBodyComponent } from "./table/TableBodyComponent";
 
 interface DataTableProps {
   result: TableResult;
   onSort?: (column: string, direction: 'asc' | 'desc') => void;
   className?: string;
+  isLoading?: boolean;
+  emptyMessage?: string;
 }
 
 function renderColumnValue(column: TableColumn, value: any, record: any) {
   return <TextColumn column={column} value={value} record={record} />;
 }
 
-export function DataTable({ result, onSort, className }: DataTableProps) {
-  const [sorting, setSorting] = React.useState<SortingState>([]);
+export const DataTable = React.memo<DataTableProps>(({ 
+  result, 
+  onSort, 
+  className = "",
+  isLoading = false,
+  emptyMessage = "No results."
+}) => {
+  const { sorting, setSorting, handleSort, error: stateError } = useTableState({ 
+    result, 
+    onSort 
+  });
+  
+  const { columns, error: columnsError } = useTableColumns({
+    result,
+    renderCell: renderColumnValue,
+  });
 
-  const columns: ColumnDef<any>[] = React.useMemo(() => {
-    const configColumns = result.config?.columns || [];
-    if (!Array.isArray(configColumns)) {
-      console.error('configColumns is not an array:', configColumns);
-      return [];
-    }
-    return configColumns
-      .filter(column => column.visible)
-      .map((column): ColumnDef<any> => ({
-        id: column.key,
-        accessorFn: (row) => row[column.key],
-        header: ({ column: tanstackColumn }) => {
-          const isActive = Object.keys(result.sort || {}).includes(column.key);
-          const direction = result.sort?.[column.key];
-
-          return (
-            <div
-              className={`flex items-center gap-2 ${
-                column.sortable ? 'cursor-pointer select-none hover:text-foreground' : ''
-              }`}
-              onClick={() => {
-                if (column.sortable && onSort) {
-                  const newDirection = direction === 'asc' ? 'desc' : 'asc';
-                  onSort(column.key, newDirection);
-                }
-              }}
-            >
-              {column.label}
-              {column.sortable && (
-                <div className="flex flex-col">
-                  <ChevronUp
-                    className={`h-3 w-3 ${
-                      isActive && direction === 'asc' ? 'text-foreground' : 'text-muted-foreground'
-                    }`}
-                  />
-                  <ChevronDown
-                    className={`h-3 w-3 -mt-1 ${
-                      isActive && direction === 'desc' ? 'text-foreground' : 'text-muted-foreground'
-                    }`}
-                  />
-                </div>
-              )}
-            </div>
-          );
-        },
-        cell: ({ row }) => {
-          const value = row.getValue(column.key);
-          return renderColumnValue(column, value, row.original);
-        },
-        enableSorting: column.sortable,
-      }));
-  }, [result.config?.columns, result.sort, onSort]);
+  const error = stateError || columnsError;
 
   const table = useReactTable({
     data: result.data || [],
@@ -97,48 +55,34 @@ export function DataTable({ result, onSort, className }: DataTableProps) {
     manualSorting: true,
   });
 
+  if (error) {
+    throw error;
+  }
+
   return (
-    <div className={`rounded-md border ${className}`}>
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <TableHead key={header.id}>
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                </TableHead>
-              ))}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && "selected"}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
-    </div>
+    <ErrorBoundary>
+      <div 
+        className={`rounded-md border ${className}`}
+        role="table"
+        aria-label="Data table"
+        aria-rowcount={result.data?.length || 0}
+      >
+        <Table>
+          <TableHeaderComponent
+            headerGroups={table.getHeaderGroups()}
+            result={result}
+            onSort={handleSort}
+          />
+          <TableBodyComponent
+            rows={table.getRowModel().rows}
+            columnsCount={columns.length}
+            isLoading={isLoading}
+            emptyMessage={emptyMessage}
+          />
+        </Table>
+      </div>
+    </ErrorBoundary>
   );
-}
+});
+
+DataTable.displayName = "DataTable";

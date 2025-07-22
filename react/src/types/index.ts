@@ -12,13 +12,12 @@ export interface TableColumn {
   suffix?: string;
   copyable?: boolean;
   limit?: number;
-  wrap?: string;
+  wrap?: 'truncate' | 'break-words';
   badge?: boolean;
   icon?: string;
   size?: number;
   rounded?: boolean;
 }
-
 
 export interface TableConfig {
   columns: TableColumn[];
@@ -41,15 +40,33 @@ export interface TablePagination {
   }>;
 }
 
-export interface TableResult {
+export interface TableResult<T = any> {
   config: TableConfig;
-  data: any[];
+  data: T[];
   pagination: TablePagination;
   sort: Record<string, 'asc' | 'desc'>;
   search: string | null;
 }
 
-export interface TableProps {
-  state: TableResult;
+export interface TableProps<T = any> {
+  state: TableResult<T>;
   className?: string;
+}
+
+// Hook interfaces
+export interface UseTableStateResult {
+  sorting: import('@tanstack/react-table').SortingState;
+  setSorting: React.Dispatch<React.SetStateAction<import('@tanstack/react-table').SortingState>>;
+  handleSort: (column: string, direction: 'asc' | 'desc') => void;
+  isLoading: boolean;
+  error: Error | null;
+}
+
+export interface UseInertiaTableResult {
+  searchValue: string;
+  setSearchValue: React.Dispatch<React.SetStateAction<string>>;
+  handleSearch: (query: string) => void;
+  handleSort: (column: string, direction: 'asc' | 'desc') => void;
+  handlePageChange: (page: number) => void;
+  isNavigating: boolean;
 }

@@ -58,6 +58,7 @@ export interface TableAction {
   hasAction?: boolean;
   hasUrl?: boolean;
   url?: string;
+  actionUrl?: string;
   openUrlInNewTab?: boolean;
   requiresConfirmation?: boolean;
   confirmationTitle?: string;
@@ -82,6 +83,7 @@ export interface TableBulkAction {
   disabled?: boolean;
   hidden?: boolean;
   hasAction?: boolean;
+  actionUrl?: string;
   requiresConfirmation?: boolean;
   confirmationTitle?: string;
   confirmationMessage?: string;

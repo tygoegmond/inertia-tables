@@ -28,6 +28,8 @@ class TableBuilder
 
     protected array $headerActions = [];
 
+    protected ?string $tableClass = null;
+
     public function __construct(?Request $request = null)
     {
         $this->request = $request ?? request();
@@ -99,6 +101,13 @@ class TableBuilder
     public function headerActions(array $headerActions): static
     {
         $this->headerActions = $headerActions;
+
+        return $this;
+    }
+
+    public function setTableClass(string $tableClass): static
+    {
+        $this->tableClass = $tableClass;
 
         return $this;
     }
@@ -367,7 +376,11 @@ class TableBuilder
     {
         return array_map(function ($action) {
             if (method_exists($action, 'toArray')) {
-                // Add table context information to help with URL generation
+                // Set table class for URL generation
+                if (method_exists($action, 'setTableClass') && $this->tableClass) {
+                    $action->setTableClass($this->tableClass);
+                }
+                
                 $actionData = $action->toArray();
                 $actionData['tableName'] = $this->name;
 

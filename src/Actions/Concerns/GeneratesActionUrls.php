@@ -6,10 +6,24 @@ use Illuminate\Support\Facades\URL;
 
 trait GeneratesActionUrls
 {
-    public function generateActionUrl(string $tableName, array $recordIds = []): string
+    protected ?string $tableClass = null;
+
+    public function setTableClass(string $tableClass): static
+    {
+        $this->tableClass = $tableClass;
+        
+        return $this;
+    }
+
+    public function getTableClass(): ?string
+    {
+        return $this->tableClass;
+    }
+
+    public function generateActionUrl(string $tableClass, array $recordIds = []): string
     {
         return URL::signedRoute('inertia-tables.action', [
-            'table' => base64_encode(get_class($this->getTable() ?? new \stdClass)),
+            'table' => base64_encode($tableClass),
             'action' => $this->getName(),
             'records' => $recordIds,
         ]);
@@ -17,10 +31,12 @@ trait GeneratesActionUrls
 
     public function getActionUrl(array $recordIds = []): string
     {
-        if (! $this->getTable()) {
-            throw new \Exception('Table must be set to generate action URL');
+        $tableClass = $this->getTableClass();
+        
+        if (! $tableClass) {
+            throw new \Exception('Table class must be set to generate action URL');
         }
 
-        return $this->generateActionUrl($this->getTable()->getName(), $recordIds);
+        return $this->generateActionUrl($tableClass, $recordIds);
     }
 }

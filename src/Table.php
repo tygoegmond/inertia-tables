@@ -2,7 +2,6 @@
 
 namespace Egmond\InertiaTables;
 
-use Closure;
 use Illuminate\Database\Eloquent\Builder;
 
 class Table
@@ -25,13 +24,11 @@ class Table
 
     protected array $headerActions = [];
 
-    public function query(Builder|Closure $query): static
+    protected ?string $tableClass = null;
+
+    public function query(Builder $query): static
     {
-        if ($query instanceof Closure) {
-            $this->query = $query($this->query);
-        } else {
-            $this->query = $query;
-        }
+        $this->query = $query;
 
         return $this;
     }
@@ -159,6 +156,18 @@ class Table
         return ! empty($this->headerActions);
     }
 
+    public function setTableClass(string $tableClass): static
+    {
+        $this->tableClass = $tableClass;
+
+        return $this;
+    }
+
+    public function getTableClass(): ?string
+    {
+        return $this->tableClass;
+    }
+
     public function build(): TableResult
     {
         if (! $this->query) {
@@ -175,6 +184,7 @@ class Table
             ->paginate($this->perPage);
 
         $builder->setName($this->name);
+        $builder->setTableClass($this->tableClass);
         $builder->actions($this->actions);
         $builder->bulkActions($this->bulkActions);
         $builder->headerActions($this->headerActions);

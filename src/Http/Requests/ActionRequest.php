@@ -4,6 +4,7 @@ namespace Egmond\InertiaTables\Http\Requests;
 
 use Egmond\InertiaTables\Actions\Action;
 use Egmond\InertiaTables\Actions\BulkAction;
+use Egmond\InertiaTables\Contracts\HasTable;
 use Egmond\InertiaTables\Table;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Http\FormRequest;
@@ -62,7 +63,13 @@ class ActionRequest extends FormRequest
                 throw new \InvalidArgumentException("Table class {$tableClass} does not exist");
             }
 
-            $this->table = app($tableClass);
+            $tableInstance = app($tableClass);
+            
+            if ($tableInstance instanceof HasTable) {
+                $this->table = $tableInstance->getTable();
+            } else {
+                throw new \InvalidArgumentException("Table class {$tableClass} must implement HasTable interface");
+            }
         }
 
         return $this->table;
@@ -81,10 +88,12 @@ class ActionRequest extends FormRequest
                 $table->getHeaderActions() ?? []
             );
 
-            $action = collect($allActions)->firstWhere('name', $actionName);
+            $action = collect($allActions)->first(fn($a) => $a->getName() === $actionName);
 
             if (! $action) {
-                throw new \InvalidArgumentException("Action {$actionName} not found");
+                // Debug information
+                $availableActions = collect($allActions)->map(fn($a) => $a->getName())->toArray();
+                throw new \InvalidArgumentException("Action {$actionName} not found. Available actions: " . implode(', ', $availableActions));
             }
 
             $this->action = $action;

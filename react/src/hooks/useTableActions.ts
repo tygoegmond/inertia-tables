@@ -7,6 +7,7 @@ interface Action {
   hasAction?: boolean;
   hasUrl?: boolean;
   url?: string;
+  actionUrl?: string;
   openUrlInNewTab?: boolean;
   requiresConfirmation?: boolean;
   confirmationTitle?: string;
@@ -19,6 +20,7 @@ interface BulkAction {
   name: string;
   label: string;
   hasAction?: boolean;
+  actionUrl?: string;
   requiresConfirmation?: boolean;
   confirmationTitle?: string;
   confirmationMessage?: string;
@@ -118,9 +120,11 @@ export const useTableActions = ({
     try {
       const recordIds = records.map(record => record.id || record.key);
       
-      router.post('/inertia-tables/action', {
-        table: btoa(tableName), // Base64 encode table class name
-        action: action.name,
+      if (!action.actionUrl) {
+        throw new Error(`Action ${action.name} does not have a valid actionUrl`);
+      }
+      
+      router.post(action.actionUrl, {
         records: recordIds,
       }, {
         onSuccess: (page) => {
@@ -148,7 +152,7 @@ export const useTableActions = ({
       setPendingAction(null);
       setConfirmationDialog(prev => ({ ...prev, isOpen: false }));
     }
-  }, [tableName, onSuccess, onError]);
+  }, [onSuccess, onError]);
 
   const executeAction = useCallback((action: Action, record?: Record<string, any>) => {
     if (action.hasUrl && action.url) {

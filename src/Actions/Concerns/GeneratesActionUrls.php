@@ -11,7 +11,7 @@ trait GeneratesActionUrls
     public function setTableClass(string $tableClass): static
     {
         $this->tableClass = $tableClass;
-        
+
         return $this;
     }
 
@@ -32,7 +32,7 @@ trait GeneratesActionUrls
     public function getActionUrl(array $recordIds = []): string
     {
         $tableClass = $this->getTableClass();
-        
+
         if (! $tableClass) {
             throw new \Exception('Table class must be set to generate action URL');
         }

@@ -380,7 +380,7 @@ class TableBuilder
                 if (method_exists($action, 'setTableClass') && $this->tableClass) {
                     $action->setTableClass($this->tableClass);
                 }
-                
+
                 $actionData = $action->toArray();
                 $actionData['tableName'] = $this->name;
 

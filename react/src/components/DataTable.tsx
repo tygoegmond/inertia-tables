@@ -51,9 +51,9 @@ function renderColumnValue(column: TableColumn, value: any, record: any) {
   return <TextColumn column={column} value={value} record={record} />;
 }
 
-export const DataTable = React.memo<DataTableProps>(({ 
-  result, 
-  onSort, 
+export const DataTable = React.memo<DataTableProps>(({
+  result,
+  onSort,
   className = "",
   isLoading = false,
   emptyMessage = "No results.",
@@ -63,32 +63,16 @@ export const DataTable = React.memo<DataTableProps>(({
   onSearch,
   onHeaderActionClick
 }) => {
-  // Handle deferred/undefined result
-  if (!result) {
-    return (
-      <div className="flex flex-col gap-4">
-        <div className={`rounded-md border ${className}`}>
-          <div className="flex items-center justify-center p-8">
-            <div className="flex items-center gap-2">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary" />
-              <span className="text-sm text-muted-foreground">Loading table...</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
-  const { handleSort, error: stateError } = useTableState({ 
-    result, 
-    onSort 
+  const { handleSort, error: stateError } = useTableState({
+    result,
+    onSort
   });
-  
+
   // Build enhanced columns with modern components
   const enhancedColumns = React.useMemo(() => {
     if (!result?.config?.columns) return [];
@@ -127,9 +111,9 @@ export const DataTable = React.memo<DataTableProps>(({
         id: column.key || column.label,
         accessorKey: column.key,
         header: ({ column: tableColumn }: any) => (
-          <DataTableColumnHeader 
-            column={tableColumn} 
-            title={column.label || column.key} 
+          <DataTableColumnHeader
+            column={tableColumn}
+            title={column.label || column.key}
           />
         ),
         cell: ({ row, getValue }: any) => {
@@ -238,7 +222,7 @@ export const DataTable = React.memo<DataTableProps>(({
                 />
               )}
             </div>
-            
+
             <div className="flex items-center gap-2">
               <DataTableViewOptions table={table} />
               {result.headerActions && result.headerActions.length > 0 && onHeaderActionClick && (
@@ -252,7 +236,7 @@ export const DataTable = React.memo<DataTableProps>(({
         )}
 
         <div className={`rounded-md border ${className}`}>
-          <div 
+          <div
             role="table"
             aria-label="Data table"
             aria-rowcount={result.data?.length || 0}

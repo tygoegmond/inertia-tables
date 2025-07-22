@@ -55,15 +55,15 @@ export const BulkActions: React.FC<BulkActionsProps> = ({
   };
 
   return (
-    <div className={`flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-950/50 border-t ${className}`}>
+    <div className={`flex items-center gap-4 p-3 bg-accent/50 border-t ${className}`}>
       <div className="flex items-center gap-2">
-        <Badge variant="secondary">
+        <Badge variant="secondary" className="text-xs">
           {selectedCount} selected
         </Badge>
         
-        <div className="h-4 border-l border-gray-300 dark:border-gray-600" />
+        <div className="h-4 w-px bg-border" />
         
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           {visibleActions.map((actionItem) => {
             if (actionItem.type === 'group') {
               return (

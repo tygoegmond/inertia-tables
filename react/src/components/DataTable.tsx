@@ -3,16 +3,32 @@ import {
   useReactTable,
   getCoreRowModel,
   getSortedRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getFacetedRowModel,
+  getFacetedUniqueValues,
   RowSelectionState,
+  ColumnFiltersState,
+  SortingState,
+  VisibilityState,
+  flexRender,
 } from "@tanstack/react-table";
-import { Table } from "./ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "./ui/table";
+import { Checkbox } from "./ui/checkbox";
 import { TableResult, TableColumn } from "../types";
 import { TextColumn } from "./columns";
 import { useTableState, useTableColumns } from "../hooks";
 import { ErrorBoundary } from "./ErrorBoundary";
-import { TableHeaderComponent } from "./table/TableHeaderComponent";
-import { TableBodyComponent } from "./table/TableBodyComponent";
 import { LoadingOverlay } from "./LoadingOverlay";
+import { DataTableColumnHeader } from "./data-table/data-table-column-header";
+import { DataTableRowActions } from "./data-table/data-table-row-actions";
 
 interface DataTableProps<T = any> {
   result: TableResult<T> | undefined;
@@ -40,11 +56,13 @@ export const DataTable = React.memo<DataTableProps>(({
   // Handle deferred/undefined result
   if (!result) {
     return (
-      <div className={`rounded-md border ${className}`}>
-        <div className="flex items-center justify-center p-8">
-          <div className="flex items-center gap-2">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 dark:border-white" />
-            <span className="text-sm text-gray-600 dark:text-gray-300">Loading table...</span>
+      <div className="flex flex-col gap-4">
+        <div className={`rounded-md border ${className}`}>
+          <div className="flex items-center justify-center p-8">
+            <div className="flex items-center gap-2">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary" />
+              <span className="text-sm text-muted-foreground">Loading table...</span>
+            </div>
           </div>
         </div>
       </div>
@@ -52,13 +70,89 @@ export const DataTable = React.memo<DataTableProps>(({
   }
 
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
+  const [sorting, setSorting] = React.useState<SortingState>([]);
 
-  const { sorting, setSorting, handleSort, error: stateError } = useTableState({ 
+  const { handleSort, error: stateError } = useTableState({ 
     result, 
     onSort 
   });
   
-  const { columns, error: columnsError } = useTableColumns({
+  // Build enhanced columns with modern components
+  const enhancedColumns = React.useMemo(() => {
+    if (!result?.config?.columns) return [];
+
+    const columns: any[] = [];
+
+    // Add selection column if we have selectable records
+    if (result.config.selectable) {
+      columns.push({
+        id: "select",
+        header: ({ table }: any) => (
+          <Checkbox
+            checked={
+              table.getIsAllPageRowsSelected() ||
+              (table.getIsSomePageRowsSelected() && "indeterminate")
+            }
+            onCheckedChange={(value: boolean) => table.toggleAllPageRowsSelected(!!value)}
+            aria-label="Select all"
+          />
+        ),
+        cell: ({ row }: any) => (
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(value: boolean) => row.toggleSelected(!!value)}
+            aria-label="Select row"
+          />
+        ),
+        enableSorting: false,
+        enableHiding: false,
+      });
+    }
+
+    // Add data columns
+    result.config.columns.forEach((column: TableColumn) => {
+      columns.push({
+        accessorKey: column.name,
+        header: ({ column: tableColumn }: any) => (
+          <DataTableColumnHeader 
+            column={tableColumn} 
+            title={column.label || column.name} 
+          />
+        ),
+        cell: ({ row, getValue }: any) => {
+          const value = getValue();
+          return renderColumnValue(column, value, row.original);
+        },
+        enableSorting: column.sortable !== false,
+      });
+    });
+
+    // Add actions column if we have row actions
+    if (result.actions && result.actions.length > 0) {
+      columns.push({
+        id: "actions",
+        header: "",
+        cell: ({ row }: any) => (
+          <DataTableRowActions
+            row={row}
+            actions={result.actions?.map((action: any) => ({
+              label: action.label,
+              onClick: (data: any) => onActionClick?.(action, data),
+              variant: action.color === 'danger' ? 'destructive' : 'default',
+            })) || []}
+          />
+        ),
+        enableSorting: false,
+        enableHiding: false,
+      });
+    }
+
+    return columns;
+  }, [result, onActionClick]);
+
+  const { error: columnsError } = useTableColumns({
     result,
     renderCell: renderColumnValue,
     onRecordSelect,
@@ -69,17 +163,35 @@ export const DataTable = React.memo<DataTableProps>(({
 
   const table = useReactTable({
     data: result.data || [],
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    enableRowSelection: true,
+    columns: enhancedColumns,
     state: {
       sorting,
+      columnVisibility,
       rowSelection,
+      columnFilters,
     },
-    onSortingChange: setSorting,
+    enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
-    manualSorting: true,
+    onSortingChange: (updater) => {
+      setSorting(updater);
+      // Handle server-side sorting
+      if (typeof updater === 'function') {
+        const newSorting = updater(sorting);
+        if (newSorting.length > 0) {
+          const { id, desc } = newSorting[0];
+          handleSort(id, desc ? 'desc' : 'asc');
+        }
+      }
+    },
+    onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFacetedRowModel: getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
+    manualSorting: !!onSort, // Use manual sorting when onSort is provided
     getRowId: (row, index) => {
       // Use the primary key field specified by the backend, or fallback to 'id', then index
       const primaryKeyField = result.primaryKey || 'id';
@@ -101,26 +213,64 @@ export const DataTable = React.memo<DataTableProps>(({
 
   return (
     <ErrorBoundary>
-      <div className={`rounded-md border ${className}`}>
-        <div 
-          role="table"
-          aria-label="Data table"
-          aria-rowcount={result.data?.length || 0}
-          className="relative"
-        >
-          <Table>
-            <TableHeaderComponent
-              headerGroups={table.getHeaderGroups()}
-              result={result}
-              onSort={handleSort}
-            />
-            <TableBodyComponent
-              rows={table.getRowModel().rows}
-              columnsCount={columns.length}
-              emptyMessage={emptyMessage}
-            />
-          </Table>
-          <LoadingOverlay isLoading={isLoading} />
+      <div className="flex flex-col gap-4">
+        <div className={`rounded-md border ${className}`}>
+          <div 
+            role="table"
+            aria-label="Data table"
+            aria-rowcount={result.data?.length || 0}
+            className="relative"
+          >
+            <Table>
+              <TableHeader>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => {
+                      return (
+                        <TableHead key={header.id} colSpan={header.colSpan}>
+                          {header.isPlaceholder
+                            ? null
+                            : flexRender(
+                                header.column.columnDef.header,
+                                header.getContext()
+                              )}
+                        </TableHead>
+                      )
+                    })}
+                  </TableRow>
+                ))}
+              </TableHeader>
+              <TableBody>
+                {table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow
+                      key={row.id}
+                      data-state={row.getIsSelected() && "selected"}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={enhancedColumns.length}
+                      className="h-24 text-center"
+                    >
+                      {emptyMessage}
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+            <LoadingOverlay isLoading={isLoading} />
+          </div>
         </div>
       </div>
     </ErrorBoundary>

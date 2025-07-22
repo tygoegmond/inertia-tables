@@ -7,6 +7,9 @@ import { ErrorBoundary } from "./ErrorBoundary";
 import { DeferredTableLoader } from "./DeferredTableLoader";
 import { HeaderActions, BulkActions, ActionConfirmationDialog } from "./actions";
 import { useInertiaTable, useTableActions, useActionDialog } from "../hooks";
+import { DataTableToolbar } from "./data-table/data-table-toolbar";
+import { DataTablePagination } from "./data-table/data-table-pagination";
+import { DataTableViewOptions } from "./data-table/data-table-view-options";
 
 const InertiaTableComponent = <T extends Record<string, any> = Record<string, any>>({ 
   state, 
@@ -53,19 +56,19 @@ const InertiaTableComponent = <T extends Record<string, any> = Record<string, an
     return (
       <ErrorBoundary>
         <div 
-          className={`space-y-4 ${className}`}
+          className={`flex flex-col gap-4 ${className}`}
           role="region"
           aria-label="Loading data table"
         >
           <div className="max-w-sm">
-            <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+            <div className="h-10 bg-muted rounded animate-pulse" />
           </div>
           <DeferredTableLoader />
           <div className="flex justify-between items-center">
-            <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+            <div className="h-4 w-32 bg-muted rounded animate-pulse" />
             <div className="flex gap-2">
               {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="h-10 w-10 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                <div key={i} className="h-10 w-10 bg-muted rounded animate-pulse" />
               ))}
             </div>
           </div>
@@ -77,7 +80,7 @@ const InertiaTableComponent = <T extends Record<string, any> = Record<string, an
   return (
     <ErrorBoundary>
       <div 
-        className={`space-y-4 ${className}`}
+        className={`flex flex-col gap-4 ${className}`}
         role="region"
         aria-label="Interactive data table"
       >

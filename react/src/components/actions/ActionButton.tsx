@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
 import { cn } from "../../lib/utils";
 import * as Icons from "lucide-react";
 
@@ -100,16 +101,18 @@ export const ActionButton = React.forwardRef<HTMLButtonElement, ActionButtonProp
         
         {/* Badge */}
         {action.badge && (
-          <span className={cn(
-            "absolute -top-1 -right-1 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-medium rounded-full",
-            action.badgeColor === 'danger' ? "bg-red-500 text-white" :
-            action.badgeColor === 'success' ? "bg-green-500 text-white" :
-            action.badgeColor === 'warning' ? "bg-yellow-500 text-white" :
-            action.badgeColor === 'info' ? "bg-blue-500 text-white" :
-            "bg-gray-500 text-white"
-          )}>
+          <Badge 
+            variant={
+              action.badgeColor === 'danger' ? "destructive" :
+              action.badgeColor === 'success' ? "default" :
+              action.badgeColor === 'warning' ? "secondary" :
+              action.badgeColor === 'info' ? "default" :
+              "secondary"
+            }
+            className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center"
+          >
             {action.badge}
-          </span>
+          </Badge>
         )}
       </div>
     );

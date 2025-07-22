@@ -43,6 +43,7 @@ export interface TableResult<T = any> {
     pagination: TablePagination;
     sort: Record<string, 'asc' | 'desc'>;
     search: string | null;
+    name?: string | null;
 }
 export interface TableProps<T = any> {
     state: TableResult<T>;

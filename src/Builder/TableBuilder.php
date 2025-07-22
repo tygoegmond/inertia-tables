@@ -20,6 +20,8 @@ class TableBuilder
 
     protected ?Request $request = null;
 
+    protected ?string $name = null;
+
     public function __construct(?Request $request = null)
     {
         $this->request = $request ?? request();
@@ -67,6 +69,13 @@ class TableBuilder
         return $this;
     }
 
+    public function setName(string $name): static
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
     public function build(Builder $query): TableResult
     {
         // Apply relationship aggregations
@@ -93,6 +102,7 @@ class TableBuilder
             pagination: $this->getPaginationData($results),
             sort: $this->getSortData(),
             search: $this->getSearchQuery(),
+            name: $this->name,
         );
     }
 
@@ -191,20 +201,21 @@ class TableBuilder
 
     protected function getSortData(): array
     {
-        $sort = $this->request->get('sort', []);
-
+        $tableParams = $this->request->get($this->name, []);
+        $sort = $tableParams['sort'] ?? null;
+        
         if (is_string($sort)) {
-            $direction = $this->request->get('direction', 'asc');
-
+            $direction = $tableParams['direction'] ?? 'asc';
             return [$sort => $direction];
         }
-
+        
         return is_array($sort) ? $sort : [];
     }
 
     protected function getSearchQuery(): ?string
     {
-        return $this->request->get('search');
+        $tableParams = $this->request->get($this->name, []);
+        return $tableParams['search'] ?? null;
     }
 
     protected function applyRelationshipAggregations(Builder $query): Builder

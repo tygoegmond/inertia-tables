@@ -18,6 +18,7 @@ export const InertiaTable = React.memo<TableProps>(({
     isNavigating,
   } = useInertiaTable({
     initialSearch: state.search || '',
+    tableState: state,
   });
 
   return (

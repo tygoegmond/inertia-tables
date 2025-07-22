@@ -15,6 +15,7 @@ class TableResult implements Arrayable, Jsonable, JsonSerializable
         public readonly array $pagination,
         public readonly array $sort = [],
         public readonly ?string $search = null,
+        public readonly ?string $name = null,
     ) {}
 
     public function toArray(): array

@@ -25,6 +25,13 @@ trait InteractsWithTable
         return $this;
     }
 
+    public function as(string $name): static
+    {
+        $this->getTable()->as($name);
+
+        return $this;
+    }
+
     public function getTable(): Table
     {
         if (! $this->tableInstance) {
@@ -34,6 +41,7 @@ trait InteractsWithTable
             if ($this->query !== null) {
                 $this->tableInstance->query($this->query);
             }
+
         }
 
         return $this->tableInstance;

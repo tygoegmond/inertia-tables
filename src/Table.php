@@ -17,6 +17,8 @@ class Table
 
     protected bool $searchable = false;
 
+    protected ?string $name = null;
+
     public function query(Builder|Closure $query): static
     {
         if ($query instanceof Closure) {
@@ -81,16 +83,41 @@ class Table
         return $this->searchable;
     }
 
+    public function as(string $name): static
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    public function setName(string $name): static
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    public function getName(): ?string
+    {
+        return $this->name;
+    }
+
     public function build(): TableResult
     {
         if (! $this->query) {
             throw new \Exception('Query is required. Use query() method to set the query.');
         }
 
+        if (! $this->name) {
+            throw new \Exception('Table name is required. Use as() method to set the table name.');
+        }
+
         $builder = InertiaTables::table()
             ->columns($this->columns)
             ->searchable($this->searchable)
             ->paginate($this->perPage);
+
+        $builder->setName($this->name);
 
         foreach ($this->defaultSort as $column => $direction) {
             $builder->sortBy($column, $direction);

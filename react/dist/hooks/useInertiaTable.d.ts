@@ -1,8 +1,10 @@
 import * as React from "react";
+import { TableResult } from "../types";
 interface UseInertiaTableProps {
     initialSearch?: string;
     preserveState?: boolean;
     preserveScroll?: boolean;
+    tableState?: TableResult;
 }
 interface InertiaTableState {
     searchValue: string;
@@ -12,5 +14,5 @@ interface InertiaTableState {
     handlePageChange: (page: number) => void;
     isNavigating: boolean;
 }
-export declare function useInertiaTable({ initialSearch, preserveState, preserveScroll, }?: UseInertiaTableProps): InertiaTableState;
+export declare function useInertiaTable({ initialSearch, preserveState, preserveScroll, tableState, }?: UseInertiaTableProps): InertiaTableState;
 export {};

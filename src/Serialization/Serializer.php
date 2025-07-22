@@ -17,6 +17,7 @@ class Serializer
             'pagination' => static::serializePagination($result->pagination),
             'sort' => static::serializeSort($result->sort),
             'search' => $result->search,
+            'name' => $result->name,
         ];
     }
 

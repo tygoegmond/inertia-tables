@@ -3,7 +3,7 @@ import { SortingState } from "@tanstack/react-table";
 import { TableResult } from "../types";
 
 interface UseTableStateProps {
-  result: TableResult;
+  result: TableResult | undefined;
   onSort?: (column: string, direction: 'asc' | 'desc') => void;
 }
 
@@ -37,14 +37,14 @@ export function useTableState({ result, onSort }: UseTableStateProps): TableStat
 
   // Sync sorting state with result
   React.useEffect(() => {
-    if (result.sort) {
+    if (result?.sort) {
       const newSorting: SortingState = Object.entries(result.sort).map(([id, desc]) => ({
         id,
         desc: desc === 'desc',
       }));
       setSorting(newSorting);
     }
-  }, [result.sort]);
+  }, [result?.sort]);
 
   return {
     sorting,

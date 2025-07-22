@@ -2,7 +2,7 @@ import * as React from "react";
 import { SortingState } from "@tanstack/react-table";
 import { TableResult } from "../types";
 interface UseTableStateProps {
-    result: TableResult;
+    result: TableResult | undefined;
     onSort?: (column: string, direction: 'asc' | 'desc') => void;
 }
 interface TableState {

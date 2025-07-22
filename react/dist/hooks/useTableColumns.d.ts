@@ -2,7 +2,7 @@ import * as React from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { TableResult, TableColumn } from "../types";
 interface UseTableColumnsProps {
-    result: TableResult;
+    result: TableResult | undefined;
     renderCell?: (column: TableColumn, value: any, record: any) => React.ReactNode;
 }
 interface TableColumnsState {

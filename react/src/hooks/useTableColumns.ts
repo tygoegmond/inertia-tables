@@ -3,7 +3,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { TableResult, TableColumn } from "../types";
 
 interface UseTableColumnsProps {
-  result: TableResult;
+  result: TableResult | undefined;
   renderCell?: (column: TableColumn, value: any, record: any) => React.ReactNode;
 }
 
@@ -22,6 +22,11 @@ export function useTableColumns({
   const { columns, visibleColumns } = React.useMemo(() => {
     try {
       setError(null);
+      
+      // Return empty arrays if result is undefined (deferred)
+      if (!result) {
+        return { columns: [], visibleColumns: [] };
+      }
       
       const configColumns = result.config?.columns || [];
       
@@ -51,7 +56,7 @@ export function useTableColumns({
       setError(error);
       return { columns: [], visibleColumns: [] };
     }
-  }, [result.config?.columns, renderCell]);
+  }, [result?.config?.columns, renderCell]);
 
   return {
     columns,

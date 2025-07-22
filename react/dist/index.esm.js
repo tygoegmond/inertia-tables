@@ -6177,14 +6177,14 @@ function useTableState({ result, onSort }) {
     }, [onSort]);
     // Sync sorting state with result
     React.useEffect(() => {
-        if (result.sort) {
+        if (result?.sort) {
             const newSorting = Object.entries(result.sort).map(([id, desc]) => ({
                 id,
                 desc: desc === 'desc',
             }));
             setSorting(newSorting);
         }
-    }, [result.sort]);
+    }, [result?.sort]);
     return {
         sorting,
         setSorting,
@@ -6199,6 +6199,10 @@ function useTableColumns({ result, renderCell, }) {
     const { columns, visibleColumns } = React.useMemo(() => {
         try {
             setError(null);
+            // Return empty arrays if result is undefined (deferred)
+            if (!result) {
+                return { columns: [], visibleColumns: [] };
+            }
             const configColumns = result.config?.columns || [];
             if (!Array.isArray(configColumns)) {
                 throw new Error('Table columns configuration is invalid');
@@ -6224,7 +6228,7 @@ function useTableColumns({ result, renderCell, }) {
             setError(error);
             return { columns: [], visibleColumns: [] };
         }
-    }, [result.config?.columns, renderCell]);
+    }, [result?.config?.columns, renderCell]);
     return {
         columns,
         visibleColumns,
@@ -6327,7 +6331,20 @@ function useInertiaTable({ initialSearch = '', preserveState = true, preserveScr
     };
 }
 
-const DefaultErrorFallback = ({ error, retry }) => (jsx("div", { className: "flex flex-col items-center justify-center p-8 border border-destructive/20 rounded-md bg-destructive/5", children: jsxs("div", { className: "text-center space-y-4", children: [jsx("div", { className: "text-destructive font-medium", children: "Something went wrong with the table" }), jsx("div", { className: "text-sm text-muted-foreground", children: error.message || 'An unexpected error occurred' }), jsx("button", { onClick: retry, className: "inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2", children: "Try again" })] }) }));
+const DefaultErrorFallback = ({ error, retry }) => {
+    // Check if this is likely a deferred prop error
+    const isDeferredError = error.message?.includes('Cannot read properties of undefined') ||
+        error.message?.includes('reading \'search\'') ||
+        error.message?.includes('reading \'config\'') ||
+        error.message?.includes('reading \'pagination\'');
+    const errorTitle = isDeferredError
+        ? 'Table data is loading...'
+        : 'Something went wrong with the table';
+    const errorMessage = isDeferredError
+        ? 'The table data is still being loaded. If this persists, there may be an issue with the deferred data request.'
+        : error.message || 'An unexpected error occurred';
+    return (jsx("div", { className: "flex flex-col items-center justify-center p-8 border border-destructive/20 rounded-md bg-destructive/5", children: jsxs("div", { className: "text-center space-y-4", children: [jsx("div", { className: "text-destructive font-medium", children: errorTitle }), jsx("div", { className: "text-sm text-muted-foreground max-w-md", children: errorMessage }), isDeferredError && (jsx("div", { className: "text-xs text-muted-foreground", children: "\uD83D\uDCA1 If using Inertia deferred props, ensure the table prop is properly set up on the server side." })), jsx("button", { onClick: retry, className: "inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2", children: isDeferredError ? 'Reload table' : 'Try again' })] }) }));
+};
 class ErrorBoundary extends React.Component {
     constructor(props) {
         super(props);
@@ -6341,9 +6358,16 @@ class ErrorBoundary extends React.Component {
     }
     componentDidCatch(error, errorInfo) {
         this.props.onError?.(error, errorInfo);
-        // Log error in development
+        // Enhanced logging for development
         if (process.env.NODE_ENV === 'development') {
-            console.error('Table ErrorBoundary caught an error:', error, errorInfo);
+            const isDeferredError = error.message?.includes('Cannot read properties of undefined');
+            if (isDeferredError) {
+                console.warn('🔄 InertiaTable: Deferred prop error detected. This usually means the table data is still loading.', '\n💡 Consider using Inertia::defer() properly on the server side.', '\n📝 Error details:', error.message);
+                console.error('Full error:', error, errorInfo);
+            }
+            else {
+                console.error('Table ErrorBoundary caught an error:', error, errorInfo);
+            }
         }
     }
     render() {
@@ -6561,6 +6585,10 @@ function renderColumnValue(column, value, record) {
     return jsx(TextColumn, { column: column, value: value, record: record });
 }
 const DataTable = React.memo(({ result, onSort, className = "", isLoading = false, emptyMessage = "No results." }) => {
+    // Handle deferred/undefined result
+    if (!result) {
+        return (jsx("div", { className: `rounded-md border ${className}`, children: jsx("div", { className: "flex items-center justify-center p-8", children: jsxs("div", { className: "flex items-center gap-2", children: [jsx("div", { className: "animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 dark:border-white" }), jsx("span", { className: "text-sm text-gray-600 dark:text-gray-300", children: "Loading table..." })] }) }) }));
+    }
     const { sorting, setSorting, handleSort, error: stateError } = useTableState({
         result,
         onSort
@@ -6612,14 +6640,23 @@ function TablePagination({ pagination, onPageChange, className }) {
                             : 'border border-input bg-background hover:bg-accent hover:text-accent-foreground'}`, children: page }, page))), jsx("button", { onClick: () => onPageChange(current_page + 1), disabled: current_page >= last_page, className: "inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 w-8", children: jsx(ChevronRight, { className: "h-4 w-4" }) })] })] }));
 }
 
+const DeferredTableLoader = React.memo(({ className = "", rows = 5, columns = 4, }) => {
+    return (jsxs("div", { className: `relative rounded-md border ${className}`, children: [jsxs(Table, { children: [jsx(TableHeader, { children: jsx(TableRow, { children: Array.from({ length: columns }).map((_, index) => (jsx(TableHead, { children: jsx("div", { className: "h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" }) }, index))) }) }), jsx(TableBody, { children: Array.from({ length: rows }).map((_, rowIndex) => (jsx(TableRow, { children: Array.from({ length: columns }).map((_, colIndex) => (jsx(TableCell, { children: jsx("div", { className: "h-4 bg-gray-100 dark:bg-gray-800 rounded animate-pulse" }) }, colIndex))) }, rowIndex))) })] }), jsx("div", { className: "absolute inset-0 flex items-center justify-center bg-white/70 dark:bg-black/70 rounded-md", children: jsxs("div", { className: "flex items-center gap-2 bg-white dark:bg-black px-3 py-2 rounded-lg shadow-sm border border-gray-200 dark:border-white/20", children: [jsx("div", { className: "animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 dark:border-white" }), jsx("span", { className: "text-sm text-gray-600 dark:text-white", children: "Loading table data..." })] }) })] }));
+});
+DeferredTableLoader.displayName = "DeferredTableLoader";
+
 const InertiaTableComponent = ({ state, className = "" }) => {
     const { searchValue, handleSearch, handleSort, handlePageChange, isNavigating, } = useInertiaTable({
-        initialSearch: state.search || '',
+        initialSearch: state?.search || '',
         tableState: state,
     });
-    return (jsx(ErrorBoundary, { children: jsxs("div", { className: `space-y-4 ${className}`, role: "region", "aria-label": "Interactive data table", children: [state.config?.searchable && (jsx(TableSearch, { value: searchValue, onChange: handleSearch, placeholder: "Search...", className: "max-w-sm" })), jsx(DataTable, { result: state, onSort: handleSort, isLoading: isNavigating }), jsx(TablePagination, { pagination: state.pagination, onPageChange: handlePageChange })] }) }));
+    // Show loading state if data is deferred and not yet available
+    if (!state) {
+        return (jsx(ErrorBoundary, { children: jsxs("div", { className: `space-y-4 ${className}`, role: "region", "aria-label": "Loading data table", children: [jsx("div", { className: "max-w-sm", children: jsx("div", { className: "h-10 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" }) }), jsx(DeferredTableLoader, {}), jsxs("div", { className: "flex justify-between items-center", children: [jsx("div", { className: "h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" }), jsx("div", { className: "flex gap-2", children: Array.from({ length: 3 }).map((_, i) => (jsx("div", { className: "h-10 w-10 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" }, i))) })] })] }) }));
+    }
+    return (jsx(ErrorBoundary, { children: jsxs("div", { className: `space-y-4 ${className}`, role: "region", "aria-label": "Interactive data table", children: [state.config?.searchable && (jsx(TableSearch, { value: searchValue, onChange: handleSearch, placeholder: "Search...", className: "max-w-sm" })), jsx(DataTable, { result: state, onSort: handleSort, isLoading: isNavigating }), state.pagination && (jsx(TablePagination, { pagination: state.pagination, onPageChange: handlePageChange }))] }) }));
 };
 const InertiaTable = React.memo(InertiaTableComponent);
 
-export { DataTable, ErrorBoundary, InertiaTable, SortableHeader, TableBodyComponent, TableHeaderComponent, TablePagination, TableSearch, TextColumn, InertiaTable as default, useInertiaTable, useTableColumns, useTableState };
+export { DataTable, DeferredTableLoader, ErrorBoundary, InertiaTable, LoadingOverlay, SortableHeader, TableBodyComponent, TableHeaderComponent, TablePagination, TableSearch, TextColumn, InertiaTable as default, useInertiaTable, useTableColumns, useTableState };
 //# sourceMappingURL=index.esm.js.map

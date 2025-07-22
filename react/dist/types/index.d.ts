@@ -46,8 +46,16 @@ export interface TableResult<T = any> {
     name?: string | null;
 }
 export interface TableProps<T = any> {
+    state: TableResult<T> | undefined;
+    className?: string;
+}
+export interface RequiredTableProps<T = any> {
     state: TableResult<T>;
     className?: string;
+}
+export interface UseTableStateProps {
+    result: TableResult | undefined;
+    onSort?: (column: string, direction: 'asc' | 'desc') => void;
 }
 export interface UseTableStateResult {
     sorting: import('@tanstack/react-table').SortingState;
@@ -55,6 +63,10 @@ export interface UseTableStateResult {
     handleSort: (column: string, direction: 'asc' | 'desc') => void;
     isLoading: boolean;
     error: Error | null;
+}
+export interface UseTableColumnsProps {
+    result: TableResult | undefined;
+    renderCell?: (column: TableColumn, value: any, record: any) => React.ReactNode;
 }
 export interface UseInertiaTableResult {
     searchValue: string;

@@ -3,6 +3,8 @@ export { DataTable } from './components/DataTable';
 export { TableSearch } from './components/TableSearch';
 export { TablePagination } from './components/TablePagination';
 export { ErrorBoundary } from './components/ErrorBoundary';
+export { DeferredTableLoader } from './components/DeferredTableLoader';
+export { LoadingOverlay } from './components/LoadingOverlay';
 export * from './components/columns';
 export * from './components/table';
 export * from './hooks';

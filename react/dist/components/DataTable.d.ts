@@ -1,7 +1,7 @@
 import * as React from "react";
 import { TableResult } from "../types";
 interface DataTableProps {
-    result: TableResult;
+    result: TableResult | undefined;
     onSort?: (column: string, direction: 'asc' | 'desc') => void;
     className?: string;
     isLoading?: boolean;

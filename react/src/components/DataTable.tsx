@@ -14,7 +14,7 @@ import { TableBodyComponent } from "./table/TableBodyComponent";
 import { LoadingOverlay } from "./LoadingOverlay";
 
 interface DataTableProps {
-  result: TableResult;
+  result: TableResult | undefined;
   onSort?: (column: string, direction: 'asc' | 'desc') => void;
   className?: string;
   isLoading?: boolean;
@@ -32,6 +32,20 @@ export const DataTable = React.memo<DataTableProps>(({
   isLoading = false,
   emptyMessage = "No results."
 }) => {
+  // Handle deferred/undefined result
+  if (!result) {
+    return (
+      <div className={`rounded-md border ${className}`}>
+        <div className="flex items-center justify-center p-8">
+          <div className="flex items-center gap-2">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 dark:border-white" />
+            <span className="text-sm text-gray-600 dark:text-gray-300">Loading table...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const { sorting, setSorting, handleSort, error: stateError } = useTableState({ 
     result, 
     onSort 

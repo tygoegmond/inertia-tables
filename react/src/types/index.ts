@@ -50,17 +50,33 @@ export interface TableResult<T = any> {
 }
 
 export interface TableProps<T = any> {
+  state: TableResult<T> | undefined;
+  className?: string;
+}
+
+// Legacy interface for backward compatibility
+export interface RequiredTableProps<T = any> {
   state: TableResult<T>;
   className?: string;
 }
 
-// Hook interfaces
+// Hook interfaces  
+export interface UseTableStateProps {
+  result: TableResult | undefined;
+  onSort?: (column: string, direction: 'asc' | 'desc') => void;
+}
+
 export interface UseTableStateResult {
   sorting: import('@tanstack/react-table').SortingState;
   setSorting: React.Dispatch<React.SetStateAction<import('@tanstack/react-table').SortingState>>;
   handleSort: (column: string, direction: 'asc' | 'desc') => void;
   isLoading: boolean;
   error: Error | null;
+}
+
+export interface UseTableColumnsProps {
+  result: TableResult | undefined;
+  renderCell?: (column: TableColumn, value: any, record: any) => React.ReactNode;
 }
 
 export interface UseInertiaTableResult {

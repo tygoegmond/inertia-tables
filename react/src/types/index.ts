@@ -22,6 +22,7 @@ export interface TableColumn {
 export interface TableConfig {
   columns: TableColumn[];
   searchable: boolean;
+  selectable?: boolean;
   perPage: number;
   defaultSort: Record<string, 'asc' | 'desc'>;
 }

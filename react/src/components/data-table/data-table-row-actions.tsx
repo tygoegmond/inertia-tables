@@ -1,5 +1,3 @@
-"use client"
-
 import { Row } from "@tanstack/react-table"
 import { MoreHorizontal } from "lucide-react"
 
@@ -44,7 +42,7 @@ export function DataTableRowActions<TData>({
           <div key={index}>
             <DropdownMenuItem
               onClick={() => action.onClick(row.original)}
-              variant={action.variant}
+              className={action.variant === 'destructive' ? 'text-destructive focus:text-destructive' : ''}
             >
               {action.label}
               {action.shortcut && (

@@ -1,5 +1,3 @@
-"use client"
-
 import * as React from "react"
 import {
   ColumnDef,
@@ -90,8 +88,8 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="flex flex-col gap-4">
-      <DataTableToolbar 
-        table={table} 
+      <DataTableToolbar
+        table={table}
         searchKey={searchKey}
         searchPlaceholder={searchPlaceholder}
         filters={filters}

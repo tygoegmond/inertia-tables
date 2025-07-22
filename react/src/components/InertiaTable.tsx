@@ -1,15 +1,11 @@
 import * as React from "react";
 import { TableProps } from "../types";
 import { DataTable } from "./DataTable";
-import { TableSearch } from "./TableSearch";
 import { TablePagination } from "./TablePagination";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { DeferredTableLoader } from "./DeferredTableLoader";
-import { HeaderActions, BulkActions, ActionConfirmationDialog } from "./actions";
-import { useInertiaTable, useTableActions, useActionDialog } from "../hooks";
-import { DataTableToolbar } from "./data-table/data-table-toolbar";
-import { DataTablePagination } from "./data-table/data-table-pagination";
-import { DataTableViewOptions } from "./data-table/data-table-view-options";
+import { BulkActions, ActionConfirmationDialog } from "./actions";
+import { useInertiaTable, useTableActions } from "../hooks";
 
 const InertiaTableComponent = <T extends Record<string, any> = Record<string, any>>({ 
   state, 
@@ -84,33 +80,15 @@ const InertiaTableComponent = <T extends Record<string, any> = Record<string, an
         role="region"
         aria-label="Interactive data table"
       >
-        {/* Header section with search and header actions */}
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex-1">
-            {state.config?.searchable && (
-              <TableSearch
-                value={searchValue}
-                onChange={handleSearch}
-                placeholder="Search..."
-                className="max-w-sm"
-              />
-            )}
-          </div>
-          
-          {state.headerActions && state.headerActions.length > 0 && (
-            <HeaderActions
-              headerActions={state.headerActions}
-              onActionClick={executeHeaderAction}
-            />
-          )}
-        </div>
-
         <DataTable
           result={state}
           onSort={handleSort}
           isLoading={isNavigating || isActionLoading}
           onRecordSelect={handleRecordSelection}
           onActionClick={executeAction}
+          searchValue={searchValue}
+          onSearch={handleSearch}
+          onHeaderActionClick={executeHeaderAction}
         />
 
         {/* Bulk actions */}

@@ -29,6 +29,10 @@ import { ErrorBoundary } from "./ErrorBoundary";
 import { LoadingOverlay } from "./LoadingOverlay";
 import { DataTableColumnHeader } from "./data-table/data-table-column-header";
 import { DataTableRowActions } from "./data-table/data-table-row-actions";
+import { DataTableToolbar } from "./data-table/data-table-toolbar";
+import { DataTableViewOptions } from "./data-table/data-table-view-options";
+import { Input } from "./ui/input";
+import { HeaderActions } from "./actions";
 
 interface DataTableProps<T = any> {
   result: TableResult<T> | undefined;
@@ -38,6 +42,9 @@ interface DataTableProps<T = any> {
   emptyMessage?: string;
   onRecordSelect?: (records: T[]) => void;
   onActionClick?: (action: any, record?: Record<string, any>) => void;
+  searchValue?: string;
+  onSearch?: (value: string) => void;
+  onHeaderActionClick?: (action: any) => void;
 }
 
 function renderColumnValue(column: TableColumn, value: any, record: any) {
@@ -51,7 +58,10 @@ export const DataTable = React.memo<DataTableProps>(({
   isLoading = false,
   emptyMessage = "No results.",
   onRecordSelect,
-  onActionClick
+  onActionClick,
+  searchValue,
+  onSearch,
+  onHeaderActionClick
 }) => {
   // Handle deferred/undefined result
   if (!result) {
@@ -114,11 +124,12 @@ export const DataTable = React.memo<DataTableProps>(({
     // Add data columns
     result.config.columns.forEach((column: TableColumn) => {
       columns.push({
-        accessorKey: column.name,
+        id: column.key || column.label,
+        accessorKey: column.key,
         header: ({ column: tableColumn }: any) => (
           <DataTableColumnHeader 
             column={tableColumn} 
-            title={column.label || column.name} 
+            title={column.label || column.key} 
           />
         ),
         cell: ({ row, getValue }: any) => {
@@ -214,6 +225,32 @@ export const DataTable = React.memo<DataTableProps>(({
   return (
     <ErrorBoundary>
       <div className="flex flex-col gap-4">
+        {/* Enhanced Toolbar */}
+        {(result.config?.searchable || result.headerActions?.length) && (
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex-1">
+              {result.config?.searchable && onSearch && (
+                <Input
+                  placeholder="Search..."
+                  value={searchValue || ''}
+                  onChange={(e) => onSearch(e.target.value)}
+                  className="h-8 w-[150px] lg:w-[250px]"
+                />
+              )}
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <DataTableViewOptions table={table} />
+              {result.headerActions && result.headerActions.length > 0 && onHeaderActionClick && (
+                <HeaderActions
+                  headerActions={result.headerActions}
+                  onActionClick={onHeaderActionClick}
+                />
+              )}
+            </div>
+          </div>
+        )}
+
         <div className={`rounded-md border ${className}`}>
           <div 
             role="table"

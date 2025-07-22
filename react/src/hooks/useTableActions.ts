@@ -118,33 +118,32 @@ export const useTableActions = ({
     try {
       const recordIds = records.map(record => record.id || record.key);
       
-      const response = await fetch('/inertia-tables/action', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+      router.post('/inertia-tables/action', {
+        table: btoa(tableName), // Base64 encode table class name
+        action: action.name,
+        records: recordIds,
+      }, {
+        onSuccess: (page) => {
+          const result = page.props as any;
+          if (result.redirect_url) {
+            router.visit(result.redirect_url);
+          } else {
+            onSuccess?.(result.message);
+          }
         },
-        body: JSON.stringify({
-          table: btoa(tableName), // Base64 encode table class name
-          action: action.name,
-          records: recordIds,
-        }),
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        if (result.redirect_url) {
-          router.visit(result.redirect_url);
-        } else {
-          onSuccess?.(result.message);
+        onError: (errors) => {
+          const errorMessage = typeof errors === 'string' ? errors : 
+            Object.values(errors)[0] as string || 'Action failed';
+          onError?.(errorMessage);
+        },
+        onFinish: () => {
+          setIsLoading(false);
+          setPendingAction(null);
+          setConfirmationDialog(prev => ({ ...prev, isOpen: false }));
         }
-      } else {
-        throw new Error(result.message || 'Action failed');
-      }
+      });
     } catch (error) {
       onError?.(error instanceof Error ? error.message : 'Action failed');
-    } finally {
       setIsLoading(false);
       setPendingAction(null);
       setConfirmationDialog(prev => ({ ...prev, isOpen: false }));

@@ -19,6 +19,12 @@ class Table
 
     protected ?string $name = null;
 
+    protected array $actions = [];
+
+    protected array $bulkActions = [];
+
+    protected array $headerActions = [];
+
     public function query(Builder|Closure $query): static
     {
         if ($query instanceof Closure) {
@@ -100,6 +106,57 @@ class Table
     public function getName(): ?string
     {
         return $this->name;
+    }
+
+    public function actions(array $actions): static
+    {
+        $this->actions = $actions;
+
+        return $this;
+    }
+
+    public function bulkActions(array $bulkActions): static
+    {
+        $this->bulkActions = $bulkActions;
+
+        return $this;
+    }
+
+    public function headerActions(array $headerActions): static
+    {
+        $this->headerActions = $headerActions;
+
+        return $this;
+    }
+
+    public function getActions(): array
+    {
+        return $this->actions;
+    }
+
+    public function getBulkActions(): array
+    {
+        return $this->bulkActions;
+    }
+
+    public function getHeaderActions(): array
+    {
+        return $this->headerActions;
+    }
+
+    public function hasActions(): bool
+    {
+        return ! empty($this->actions);
+    }
+
+    public function hasBulkActions(): bool
+    {
+        return ! empty($this->bulkActions);
+    }
+
+    public function hasHeaderActions(): bool
+    {
+        return ! empty($this->headerActions);
     }
 
     public function build(): TableResult

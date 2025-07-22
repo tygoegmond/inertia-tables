@@ -16,6 +16,6 @@ export declare class ErrorBoundary extends React.Component<ErrorBoundaryProps, E
     static getDerivedStateFromError(error: Error): ErrorBoundaryState;
     componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void;
     handleRetry: () => void;
-    render(): string | number | bigint | boolean | Iterable<React.ReactNode> | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | import("react/jsx-runtime").JSX.Element | null | undefined;
+    render(): string | number | boolean | Iterable<React.ReactNode> | import("react/jsx-runtime").JSX.Element | null | undefined;
 }
 export {};

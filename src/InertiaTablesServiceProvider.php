@@ -19,6 +19,7 @@ class InertiaTablesServiceProvider extends PackageServiceProvider
             ->name('inertia-tables')
             ->hasConfigFile()
             ->hasViews()
+            ->hasRoutes('web')
             ->hasMigration('create_inertia_tables_table')
             ->hasCommand(InertiaTablesCommand::class);
     }

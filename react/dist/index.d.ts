@@ -7,6 +7,7 @@ export { DeferredTableLoader } from './components/DeferredTableLoader';
 export { LoadingOverlay } from './components/LoadingOverlay';
 export * from './components/columns';
 export * from './components/table';
+export * from './components/actions';
 export * from './hooks';
 export * from './types';
 import { InertiaTable } from './components/InertiaTable';

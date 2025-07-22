@@ -40,6 +40,73 @@ export interface TablePagination {
   }>;
 }
 
+export interface TableAction {
+  name: string;
+  label: string;
+  icon?: string;
+  color: string;
+  size: string;
+  style: 'button' | 'link' | 'iconButton';
+  outlined: boolean;
+  tooltip?: string;
+  badge?: string;
+  badgeColor?: string;
+  extraAttributes?: Record<string, any>;
+  disabled?: boolean;
+  hidden?: boolean;
+  hasAction?: boolean;
+  hasUrl?: boolean;
+  url?: string;
+  openUrlInNewTab?: boolean;
+  requiresConfirmation?: boolean;
+  confirmationTitle?: string;
+  confirmationMessage?: string;
+  confirmationButton?: string;
+  cancelButton?: string;
+}
+
+export interface TableBulkAction {
+  name: string;
+  label: string;
+  icon?: string;
+  color: string;
+  size: string;
+  style: 'button' | 'link' | 'iconButton';
+  outlined: boolean;
+  tooltip?: string;
+  badge?: string;
+  badgeColor?: string;
+  extraAttributes?: Record<string, any>;
+  disabled?: boolean;
+  hidden?: boolean;
+  hasAction?: boolean;
+  requiresConfirmation?: boolean;
+  confirmationTitle?: string;
+  confirmationMessage?: string;
+  confirmationButton?: string;
+  cancelButton?: string;
+  deselectRecordsAfterCompletion?: boolean;
+  type: 'bulk';
+}
+
+export interface TableActionGroup {
+  type: 'group';
+  name: string;
+  label: string;
+  icon?: string;
+  color: string;
+  size: string;
+  style: 'button' | 'link' | 'iconButton';
+  outlined: boolean;
+  tooltip?: string;
+  extraAttributes?: Record<string, any>;
+  actions: TableAction[];
+}
+
+export type TableActionItem = TableAction | TableActionGroup;
+export type TableBulkActionItem = TableBulkAction | { type: 'group'; actions: TableBulkAction[]; [key: string]: any };
+export type TableHeaderActionItem = TableAction | TableActionGroup;
+
 export interface TableResult<T = any> {
   config: TableConfig;
   data: T[];
@@ -47,6 +114,9 @@ export interface TableResult<T = any> {
   sort: Record<string, 'asc' | 'desc'>;
   search: string | null;
   name?: string | null;
+  actions?: TableActionItem[];
+  bulkActions?: TableBulkActionItem[];
+  headerActions?: TableHeaderActionItem[];
 }
 
 export interface TableProps<T = any> {

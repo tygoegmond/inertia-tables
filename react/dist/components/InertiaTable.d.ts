@@ -1,3 +1,4 @@
-import * as React from "react";
 import { TableProps } from "../types";
-export declare const InertiaTable: React.NamedExoticComponent<TableProps<any>>;
+declare const InertiaTableComponent: <T = any>({ state, className }: TableProps<T>) => import("react/jsx-runtime").JSX.Element;
+export declare const InertiaTable: typeof InertiaTableComponent;
+export {};

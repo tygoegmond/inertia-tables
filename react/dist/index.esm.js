@@ -6593,14 +6593,14 @@ function TablePagination({ pagination, onPageChange, className }) {
                             : 'border border-input bg-background hover:bg-accent hover:text-accent-foreground'}`, children: page }, page))), jsx("button", { onClick: () => onPageChange(current_page + 1), disabled: current_page >= last_page, className: "inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 w-8", children: jsx(ChevronRight, { className: "h-4 w-4" }) })] })] }));
 }
 
-const InertiaTable = React.memo(({ state, className = "" }) => {
+const InertiaTableComponent = ({ state, className = "" }) => {
     const { searchValue, handleSearch, handleSort, handlePageChange, isNavigating, } = useInertiaTable({
         initialSearch: state.search || '',
         tableState: state,
     });
     return (jsx(ErrorBoundary, { children: jsxs("div", { className: `space-y-4 ${className}`, role: "region", "aria-label": "Interactive data table", children: [state.config?.searchable && (jsx(TableSearch, { value: searchValue, onChange: handleSearch, placeholder: "Search...", className: "max-w-sm" })), jsx(DataTable, { result: state, onSort: handleSort, isLoading: isNavigating }), jsx(TablePagination, { pagination: state.pagination, onPageChange: handlePageChange })] }) }));
-});
-InertiaTable.displayName = "InertiaTable";
+};
+const InertiaTable = React.memo(InertiaTableComponent);
 
 export { DataTable, ErrorBoundary, InertiaTable, SortableHeader, TableBodyComponent, TableHeaderComponent, TablePagination, TableSearch, TextColumn, InertiaTable as default, useInertiaTable, useTableColumns, useTableState };
 //# sourceMappingURL=index.esm.js.map

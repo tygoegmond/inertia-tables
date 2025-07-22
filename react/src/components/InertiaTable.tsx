@@ -6,10 +6,10 @@ import { TablePagination } from "./TablePagination";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { useInertiaTable } from "../hooks";
 
-export const InertiaTable = React.memo<TableProps>(({ 
+const InertiaTableComponent = <T = any>({ 
   state, 
   className = "" 
-}) => {
+}: TableProps<T>) => {
   const {
     searchValue,
     handleSearch,
@@ -50,6 +50,6 @@ export const InertiaTable = React.memo<TableProps>(({
       </div>
     </ErrorBoundary>
   );
-});
+};
 
-InertiaTable.displayName = "InertiaTable";
+export const InertiaTable = React.memo(InertiaTableComponent) as typeof InertiaTableComponent;

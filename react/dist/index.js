@@ -6306,10 +6306,13 @@ function useInertiaTable({ initialSearch = '', preserveState = true, preserveScr
                 currentParams[key] = value;
             }
         }
-        // Update only this table's parameters
+        // Update only this table's parameters, merging with existing table params
         const finalParams = {
             ...currentParams,
-            [tableName]: params
+            [tableName]: {
+                ...(currentParams[tableName] || {}),
+                ...params
+            }
         };
         const options = {
             preserveState,
@@ -6634,7 +6637,7 @@ const DataTable = React__namespace.memo(({ result, onSort, className = "", isLoa
     if (error) {
         throw error;
     }
-    return (jsxRuntime.jsx(ErrorBoundary, { children: jsxRuntime.jsx("div", { className: `rounded-md border ${className}`, children: jsxRuntime.jsx("div", { role: "table", "aria-label": "Data table", "aria-rowcount": result.data?.length || 0, children: jsxRuntime.jsxs(Table, { children: [jsxRuntime.jsx(TableHeaderComponent, { headerGroups: table.getHeaderGroups(), result: result, onSort: handleSort }), jsxRuntime.jsx(TableBodyComponent, { rows: table.getRowModel().rows, columnsCount: columns.length, emptyMessage: emptyMessage }), jsxRuntime.jsx(LoadingOverlay, { isLoading: isLoading })] }) }) }) }));
+    return (jsxRuntime.jsx(ErrorBoundary, { children: jsxRuntime.jsx("div", { className: `rounded-md border ${className}`, children: jsxRuntime.jsxs("div", { role: "table", "aria-label": "Data table", "aria-rowcount": result.data?.length || 0, className: "relative", children: [jsxRuntime.jsxs(Table, { children: [jsxRuntime.jsx(TableHeaderComponent, { headerGroups: table.getHeaderGroups(), result: result, onSort: handleSort }), jsxRuntime.jsx(TableBodyComponent, { rows: table.getRowModel().rows, columnsCount: columns.length, emptyMessage: emptyMessage })] }), jsxRuntime.jsx(LoadingOverlay, { isLoading: isLoading })] }) }) }));
 });
 DataTable.displayName = "DataTable";
 

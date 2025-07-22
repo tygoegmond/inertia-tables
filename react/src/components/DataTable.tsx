@@ -81,6 +81,7 @@ export const DataTable = React.memo<DataTableProps>(({
           role="table"
           aria-label="Data table"
           aria-rowcount={result.data?.length || 0}
+          className="relative"
         >
           <Table>
             <TableHeaderComponent
@@ -93,8 +94,8 @@ export const DataTable = React.memo<DataTableProps>(({
               columnsCount={columns.length}
               emptyMessage={emptyMessage}
             />
-            <LoadingOverlay isLoading={isLoading} />  
           </Table>
+          <LoadingOverlay isLoading={isLoading} />
         </div>
       </div>
     </ErrorBoundary>

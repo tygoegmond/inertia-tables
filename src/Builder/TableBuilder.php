@@ -91,12 +91,11 @@ class TableBuilder
         $query = $this->applySorting($query);
 
         // Execute query with pagination
-        $results = $query->paginate($this->perPage);
+        $page = $this->getPageNumber();
+        $results = $query->paginate($this->perPage, ['*'], 'page', $page);
 
         // Transform data
         $transformedData = $this->transformData($results);
-
-        sleep(1); // Simulate a delay for demonstration purposes
 
         return new TableResult(
             config: $this->getConfig(),
@@ -220,6 +219,13 @@ class TableBuilder
         $tableParams = $this->request->get($this->name, []);
 
         return $tableParams['search'] ?? null;
+    }
+
+    protected function getPageNumber(): int
+    {
+        $tableParams = $this->request->get($this->name, []);
+
+        return (int) ($tableParams['page'] ?? 1);
     }
 
     protected function applyRelationshipAggregations(Builder $query): Builder

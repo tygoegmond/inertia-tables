@@ -77,10 +77,13 @@ export function useInertiaTable({
         }
       }
 
-      // Update only this table's parameters
+      // Update only this table's parameters, merging with existing table params
       const finalParams = {
         ...currentParams,
-        [tableName]: params
+        [tableName]: {
+          ...(currentParams[tableName] || {}),
+          ...params
+        }
       };
 
       const options: any = {

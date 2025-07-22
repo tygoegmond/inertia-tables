@@ -6284,10 +6284,13 @@ function useInertiaTable({ initialSearch = '', preserveState = true, preserveScr
                 currentParams[key] = value;
             }
         }
-        // Update only this table's parameters
+        // Update only this table's parameters, merging with existing table params
         const finalParams = {
             ...currentParams,
-            [tableName]: params
+            [tableName]: {
+                ...(currentParams[tableName] || {}),
+                ...params
+            }
         };
         const options = {
             preserveState,
@@ -6612,7 +6615,7 @@ const DataTable = React.memo(({ result, onSort, className = "", isLoading = fals
     if (error) {
         throw error;
     }
-    return (jsx(ErrorBoundary, { children: jsx("div", { className: `rounded-md border ${className}`, children: jsx("div", { role: "table", "aria-label": "Data table", "aria-rowcount": result.data?.length || 0, children: jsxs(Table, { children: [jsx(TableHeaderComponent, { headerGroups: table.getHeaderGroups(), result: result, onSort: handleSort }), jsx(TableBodyComponent, { rows: table.getRowModel().rows, columnsCount: columns.length, emptyMessage: emptyMessage }), jsx(LoadingOverlay, { isLoading: isLoading })] }) }) }) }));
+    return (jsx(ErrorBoundary, { children: jsx("div", { className: `rounded-md border ${className}`, children: jsxs("div", { role: "table", "aria-label": "Data table", "aria-rowcount": result.data?.length || 0, className: "relative", children: [jsxs(Table, { children: [jsx(TableHeaderComponent, { headerGroups: table.getHeaderGroups(), result: result, onSort: handleSort }), jsx(TableBodyComponent, { rows: table.getRowModel().rows, columnsCount: columns.length, emptyMessage: emptyMessage })] }), jsx(LoadingOverlay, { isLoading: isLoading })] }) }) }));
 });
 DataTable.displayName = "DataTable";
 

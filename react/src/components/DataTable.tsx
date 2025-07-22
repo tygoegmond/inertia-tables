@@ -79,8 +79,8 @@ export const DataTable = React.memo<DataTableProps>(({
 
     const columns: any[] = [];
 
-    // Add selection column if we have selectable records
-    if (result.config.selectable) {
+    // Add selection column if we have selectable records or bulk actions
+    if (result.config.selectable || (result.bulkActions && result.bulkActions.length > 0)) {
       columns.push({
         id: "select",
         header: ({ table }: any) => (

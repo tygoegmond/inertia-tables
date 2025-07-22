@@ -6235,6 +6235,7 @@ function useTableColumns({ result, renderCell, }) {
 function useInertiaTable({ initialSearch = '', preserveState = true, preserveScroll = true, tableState, } = {}) {
     const [searchValue, setSearchValue] = React.useState(initialSearch);
     const [isNavigating, setIsNavigating] = React.useState(false);
+    const pendingRequestsRef = React.useRef(0);
     const { props } = usePage();
     // Auto-detect table name and prop name
     const tableName = tableState?.name;
@@ -6250,11 +6251,15 @@ function useInertiaTable({ initialSearch = '', preserveState = true, preserveScr
         return null;
     }, [props, tableState, tableName]);
     const navigate = React.useCallback((params) => {
+        pendingRequestsRef.current++;
         setIsNavigating(true);
         // Table name is always required now
         if (!tableName) {
             console.error('Table name is required for navigation');
-            setIsNavigating(false);
+            pendingRequestsRef.current--;
+            if (pendingRequestsRef.current === 0) {
+                setIsNavigating(false);
+            }
             return;
         }
         // Get current URL parameters to preserve other table states
@@ -6283,8 +6288,18 @@ function useInertiaTable({ initialSearch = '', preserveState = true, preserveScr
         const options = {
             preserveState,
             preserveScroll,
-            onFinish: () => setIsNavigating(false),
-            onError: () => setIsNavigating(false),
+            onFinish: () => {
+                pendingRequestsRef.current--;
+                if (pendingRequestsRef.current === 0) {
+                    setIsNavigating(false);
+                }
+            },
+            onError: () => {
+                pendingRequestsRef.current--;
+                if (pendingRequestsRef.current === 0) {
+                    setIsNavigating(false);
+                }
+            },
         };
         // Add partial reload if we know the prop name
         if (propName) {
@@ -6527,16 +6542,20 @@ const TableHeaderComponent = React.memo(({ headerGroups, result, onSort, }) => {
 });
 TableHeaderComponent.displayName = "TableHeaderComponent";
 
-const TableBodyComponent = React.memo(({ rows, columnsCount, isLoading = false, emptyMessage = "No results.", }) => {
-    if (isLoading) {
-        return (jsx(TableBody, { children: jsx(TableRow, { children: jsx(TableCell, { colSpan: columnsCount, className: "h-24 text-center", role: "status", "aria-live": "polite", children: jsxs("div", { className: "flex items-center justify-center gap-2", children: [jsx("div", { className: "animate-spin rounded-full h-4 w-4 border-b-2 border-foreground" }), "Loading..."] }) }) }) }));
-    }
+const TableBodyComponent = React.memo(({ rows, columnsCount, emptyMessage = "No results.", }) => {
     if (!rows?.length) {
         return (jsx(TableBody, { children: jsx(TableRow, { children: jsx(TableCell, { colSpan: columnsCount, className: "h-24 text-center", role: "status", "aria-live": "polite", children: emptyMessage }) }) }));
     }
     return (jsx(TableBody, { children: rows.map((row) => (jsx(TableRow, { "data-state": row.getIsSelected() && "selected", role: "row", children: row.getVisibleCells().map((cell) => (jsx(TableCell, { role: "gridcell", children: flexRender(cell.column.columnDef.cell, cell.getContext()) }, cell.id))) }, row.id))) }));
 });
 TableBodyComponent.displayName = "TableBodyComponent";
+
+const LoadingOverlay = React.memo(({ isLoading = false, className = "" }) => {
+    if (!isLoading)
+        return null;
+    return (jsx("div", { className: `absolute top-0 left-0 right-0 bottom-0 bg-white/70 dark:bg-black/70 flex items-center justify-center z-10 pointer-events-none rounded-md ${className}`, role: "status", "aria-live": "polite", "aria-label": "Loading new data", children: jsxs("div", { className: "flex items-center gap-2 bg-white dark:bg-black px-3 py-2 rounded-lg shadow-sm border border-gray-200 dark:border-white/20 pointer-events-auto", children: [jsx("div", { className: "animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 dark:border-white" }), jsx("span", { className: "text-sm text-gray-600 dark:text-white", children: "Loading..." })] }) }));
+});
+LoadingOverlay.displayName = "LoadingOverlay";
 
 function renderColumnValue(column, value, record) {
     return jsx(TextColumn, { column: column, value: value, record: record });
@@ -6565,7 +6584,7 @@ const DataTable = React.memo(({ result, onSort, className = "", isLoading = fals
     if (error) {
         throw error;
     }
-    return (jsx(ErrorBoundary, { children: jsx("div", { className: `rounded-md border ${className}`, role: "table", "aria-label": "Data table", "aria-rowcount": result.data?.length || 0, children: jsxs(Table, { children: [jsx(TableHeaderComponent, { headerGroups: table.getHeaderGroups(), result: result, onSort: handleSort }), jsx(TableBodyComponent, { rows: table.getRowModel().rows, columnsCount: columns.length, isLoading: isLoading, emptyMessage: emptyMessage })] }) }) }));
+    return (jsx(ErrorBoundary, { children: jsx("div", { className: `rounded-md border ${className}`, children: jsx("div", { role: "table", "aria-label": "Data table", "aria-rowcount": result.data?.length || 0, children: jsxs(Table, { children: [jsx(TableHeaderComponent, { headerGroups: table.getHeaderGroups(), result: result, onSort: handleSort }), jsx(TableBodyComponent, { rows: table.getRowModel().rows, columnsCount: columns.length, emptyMessage: emptyMessage }), jsx(LoadingOverlay, { isLoading: isLoading })] }) }) }) }));
 });
 DataTable.displayName = "DataTable";
 

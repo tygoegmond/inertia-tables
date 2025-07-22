@@ -26,6 +26,7 @@ export function useInertiaTable({
 }: UseInertiaTableProps = {}): InertiaTableState {
   const [searchValue, setSearchValue] = React.useState(initialSearch);
   const [isNavigating, setIsNavigating] = React.useState(false);
+  const pendingRequestsRef = React.useRef(0);
   const { props } = usePage();
 
   // Auto-detect table name and prop name
@@ -44,12 +45,16 @@ export function useInertiaTable({
 
   const navigate = React.useCallback(
     (params: Record<string, any>) => {
+      pendingRequestsRef.current++;
       setIsNavigating(true);
       
       // Table name is always required now
       if (!tableName) {
         console.error('Table name is required for navigation');
-        setIsNavigating(false);
+        pendingRequestsRef.current--;
+        if (pendingRequestsRef.current === 0) {
+          setIsNavigating(false);
+        }
         return;
       }
 
@@ -81,8 +86,18 @@ export function useInertiaTable({
       const options: any = {
         preserveState,
         preserveScroll,
-        onFinish: () => setIsNavigating(false),
-        onError: () => setIsNavigating(false),
+        onFinish: () => {
+          pendingRequestsRef.current--;
+          if (pendingRequestsRef.current === 0) {
+            setIsNavigating(false);
+          }
+        },
+        onError: () => {
+          pendingRequestsRef.current--;
+          if (pendingRequestsRef.current === 0) {
+            setIsNavigating(false);
+          }
+        },
       };
 
       // Add partial reload if we know the prop name

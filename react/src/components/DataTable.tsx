@@ -11,6 +11,7 @@ import { useTableState, useTableColumns } from "../hooks";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { TableHeaderComponent } from "./table/TableHeaderComponent";
 import { TableBodyComponent } from "./table/TableBodyComponent";
+import { LoadingOverlay } from "./LoadingOverlay";
 
 interface DataTableProps {
   result: TableResult;
@@ -61,25 +62,26 @@ export const DataTable = React.memo<DataTableProps>(({
 
   return (
     <ErrorBoundary>
-      <div 
-        className={`rounded-md border ${className}`}
-        role="table"
-        aria-label="Data table"
-        aria-rowcount={result.data?.length || 0}
-      >
-        <Table>
-          <TableHeaderComponent
-            headerGroups={table.getHeaderGroups()}
-            result={result}
-            onSort={handleSort}
-          />
-          <TableBodyComponent
-            rows={table.getRowModel().rows}
-            columnsCount={columns.length}
-            isLoading={isLoading}
-            emptyMessage={emptyMessage}
-          />
-        </Table>
+      <div className={`rounded-md border ${className}`}>
+        <div 
+          role="table"
+          aria-label="Data table"
+          aria-rowcount={result.data?.length || 0}
+        >
+          <Table>
+            <TableHeaderComponent
+              headerGroups={table.getHeaderGroups()}
+              result={result}
+              onSort={handleSort}
+            />
+            <TableBodyComponent
+              rows={table.getRowModel().rows}
+              columnsCount={columns.length}
+              emptyMessage={emptyMessage}
+            />
+            <LoadingOverlay isLoading={isLoading} />  
+          </Table>
+        </div>
       </div>
     </ErrorBoundary>
   );

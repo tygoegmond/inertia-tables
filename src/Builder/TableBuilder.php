@@ -96,6 +96,8 @@ class TableBuilder
         // Transform data
         $transformedData = $this->transformData($results);
 
+        sleep(1); // Simulate a delay for demonstration purposes
+
         return new TableResult(
             config: $this->getConfig(),
             data: $transformedData,
@@ -203,12 +205,12 @@ class TableBuilder
     {
         $tableParams = $this->request->get($this->name, []);
         $sort = $tableParams['sort'] ?? null;
-        
+
         if (is_string($sort)) {
             $direction = $tableParams['direction'] ?? 'asc';
             return [$sort => $direction];
         }
-        
+
         return is_array($sort) ? $sort : [];
     }
 

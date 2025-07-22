@@ -8,16 +8,16 @@ use Illuminate\Database\Eloquent\Collection;
 
 class BulkAction implements Arrayable
 {
-    use Concerns\HasLabel;
-    use Concerns\HasIcon;
-    use Concerns\HasColor;
-    use Concerns\HasSize;
-    use Concerns\CanBeHidden;
     use Concerns\CanBeDisabled;
-    use Concerns\HasAuthorization;
-    use Concerns\HasConfirmation;
-    use Concerns\InteractsWithTable;
+    use Concerns\CanBeHidden;
     use Concerns\GeneratesActionUrls;
+    use Concerns\HasAuthorization;
+    use Concerns\HasColor;
+    use Concerns\HasConfirmation;
+    use Concerns\HasIcon;
+    use Concerns\HasLabel;
+    use Concerns\HasSize;
+    use Concerns\InteractsWithTable;
 
     protected string $name;
 

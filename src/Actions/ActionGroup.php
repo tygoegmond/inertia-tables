@@ -7,12 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class ActionGroup implements Arrayable
 {
-    use Concerns\HasLabel;
-    use Concerns\HasIcon;
-    use Concerns\HasColor;
-    use Concerns\HasSize;
-    use Concerns\CanBeHidden;
     use Concerns\CanBeDisabled;
+    use Concerns\CanBeHidden;
+    use Concerns\HasColor;
+    use Concerns\HasIcon;
+    use Concerns\HasLabel;
+    use Concerns\HasSize;
     use Concerns\InteractsWithTable;
 
     protected string $name;

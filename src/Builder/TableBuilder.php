@@ -370,8 +370,10 @@ class TableBuilder
                 // Add table context information to help with URL generation
                 $actionData = $action->toArray();
                 $actionData['tableName'] = $this->name;
+
                 return $actionData;
             }
+
             return $action;
         }, $actions);
     }

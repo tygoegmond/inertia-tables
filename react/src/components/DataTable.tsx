@@ -3,6 +3,7 @@ import {
   useReactTable,
   getCoreRowModel,
   getSortedRowModel,
+  RowSelectionState,
 } from "@tanstack/react-table";
 import { Table } from "./ui/table";
 import { TableResult, TableColumn } from "../types";
@@ -13,12 +14,14 @@ import { TableHeaderComponent } from "./table/TableHeaderComponent";
 import { TableBodyComponent } from "./table/TableBodyComponent";
 import { LoadingOverlay } from "./LoadingOverlay";
 
-interface DataTableProps {
-  result: TableResult | undefined;
+interface DataTableProps<T = any> {
+  result: TableResult<T> | undefined;
   onSort?: (column: string, direction: 'asc' | 'desc') => void;
   className?: string;
   isLoading?: boolean;
   emptyMessage?: string;
+  onRecordSelect?: (records: T[]) => void;
+  onActionClick?: (action: any, record?: Record<string, any>) => void;
 }
 
 function renderColumnValue(column: TableColumn, value: any, record: any) {
@@ -30,7 +33,9 @@ export const DataTable = React.memo<DataTableProps>(({
   onSort, 
   className = "",
   isLoading = false,
-  emptyMessage = "No results."
+  emptyMessage = "No results.",
+  onRecordSelect,
+  onActionClick
 }) => {
   // Handle deferred/undefined result
   if (!result) {
@@ -46,6 +51,8 @@ export const DataTable = React.memo<DataTableProps>(({
     );
   }
 
+  const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
+
   const { sorting, setSorting, handleSort, error: stateError } = useTableState({ 
     result, 
     onSort 
@@ -54,6 +61,8 @@ export const DataTable = React.memo<DataTableProps>(({
   const { columns, error: columnsError } = useTableColumns({
     result,
     renderCell: renderColumnValue,
+    onRecordSelect,
+    onActionClick,
   });
 
   const error = stateError || columnsError;
@@ -63,12 +72,28 @@ export const DataTable = React.memo<DataTableProps>(({
     columns,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    enableRowSelection: true,
     state: {
       sorting,
+      rowSelection,
     },
     onSortingChange: setSorting,
+    onRowSelectionChange: setRowSelection,
     manualSorting: true,
+    getRowId: (row, index) => {
+      // Use the primary key field specified by the backend, or fallback to 'id', then index
+      const primaryKeyField = result.primaryKey || 'id';
+      return row[primaryKeyField]?.toString() || index.toString();
+    },
   });
+
+  // Notify parent of selection changes
+  React.useEffect(() => {
+    if (onRecordSelect) {
+      const selectedRows = table.getFilteredSelectedRowModel().rows.map(row => row.original);
+      onRecordSelect(selectedRows);
+    }
+  }, [rowSelection, table, onRecordSelect]);
 
   if (error) {
     throw error;

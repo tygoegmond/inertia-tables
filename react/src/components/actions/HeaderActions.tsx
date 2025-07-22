@@ -1,51 +1,11 @@
 import * as React from "react";
 import { ActionButton } from "./ActionButton";
 import { ActionGroup } from "./ActionGroup";
-
-interface HeaderAction {
-  name: string;
-  label: string;
-  icon?: string;
-  color: string;
-  size: string;
-  style: 'button' | 'link' | 'iconButton';
-  outlined: boolean;
-  tooltip?: string;
-  badge?: string;
-  badgeColor?: string;
-  extraAttributes?: Record<string, any>;
-  disabled?: boolean;
-  hidden?: boolean;
-  hasAction?: boolean;
-  hasUrl?: boolean;
-  url?: string;
-  openUrlInNewTab?: boolean;
-  requiresConfirmation?: boolean;
-  confirmationTitle?: string;
-  confirmationMessage?: string;
-  confirmationButton?: string;
-  cancelButton?: string;
-}
-
-interface HeaderActionGroup {
-  type: 'group';
-  name: string;
-  label: string;
-  icon?: string;
-  color: string;
-  size: string;
-  style: 'button' | 'link' | 'iconButton';
-  outlined: boolean;
-  tooltip?: string;
-  extraAttributes?: Record<string, any>;
-  actions: HeaderAction[];
-}
-
-type HeaderActionItem = HeaderAction | HeaderActionGroup;
+import type { TableAction, TableActionGroup, TableHeaderActionItem } from "../../types";
 
 interface HeaderActionsProps {
-  headerActions: HeaderActionItem[];
-  onActionClick: (action: HeaderAction) => void;
+  headerActions: TableHeaderActionItem[];
+  onActionClick: (action: TableAction) => void;
   className?: string;
 }
 
@@ -68,15 +28,15 @@ export const HeaderActions: React.FC<HeaderActionsProps> = ({
     return null;
   }
 
-  const handleActionClick = (actionName: string, parentAction?: HeaderActionItem) => {
-    let targetAction: HeaderAction;
+  const handleActionClick = (actionName: string, parentAction?: TableHeaderActionItem) => {
+    let targetAction: TableAction;
 
     if (parentAction && parentAction.type === 'group') {
       // Find the action within the group
-      targetAction = parentAction.actions.find(a => a.name === actionName)!;
+      targetAction = parentAction.actions.find((a: TableAction) => a.name === actionName)!;
     } else {
       // Find the action in the main actions list
-      targetAction = headerActions.find(a => a.name === actionName) as HeaderAction;
+      targetAction = headerActions.find(a => a.name === actionName) as TableAction;
     }
 
     if (targetAction) {
@@ -98,7 +58,7 @@ export const HeaderActions: React.FC<HeaderActionsProps> = ({
         }
 
         // Regular header action
-        const action = actionItem as HeaderAction;
+        const action = actionItem as TableAction;
         
         return (
           <ActionButton

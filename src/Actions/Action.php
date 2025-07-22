@@ -144,7 +144,7 @@ class Action implements Arrayable
 
     public function toArray(): array
     {
-        return [
+        $data = [
             'name' => $this->name,
             'label' => $this->getLabel(),
             'icon' => $this->getIcon(),
@@ -166,5 +166,17 @@ class Action implements Arrayable
             'hasAction' => $this->hasAction(),
             'hasUrl' => $this->hasUrl(),
         ];
+
+        // Add signed action URL for actions that need to be processed
+        if ($this->hasAction()) {
+            try {
+                $data['actionUrl'] = $this->getActionUrl();
+            } catch (\Exception $e) {
+                // If we can't generate action URL, it will be handled on frontend
+                $data['actionUrl'] = null;
+            }
+        }
+
+        return $data;
     }
 }

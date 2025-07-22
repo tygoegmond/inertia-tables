@@ -63,6 +63,7 @@ export interface TableAction {
   confirmationMessage?: string;
   confirmationButton?: string;
   cancelButton?: string;
+  type?: 'action';
 }
 
 export interface TableBulkAction {
@@ -101,10 +102,26 @@ export interface TableActionGroup {
   tooltip?: string;
   extraAttributes?: Record<string, any>;
   actions: TableAction[];
+  hidden?: boolean;
 }
 
 export type TableActionItem = TableAction | TableActionGroup;
-export type TableBulkActionItem = TableBulkAction | { type: 'group'; actions: TableBulkAction[]; [key: string]: any };
+export interface TableBulkActionGroup {
+  type: 'group';
+  name: string;
+  label: string;
+  icon?: string;
+  color: string;
+  size: string;
+  style: 'button' | 'link' | 'iconButton';
+  outlined: boolean;
+  tooltip?: string;
+  extraAttributes?: Record<string, any>;
+  actions: TableBulkAction[];
+  hidden?: boolean;
+}
+
+export type TableBulkActionItem = TableBulkAction | TableBulkActionGroup;
 export type TableHeaderActionItem = TableAction | TableActionGroup;
 
 export interface TableResult<T = any> {
@@ -117,6 +134,7 @@ export interface TableResult<T = any> {
   actions?: TableActionItem[];
   bulkActions?: TableBulkActionItem[];
   headerActions?: TableHeaderActionItem[];
+  primaryKey?: string | null;
 }
 
 export interface TableProps<T = any> {

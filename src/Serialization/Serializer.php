@@ -21,6 +21,7 @@ class Serializer
             'actions' => static::serializeActions($result->actions),
             'bulkActions' => static::serializeBulkActions($result->bulkActions),
             'headerActions' => static::serializeHeaderActions($result->headerActions),
+            'primaryKey' => $result->primaryKey,
         ];
     }
 

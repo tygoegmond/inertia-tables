@@ -175,6 +175,9 @@ class Table
             ->paginate($this->perPage);
 
         $builder->setName($this->name);
+        $builder->actions($this->actions);
+        $builder->bulkActions($this->bulkActions);
+        $builder->headerActions($this->headerActions);
 
         foreach ($this->defaultSort as $column => $direction) {
             $builder->sortBy($column, $direction);

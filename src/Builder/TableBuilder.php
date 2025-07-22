@@ -22,6 +22,12 @@ class TableBuilder
 
     protected ?string $name = null;
 
+    protected array $actions = [];
+
+    protected array $bulkActions = [];
+
+    protected array $headerActions = [];
+
     public function __construct(?Request $request = null)
     {
         $this->request = $request ?? request();
@@ -76,6 +82,27 @@ class TableBuilder
         return $this;
     }
 
+    public function actions(array $actions): static
+    {
+        $this->actions = $actions;
+
+        return $this;
+    }
+
+    public function bulkActions(array $bulkActions): static
+    {
+        $this->bulkActions = $bulkActions;
+
+        return $this;
+    }
+
+    public function headerActions(array $headerActions): static
+    {
+        $this->headerActions = $headerActions;
+
+        return $this;
+    }
+
     public function build(Builder $query): TableResult
     {
         // Apply relationship aggregations
@@ -104,6 +131,10 @@ class TableBuilder
             sort: $this->getSortData(),
             search: $this->getSearchQuery(),
             name: $this->name,
+            actions: $this->serializeActions($this->actions),
+            bulkActions: $this->serializeActions($this->bulkActions),
+            headerActions: $this->serializeActions($this->headerActions),
+            primaryKey: $this->primaryKey,
         );
     }
 
@@ -148,12 +179,19 @@ class TableBuilder
         return $query;
     }
 
+    protected ?string $primaryKey = null;
+
     protected function transformData(LengthAwarePaginator $results): array
     {
         return $results->getCollection()->map(function ($record) {
             $recordArray = $record->toArray();
             $transformedRecord = [];
             $badgeVariants = [];
+
+            // Always include the primary key for row identification
+            $primaryKey = $record->getKeyName();
+            $this->primaryKey = $primaryKey; // Store for TableResult
+            $transformedRecord[$primaryKey] = $record->getKey();
 
             foreach ($this->columns as $column) {
                 $key = $column->getKey();
@@ -323,5 +361,18 @@ class TableBuilder
         } else {
             $query->withSum($relationship, $column);
         }
+    }
+
+    protected function serializeActions(array $actions): array
+    {
+        return array_map(function ($action) {
+            if (method_exists($action, 'toArray')) {
+                // Add table context information to help with URL generation
+                $actionData = $action->toArray();
+                $actionData['tableName'] = $this->name;
+                return $actionData;
+            }
+            return $action;
+        }, $actions);
     }
 }

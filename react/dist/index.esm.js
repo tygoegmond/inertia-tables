@@ -1,12 +1,9 @@
-import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
+import { jsx, Fragment, jsxs } from 'react/jsx-runtime';
 import * as React from 'react';
-import React__default, { useState, useCallback, forwardRef, createElement, useLayoutEffect } from 'react';
-import { usePage, router } from '@inertiajs/react';
-import { cn as cn$1 } from '@/lib/utils';
+import React__default, { forwardRef, createElement, useLayoutEffect, useState, useCallback } from 'react';
 import * as ReactDOM from 'react-dom';
 import ReactDOM__default from 'react-dom';
-import { buttonVariants as buttonVariants$1 } from '@/components/ui/button';
-import { Label as Label$1 } from '@/components/ui/label';
+import { usePage, router } from '@inertiajs/react';
 
 /**
    * table-core
@@ -6199,420 +6196,163 @@ function useTableState({ result, onSort }) {
     };
 }
 
-function useTableColumns({ result, renderCell, }) {
-    const [error, setError] = React.useState(null);
-    const { columns, visibleColumns } = React.useMemo(() => {
-        try {
-            setError(null);
-            // Return empty arrays if result is undefined (deferred)
-            if (!result) {
-                return { columns: [], visibleColumns: [] };
-            }
-            const configColumns = result.config?.columns || [];
-            if (!Array.isArray(configColumns)) {
-                throw new Error('Table columns configuration is invalid');
-            }
-            const visibleColumns = configColumns.filter(column => column.visible);
-            const columns = visibleColumns.map((column) => ({
-                id: column.key,
-                accessorFn: (row) => row[column.key],
-                header: column.label,
-                cell: ({ row }) => {
-                    const value = row.getValue(column.key);
-                    return renderCell ? renderCell(column, value, row.original) : value;
-                },
-                enableSorting: column.sortable,
-                meta: {
-                    column,
-                },
-            }));
-            return { columns, visibleColumns };
+// packages/react/compose-refs/src/compose-refs.tsx
+function setRef(ref, value) {
+  if (typeof ref === "function") {
+    return ref(value);
+  } else if (ref !== null && ref !== void 0) {
+    ref.current = value;
+  }
+}
+function composeRefs(...refs) {
+  return (node) => {
+    let hasCleanup = false;
+    const cleanups = refs.map((ref) => {
+      const cleanup = setRef(ref, node);
+      if (!hasCleanup && typeof cleanup == "function") {
+        hasCleanup = true;
+      }
+      return cleanup;
+    });
+    if (hasCleanup) {
+      return () => {
+        for (let i = 0; i < cleanups.length; i++) {
+          const cleanup = cleanups[i];
+          if (typeof cleanup == "function") {
+            cleanup();
+          } else {
+            setRef(refs[i], null);
+          }
         }
-        catch (err) {
-            const error = err instanceof Error ? err : new Error('Failed to process table columns');
-            setError(error);
-            return { columns: [], visibleColumns: [] };
-        }
-    }, [result?.config?.columns, renderCell]);
-    return {
-        columns,
-        visibleColumns,
-        error,
-    };
+      };
+    }
+  };
+}
+function useComposedRefs(...refs) {
+  return React.useCallback(composeRefs(...refs), refs);
 }
 
-function useInertiaTable({ initialSearch = '', preserveState = true, preserveScroll = true, tableState, } = {}) {
-    const [searchValue, setSearchValue] = React.useState(initialSearch);
-    const [isNavigating, setIsNavigating] = React.useState(false);
-    const pendingRequestsRef = React.useRef(0);
-    const { props } = usePage();
-    // Auto-detect table name and prop name
-    const tableName = tableState?.name;
-    const propName = React.useMemo(() => {
-        if (!tableState || !tableName)
-            return null;
-        // Find which prop contains this table state by matching the table name
-        for (const [key, value] of Object.entries(props)) {
-            if (value && typeof value === 'object' && 'name' in value && value.name === tableName) {
-                return key;
-            }
+// src/slot.tsx
+// @__NO_SIDE_EFFECTS__
+function createSlot(ownerName) {
+  const SlotClone = /* @__PURE__ */ createSlotClone(ownerName);
+  const Slot2 = React.forwardRef((props, forwardedRef) => {
+    const { children, ...slotProps } = props;
+    const childrenArray = React.Children.toArray(children);
+    const slottable = childrenArray.find(isSlottable);
+    if (slottable) {
+      const newElement = slottable.props.children;
+      const newChildren = childrenArray.map((child) => {
+        if (child === slottable) {
+          if (React.Children.count(newElement) > 1) return React.Children.only(null);
+          return React.isValidElement(newElement) ? newElement.props.children : null;
+        } else {
+          return child;
         }
-        return null;
-    }, [props, tableState, tableName]);
-    const navigate = React.useCallback((params) => {
-        pendingRequestsRef.current++;
-        setIsNavigating(true);
-        // Table name is always required now
-        if (!tableName) {
-            console.error('Table name is required for navigation');
-            pendingRequestsRef.current--;
-            if (pendingRequestsRef.current === 0) {
-                setIsNavigating(false);
-            }
-            return;
-        }
-        // Get current URL parameters to preserve other table states
-        const currentUrl = new URL(window.location.href);
-        const currentParams = {};
-        // Parse existing query parameters
-        for (const [key, value] of currentUrl.searchParams.entries()) {
-            // Handle nested parameters like "users[search]"
-            const match = key.match(/^([^[]+)\[([^]]+)\]$/);
-            if (match) {
-                const [, tableKey, paramKey] = match;
-                if (!currentParams[tableKey]) {
-                    currentParams[tableKey] = {};
-                }
-                currentParams[tableKey][paramKey] = value;
-            }
-            else {
-                currentParams[key] = value;
-            }
-        }
-        // Update only this table's parameters, merging with existing table params
-        const finalParams = {
-            ...currentParams,
-            [tableName]: {
-                ...(currentParams[tableName] || {}),
-                ...params
-            }
+      });
+      return /* @__PURE__ */ jsx(SlotClone, { ...slotProps, ref: forwardedRef, children: React.isValidElement(newElement) ? React.cloneElement(newElement, void 0, newChildren) : null });
+    }
+    return /* @__PURE__ */ jsx(SlotClone, { ...slotProps, ref: forwardedRef, children });
+  });
+  Slot2.displayName = `${ownerName}.Slot`;
+  return Slot2;
+}
+var Slot$2 = /* @__PURE__ */ createSlot("Slot");
+// @__NO_SIDE_EFFECTS__
+function createSlotClone(ownerName) {
+  const SlotClone = React.forwardRef((props, forwardedRef) => {
+    const { children, ...slotProps } = props;
+    if (React.isValidElement(children)) {
+      const childrenRef = getElementRef$1(children);
+      const props2 = mergeProps(slotProps, children.props);
+      if (children.type !== React.Fragment) {
+        props2.ref = forwardedRef ? composeRefs(forwardedRef, childrenRef) : childrenRef;
+      }
+      return React.cloneElement(children, props2);
+    }
+    return React.Children.count(children) > 1 ? React.Children.only(null) : null;
+  });
+  SlotClone.displayName = `${ownerName}.SlotClone`;
+  return SlotClone;
+}
+var SLOTTABLE_IDENTIFIER = Symbol("radix.slottable");
+// @__NO_SIDE_EFFECTS__
+function createSlottable(ownerName) {
+  const Slottable2 = ({ children }) => {
+    return /* @__PURE__ */ jsx(Fragment, { children });
+  };
+  Slottable2.displayName = `${ownerName}.Slottable`;
+  Slottable2.__radixId = SLOTTABLE_IDENTIFIER;
+  return Slottable2;
+}
+function isSlottable(child) {
+  return React.isValidElement(child) && typeof child.type === "function" && "__radixId" in child.type && child.type.__radixId === SLOTTABLE_IDENTIFIER;
+}
+function mergeProps(slotProps, childProps) {
+  const overrideProps = { ...childProps };
+  for (const propName in childProps) {
+    const slotPropValue = slotProps[propName];
+    const childPropValue = childProps[propName];
+    const isHandler = /^on[A-Z]/.test(propName);
+    if (isHandler) {
+      if (slotPropValue && childPropValue) {
+        overrideProps[propName] = (...args) => {
+          const result = childPropValue(...args);
+          slotPropValue(...args);
+          return result;
         };
-        const options = {
-            preserveState,
-            preserveScroll,
-            onFinish: () => {
-                pendingRequestsRef.current--;
-                if (pendingRequestsRef.current === 0) {
-                    setIsNavigating(false);
-                }
-            },
-            onError: () => {
-                pendingRequestsRef.current--;
-                if (pendingRequestsRef.current === 0) {
-                    setIsNavigating(false);
-                }
-            },
-        };
-        // Add partial reload if we know the prop name
-        if (propName) {
-            options.only = [propName];
-        }
-        router.get(window.location.pathname, finalParams, options);
-    }, [preserveState, preserveScroll, tableName, propName]);
-    const handleSearch = React.useCallback((query) => {
-        setSearchValue(query);
-        navigate({ search: query });
-    }, [navigate]);
-    const handleSort = React.useCallback((column, direction) => {
-        navigate({ sort: column, direction });
-    }, [navigate]);
-    const handlePageChange = React.useCallback((page) => {
-        navigate({ page });
-    }, [navigate]);
-    return {
-        searchValue,
-        setSearchValue,
-        handleSearch,
-        handleSort,
-        handlePageChange,
-        isNavigating,
-    };
+      } else if (slotPropValue) {
+        overrideProps[propName] = slotPropValue;
+      }
+    } else if (propName === "style") {
+      overrideProps[propName] = { ...slotPropValue, ...childPropValue };
+    } else if (propName === "className") {
+      overrideProps[propName] = [slotPropValue, childPropValue].filter(Boolean).join(" ");
+    }
+  }
+  return { ...slotProps, ...overrideProps };
+}
+function getElementRef$1(element) {
+  let getter = Object.getOwnPropertyDescriptor(element.props, "ref")?.get;
+  let mayWarn = getter && "isReactWarning" in getter && getter.isReactWarning;
+  if (mayWarn) {
+    return element.ref;
+  }
+  getter = Object.getOwnPropertyDescriptor(element, "ref")?.get;
+  mayWarn = getter && "isReactWarning" in getter && getter.isReactWarning;
+  if (mayWarn) {
+    return element.props.ref;
+  }
+  return element.props.ref || element.ref;
 }
 
-const useTableActions = ({ tableName, onSuccess, onError, }) => {
-    const [isLoading, setIsLoading] = useState(false);
-    const [confirmationDialog, setConfirmationDialog] = useState({
-        isOpen: false,
-        title: "",
-        message: "",
-        confirmButton: "Confirm",
-        cancelButton: "Cancel",
-    });
-    const [formDialog, setFormDialog] = useState({
-        isOpen: false,
-        title: "",
-        description: "",
-        fields: [],
-        submitButton: "Submit",
-        cancelButton: "Cancel",
-    });
-    const [pendingAction, setPendingAction] = useState(null);
-    const handleUrlAction = useCallback((action, record) => {
-        if (!action.url)
-            return;
-        let url = action.url;
-        // Replace record placeholders in URL if record is provided
-        if (record) {
-            Object.keys(record).forEach(key => {
-                url = url.replace(`{${key}}`, record[key]);
-            });
-        }
-        if (action.openUrlInNewTab) {
-            window.open(url, '_blank');
-        }
-        else {
-            router.visit(url);
-        }
-    }, []);
-    const performActionRequest = useCallback(async (action, records = []) => {
-        setIsLoading(true);
-        try {
-            const recordIds = records.map(record => record.id || record.key);
-            const response = await fetch('/inertia-tables/action', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                },
-                body: JSON.stringify({
-                    table: btoa(tableName), // Base64 encode table class name
-                    action: action.name,
-                    records: recordIds,
-                }),
-            });
-            const result = await response.json();
-            if (response.ok) {
-                if (result.redirect_url) {
-                    router.visit(result.redirect_url);
-                }
-                else {
-                    onSuccess?.(result.message);
-                }
-            }
-            else {
-                throw new Error(result.message || 'Action failed');
-            }
-        }
-        catch (error) {
-            onError?.(error instanceof Error ? error.message : 'Action failed');
-        }
-        finally {
-            setIsLoading(false);
-            setPendingAction(null);
-            setConfirmationDialog(prev => ({ ...prev, isOpen: false }));
-        }
-    }, [tableName, onSuccess, onError]);
-    const executeAction = useCallback((action, record) => {
-        if (action.hasUrl && action.url) {
-            handleUrlAction(action, record);
-            return;
-        }
-        if (!action.hasAction) {
-            console.warn('Action has no URL or action handler');
-            return;
-        }
-        if (action.requiresConfirmation) {
-            setPendingAction({ action, record, type: 'single' });
-            setConfirmationDialog({
-                isOpen: true,
-                title: action.confirmationTitle || 'Confirm Action',
-                message: action.confirmationMessage || 'Are you sure you want to perform this action?',
-                confirmButton: action.confirmationButton || 'Confirm',
-                cancelButton: action.cancelButton || 'Cancel',
-            });
-        }
-        else {
-            performActionRequest(action, record ? [record] : []);
-        }
-    }, [handleUrlAction, performActionRequest]);
-    const executeBulkAction = useCallback((action, records) => {
-        if (!action.hasAction) {
-            console.warn('Bulk action has no action handler');
-            return;
-        }
-        if (action.requiresConfirmation) {
-            setPendingAction({ action, records, type: 'bulk' });
-            setConfirmationDialog({
-                isOpen: true,
-                title: action.confirmationTitle || 'Confirm Bulk Action',
-                message: action.confirmationMessage || `Are you sure you want to perform this action on ${records.length} records?`,
-                confirmButton: action.confirmationButton || 'Confirm',
-                cancelButton: action.cancelButton || 'Cancel',
-            });
-        }
-        else {
-            performActionRequest(action, records);
-        }
-    }, [performActionRequest]);
-    const executeHeaderAction = useCallback((action) => {
-        if (action.hasUrl && action.url) {
-            handleUrlAction(action);
-            return;
-        }
-        if (!action.hasAction) {
-            console.warn('Header action has no URL or action handler');
-            return;
-        }
-        if (action.requiresConfirmation) {
-            setPendingAction({ action, type: 'header' });
-            setConfirmationDialog({
-                isOpen: true,
-                title: action.confirmationTitle || 'Confirm Action',
-                message: action.confirmationMessage || 'Are you sure you want to perform this action?',
-                confirmButton: action.confirmationButton || 'Confirm',
-                cancelButton: action.cancelButton || 'Cancel',
-            });
-        }
-        else {
-            performActionRequest(action, []);
-        }
-    }, [handleUrlAction, performActionRequest]);
-    const confirmAction = useCallback(() => {
-        if (!pendingAction)
-            return;
-        const { action, record, records } = pendingAction;
-        if (pendingAction.type === 'bulk' && records) {
-            performActionRequest(action, records);
-        }
-        else if (pendingAction.type === 'single' && record) {
-            performActionRequest(action, [record]);
-        }
-        else {
-            performActionRequest(action, []);
-        }
-    }, [pendingAction, performActionRequest]);
-    const cancelAction = useCallback(() => {
-        setPendingAction(null);
-        setConfirmationDialog(prev => ({ ...prev, isOpen: false }));
-        setFormDialog(prev => ({ ...prev, isOpen: false }));
-    }, []);
-    const submitForm = useCallback((data) => {
-        // Handle form submission
-        // This would extend the action request to include form data
-        console.log('Form submitted:', data);
-    }, []);
-    return {
-        isLoading,
-        confirmationDialog,
-        formDialog,
-        executeAction,
-        executeBulkAction,
-        executeHeaderAction,
-        confirmAction,
-        cancelAction,
-        submitForm,
-    };
-};
-
-const useActionDialog = () => {
-    const [confirmationDialog, setConfirmationDialog] = useState({
-        isOpen: false,
-        title: "",
-        message: "",
-        confirmButton: "Confirm",
-        cancelButton: "Cancel",
-    });
-    const [formDialog, setFormDialog] = useState({
-        isOpen: false,
-        title: "",
-        description: "",
-        fields: [],
-        submitButton: "Submit",
-        cancelButton: "Cancel",
-        initialData: {},
-    });
-    const showConfirmation = useCallback((config) => {
-        setConfirmationDialog(prev => ({
-            ...prev,
-            ...config,
-            isOpen: true,
-        }));
-    }, []);
-    const showForm = useCallback((config) => {
-        setFormDialog(prev => ({
-            ...prev,
-            ...config,
-            isOpen: true,
-        }));
-    }, []);
-    const hideConfirmation = useCallback(() => {
-        setConfirmationDialog(prev => ({ ...prev, isOpen: false }));
-    }, []);
-    const hideForm = useCallback(() => {
-        setFormDialog(prev => ({ ...prev, isOpen: false }));
-    }, []);
-    const hideAll = useCallback(() => {
-        setConfirmationDialog(prev => ({ ...prev, isOpen: false }));
-        setFormDialog(prev => ({ ...prev, isOpen: false }));
-    }, []);
-    return {
-        confirmationDialog,
-        formDialog,
-        showConfirmation,
-        showForm,
-        hideConfirmation,
-        hideForm,
-        hideAll,
-    };
-};
-
-const DefaultErrorFallback = ({ error, retry }) => {
-    // Check if this is likely a deferred prop error
-    const isDeferredError = error.message?.includes('Cannot read properties of undefined') ||
-        error.message?.includes('reading \'search\'') ||
-        error.message?.includes('reading \'config\'') ||
-        error.message?.includes('reading \'pagination\'');
-    const errorTitle = isDeferredError
-        ? 'Table data is loading...'
-        : 'Something went wrong with the table';
-    const errorMessage = isDeferredError
-        ? 'The table data is still being loaded. If this persists, there may be an issue with the deferred data request.'
-        : error.message || 'An unexpected error occurred';
-    return (jsx("div", { className: "flex flex-col items-center justify-center p-8 border border-destructive/20 rounded-md bg-destructive/5", children: jsxs("div", { className: "text-center space-y-4", children: [jsx("div", { className: "text-destructive font-medium", children: errorTitle }), jsx("div", { className: "text-sm text-muted-foreground max-w-md", children: errorMessage }), isDeferredError && (jsx("div", { className: "text-xs text-muted-foreground", children: "\uD83D\uDCA1 If using Inertia deferred props, ensure the table prop is properly set up on the server side." })), jsx("button", { onClick: retry, className: "inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2", children: isDeferredError ? 'Reload table' : 'Try again' })] }) }));
-};
-class ErrorBoundary extends React.Component {
-    constructor(props) {
-        super(props);
-        this.handleRetry = () => {
-            this.setState({ hasError: false, error: null });
-        };
-        this.state = { hasError: false, error: null };
-    }
-    static getDerivedStateFromError(error) {
-        return { hasError: true, error };
-    }
-    componentDidCatch(error, errorInfo) {
-        this.props.onError?.(error, errorInfo);
-        // Enhanced logging for development
-        if (process.env.NODE_ENV === 'development') {
-            const isDeferredError = error.message?.includes('Cannot read properties of undefined');
-            if (isDeferredError) {
-                console.warn('🔄 InertiaTable: Deferred prop error detected. This usually means the table data is still loading.', '\n💡 Consider using Inertia::defer() properly on the server side.', '\n📝 Error details:', error.message);
-                console.error('Full error:', error, errorInfo);
-            }
-            else {
-                console.error('Table ErrorBoundary caught an error:', error, errorInfo);
-            }
-        }
-    }
-    render() {
-        if (this.state.hasError && this.state.error) {
-            const FallbackComponent = this.props.fallback || DefaultErrorFallback;
-            return (jsx(FallbackComponent, { error: this.state.error, retry: this.handleRetry }));
-        }
-        return this.props.children;
-    }
-}
+const buttonVariants = cva("inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0", {
+    variants: {
+        variant: {
+            default: "bg-primary text-primary-foreground hover:bg-primary/90",
+            destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+            outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+            secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+            ghost: "hover:bg-accent hover:text-accent-foreground",
+            link: "text-primary underline-offset-4 hover:underline",
+        },
+        size: {
+            default: "h-10 px-4 py-2",
+            sm: "h-9 rounded-md px-3",
+            lg: "h-11 rounded-md px-8",
+            icon: "h-10 w-10",
+        },
+    },
+    defaultVariants: {
+        variant: "default",
+        size: "default",
+    },
+});
+const Button = React.forwardRef(({ className, variant, size, asChild = false, ...props }, ref) => {
+    const Comp = asChild ? Slot$2 : "button";
+    return (jsx(Comp, { className: cn(buttonVariants({ variant, size, className })), ref: ref, ...props }));
+});
+Button.displayName = "Button";
 
 /**
  * @license lucide-react v0.475.0 - ISC
@@ -41909,281 +41649,6 @@ var Icons = /*#__PURE__*/Object.freeze({
   icons: index$1
 });
 
-const SortableHeader = React.memo(({ column, sortDirection, onSort, className = "", }) => {
-    const isActive = sortDirection !== null && sortDirection !== undefined;
-    const handleClick = React.useCallback(() => {
-        if (column.sortable && onSort) {
-            const newDirection = sortDirection === 'asc' ? 'desc' : 'asc';
-            onSort(column.key, newDirection);
-        }
-    }, [column.key, column.sortable, onSort, sortDirection]);
-    const handleKeyDown = React.useCallback((event) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault();
-            handleClick();
-        }
-    }, [handleClick]);
-    if (!column.sortable) {
-        return jsx("span", { className: className, children: column.label });
-    }
-    return (jsxs("div", { className: `flex items-center gap-2 cursor-pointer select-none hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-sm ${className}`, onClick: handleClick, onKeyDown: handleKeyDown, tabIndex: 0, role: "button", "aria-label": `Sort by ${column.label} ${sortDirection === 'asc'
-            ? 'descending'
-            : sortDirection === 'desc'
-                ? 'ascending'
-                : 'ascending'}`, "aria-pressed": isActive, children: [column.label, jsxs("div", { className: "flex flex-col", "aria-hidden": "true", children: [jsx(ChevronUp, { className: `h-3 w-3 ${isActive && sortDirection === 'asc'
-                            ? 'text-foreground'
-                            : 'text-muted-foreground'}` }), jsx(ChevronDown, { className: `h-3 w-3 -mt-1 ${isActive && sortDirection === 'desc'
-                            ? 'text-foreground'
-                            : 'text-muted-foreground'}` })] })] }));
-});
-SortableHeader.displayName = "SortableHeader";
-
-const TableHeaderComponent = React.memo(({ headerGroups, result, onSort, }) => {
-    return (jsx(TableHeader, { children: headerGroups.map((headerGroup) => (jsx(TableRow, { children: headerGroup.headers.map((header) => {
-                const column = header.column.columnDef.meta?.column;
-                const sortDirection = column?.key ? result.sort?.[column.key] || null : null;
-                return (jsx(TableHead, { children: header.isPlaceholder ? null : column ? (jsx(SortableHeader, { column: column, sortDirection: sortDirection, onSort: onSort })) : (flexRender(header.column.columnDef.header, header.getContext())) }, header.id));
-            }) }, headerGroup.id))) }));
-});
-TableHeaderComponent.displayName = "TableHeaderComponent";
-
-const TableBodyComponent = React.memo(({ rows, columnsCount, emptyMessage = "No results.", }) => {
-    if (!rows?.length) {
-        return (jsx(TableBody, { children: jsx(TableRow, { children: jsx(TableCell, { colSpan: columnsCount, className: "h-24 text-center", role: "status", "aria-live": "polite", children: emptyMessage }) }) }));
-    }
-    return (jsx(TableBody, { children: rows.map((row) => (jsx(TableRow, { "data-state": row.getIsSelected() && "selected", role: "row", children: row.getVisibleCells().map((cell) => (jsx(TableCell, { role: "gridcell", children: flexRender(cell.column.columnDef.cell, cell.getContext()) }, cell.id))) }, row.id))) }));
-});
-TableBodyComponent.displayName = "TableBodyComponent";
-
-const LoadingOverlay = React.memo(({ isLoading = false, className = "" }) => {
-    if (!isLoading)
-        return null;
-    return (jsx("div", { className: `absolute top-0 left-0 right-0 bottom-0 bg-white/70 dark:bg-black/70 flex items-center justify-center z-10 pointer-events-none rounded-md ${className}`, role: "status", "aria-live": "polite", "aria-label": "Loading new data", children: jsxs("div", { className: "flex items-center gap-2 bg-white dark:bg-black px-3 py-2 rounded-lg shadow-sm border border-gray-200 dark:border-white/20 pointer-events-auto", children: [jsx("div", { className: "animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 dark:border-white" }), jsx("span", { className: "text-sm text-gray-600 dark:text-white", children: "Loading..." })] }) }));
-});
-LoadingOverlay.displayName = "LoadingOverlay";
-
-function renderColumnValue(column, value, record) {
-    return jsx(TextColumn, { column: column, value: value, record: record });
-}
-const DataTable = React.memo(({ result, onSort, className = "", isLoading = false, emptyMessage = "No results." }) => {
-    // Handle deferred/undefined result
-    if (!result) {
-        return (jsx("div", { className: `rounded-md border ${className}`, children: jsx("div", { className: "flex items-center justify-center p-8", children: jsxs("div", { className: "flex items-center gap-2", children: [jsx("div", { className: "animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 dark:border-white" }), jsx("span", { className: "text-sm text-gray-600 dark:text-gray-300", children: "Loading table..." })] }) }) }));
-    }
-    const { sorting, setSorting, handleSort, error: stateError } = useTableState({
-        result,
-        onSort
-    });
-    const { columns, error: columnsError } = useTableColumns({
-        result,
-        renderCell: renderColumnValue,
-    });
-    const error = stateError || columnsError;
-    const table = useReactTable({
-        data: result.data || [],
-        columns,
-        getCoreRowModel: getCoreRowModel(),
-        getSortedRowModel: getSortedRowModel(),
-        state: {
-            sorting,
-        },
-        onSortingChange: setSorting,
-        manualSorting: true,
-    });
-    if (error) {
-        throw error;
-    }
-    return (jsx(ErrorBoundary, { children: jsx("div", { className: `rounded-md border ${className}`, children: jsxs("div", { role: "table", "aria-label": "Data table", "aria-rowcount": result.data?.length || 0, className: "relative", children: [jsxs(Table$1, { children: [jsx(TableHeaderComponent, { headerGroups: table.getHeaderGroups(), result: result, onSort: handleSort }), jsx(TableBodyComponent, { rows: table.getRowModel().rows, columnsCount: columns.length, emptyMessage: emptyMessage })] }), jsx(LoadingOverlay, { isLoading: isLoading })] }) }) }));
-});
-DataTable.displayName = "DataTable";
-
-function TableSearch({ value, onChange, placeholder = "Search...", className }) {
-    return (jsxs("div", { className: `relative ${className}`, children: [jsx(Search, { className: "absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" }), jsx("input", { type: "text", placeholder: placeholder, value: value, onChange: (e) => onChange(e.target.value), className: "flex h-10 w-full rounded-md border border-input bg-background pl-10 pr-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" })] }));
-}
-
-function TablePagination({ pagination, onPageChange, className }) {
-    const { current_page, last_page, from, to, total } = pagination;
-    const getPageNumbers = () => {
-        const pages = [];
-        const maxVisible = 5;
-        let start = Math.max(1, current_page - Math.floor(maxVisible / 2));
-        const end = Math.min(last_page, start + maxVisible - 1);
-        if (end - start + 1 < maxVisible) {
-            start = Math.max(1, end - maxVisible + 1);
-        }
-        for (let i = start; i <= end; i++) {
-            pages.push(i);
-        }
-        return pages;
-    };
-    return (jsxs("div", { className: `flex items-center justify-between ${className}`, children: [jsx("div", { className: "text-sm text-muted-foreground", children: from && to ? (`Showing ${from} to ${to} of ${total} results`) : (`${total} results`) }), jsxs("div", { className: "flex items-center gap-2", children: [jsx("button", { onClick: () => onPageChange(current_page - 1), disabled: current_page <= 1, className: "inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 w-8", children: jsx(ChevronLeft, { className: "h-4 w-4" }) }), getPageNumbers().map((page) => (jsx("button", { onClick: () => onPageChange(page), className: `inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-8 w-8 ${page === current_page
-                            ? 'bg-primary text-primary-foreground'
-                            : 'border border-input bg-background hover:bg-accent hover:text-accent-foreground'}`, children: page }, page))), jsx("button", { onClick: () => onPageChange(current_page + 1), disabled: current_page >= last_page, className: "inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 w-8", children: jsx(ChevronRight, { className: "h-4 w-4" }) })] })] }));
-}
-
-const DeferredTableLoader = React.memo(({ className = "", rows = 5, columns = 4, }) => {
-    return (jsxs("div", { className: `relative rounded-md border ${className}`, children: [jsxs(Table$1, { children: [jsx(TableHeader, { children: jsx(TableRow, { children: Array.from({ length: columns }).map((_, index) => (jsx(TableHead, { children: jsx("div", { className: "h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" }) }, index))) }) }), jsx(TableBody, { children: Array.from({ length: rows }).map((_, rowIndex) => (jsx(TableRow, { children: Array.from({ length: columns }).map((_, colIndex) => (jsx(TableCell, { children: jsx("div", { className: "h-4 bg-gray-100 dark:bg-gray-800 rounded animate-pulse" }) }, colIndex))) }, rowIndex))) })] }), jsx("div", { className: "absolute inset-0 flex items-center justify-center bg-white/70 dark:bg-black/70 rounded-md", children: jsxs("div", { className: "flex items-center gap-2 bg-white dark:bg-black px-3 py-2 rounded-lg shadow-sm border border-gray-200 dark:border-white/20", children: [jsx("div", { className: "animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 dark:border-white" }), jsx("span", { className: "text-sm text-gray-600 dark:text-white", children: "Loading table data..." })] }) })] }));
-});
-DeferredTableLoader.displayName = "DeferredTableLoader";
-
-// packages/react/compose-refs/src/compose-refs.tsx
-function setRef(ref, value) {
-  if (typeof ref === "function") {
-    return ref(value);
-  } else if (ref !== null && ref !== void 0) {
-    ref.current = value;
-  }
-}
-function composeRefs(...refs) {
-  return (node) => {
-    let hasCleanup = false;
-    const cleanups = refs.map((ref) => {
-      const cleanup = setRef(ref, node);
-      if (!hasCleanup && typeof cleanup == "function") {
-        hasCleanup = true;
-      }
-      return cleanup;
-    });
-    if (hasCleanup) {
-      return () => {
-        for (let i = 0; i < cleanups.length; i++) {
-          const cleanup = cleanups[i];
-          if (typeof cleanup == "function") {
-            cleanup();
-          } else {
-            setRef(refs[i], null);
-          }
-        }
-      };
-    }
-  };
-}
-function useComposedRefs(...refs) {
-  return React.useCallback(composeRefs(...refs), refs);
-}
-
-// src/slot.tsx
-// @__NO_SIDE_EFFECTS__
-function createSlot(ownerName) {
-  const SlotClone = /* @__PURE__ */ createSlotClone(ownerName);
-  const Slot2 = React.forwardRef((props, forwardedRef) => {
-    const { children, ...slotProps } = props;
-    const childrenArray = React.Children.toArray(children);
-    const slottable = childrenArray.find(isSlottable);
-    if (slottable) {
-      const newElement = slottable.props.children;
-      const newChildren = childrenArray.map((child) => {
-        if (child === slottable) {
-          if (React.Children.count(newElement) > 1) return React.Children.only(null);
-          return React.isValidElement(newElement) ? newElement.props.children : null;
-        } else {
-          return child;
-        }
-      });
-      return /* @__PURE__ */ jsx(SlotClone, { ...slotProps, ref: forwardedRef, children: React.isValidElement(newElement) ? React.cloneElement(newElement, void 0, newChildren) : null });
-    }
-    return /* @__PURE__ */ jsx(SlotClone, { ...slotProps, ref: forwardedRef, children });
-  });
-  Slot2.displayName = `${ownerName}.Slot`;
-  return Slot2;
-}
-var Slot$2 = /* @__PURE__ */ createSlot("Slot");
-// @__NO_SIDE_EFFECTS__
-function createSlotClone(ownerName) {
-  const SlotClone = React.forwardRef((props, forwardedRef) => {
-    const { children, ...slotProps } = props;
-    if (React.isValidElement(children)) {
-      const childrenRef = getElementRef$1(children);
-      const props2 = mergeProps(slotProps, children.props);
-      if (children.type !== React.Fragment) {
-        props2.ref = forwardedRef ? composeRefs(forwardedRef, childrenRef) : childrenRef;
-      }
-      return React.cloneElement(children, props2);
-    }
-    return React.Children.count(children) > 1 ? React.Children.only(null) : null;
-  });
-  SlotClone.displayName = `${ownerName}.SlotClone`;
-  return SlotClone;
-}
-var SLOTTABLE_IDENTIFIER = Symbol("radix.slottable");
-// @__NO_SIDE_EFFECTS__
-function createSlottable(ownerName) {
-  const Slottable2 = ({ children }) => {
-    return /* @__PURE__ */ jsx(Fragment, { children });
-  };
-  Slottable2.displayName = `${ownerName}.Slottable`;
-  Slottable2.__radixId = SLOTTABLE_IDENTIFIER;
-  return Slottable2;
-}
-function isSlottable(child) {
-  return React.isValidElement(child) && typeof child.type === "function" && "__radixId" in child.type && child.type.__radixId === SLOTTABLE_IDENTIFIER;
-}
-function mergeProps(slotProps, childProps) {
-  const overrideProps = { ...childProps };
-  for (const propName in childProps) {
-    const slotPropValue = slotProps[propName];
-    const childPropValue = childProps[propName];
-    const isHandler = /^on[A-Z]/.test(propName);
-    if (isHandler) {
-      if (slotPropValue && childPropValue) {
-        overrideProps[propName] = (...args) => {
-          const result = childPropValue(...args);
-          slotPropValue(...args);
-          return result;
-        };
-      } else if (slotPropValue) {
-        overrideProps[propName] = slotPropValue;
-      }
-    } else if (propName === "style") {
-      overrideProps[propName] = { ...slotPropValue, ...childPropValue };
-    } else if (propName === "className") {
-      overrideProps[propName] = [slotPropValue, childPropValue].filter(Boolean).join(" ");
-    }
-  }
-  return { ...slotProps, ...overrideProps };
-}
-function getElementRef$1(element) {
-  let getter = Object.getOwnPropertyDescriptor(element.props, "ref")?.get;
-  let mayWarn = getter && "isReactWarning" in getter && getter.isReactWarning;
-  if (mayWarn) {
-    return element.ref;
-  }
-  getter = Object.getOwnPropertyDescriptor(element, "ref")?.get;
-  mayWarn = getter && "isReactWarning" in getter && getter.isReactWarning;
-  if (mayWarn) {
-    return element.props.ref;
-  }
-  return element.props.ref || element.ref;
-}
-
-const buttonVariants = cva("inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0", {
-    variants: {
-        variant: {
-            default: "bg-primary text-primary-foreground hover:bg-primary/90",
-            destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-            outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
-            secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-            ghost: "hover:bg-accent hover:text-accent-foreground",
-            link: "text-primary underline-offset-4 hover:underline",
-        },
-        size: {
-            default: "h-10 px-4 py-2",
-            sm: "h-9 rounded-md px-3",
-            lg: "h-11 rounded-md px-8",
-            icon: "h-10 w-10",
-        },
-    },
-    defaultVariants: {
-        variant: "default",
-        size: "default",
-    },
-});
-const Button = React.forwardRef(({ className, variant, size, asChild = false, ...props }, ref) => {
-    const Comp = asChild ? Slot$2 : "button";
-    return (jsx(Comp, { className: cn$1(buttonVariants({ variant, size, className })), ref: ref, ...props }));
-});
-Button.displayName = "Button";
-
 const ActionButton = React.forwardRef(({ action, onClick, disabled = false, className, ...props }, ref) => {
     const isDisabled = disabled || action.disabled;
     // Get the icon component
@@ -45141,7 +44606,7 @@ const arrow = (options, deps) => ({
 });
 
 // src/arrow.tsx
-var NAME = "Arrow";
+var NAME$1 = "Arrow";
 var Arrow$1 = React.forwardRef((props, forwardedRef) => {
   const { children, width = 10, height = 5, ...arrowProps } = props;
   return /* @__PURE__ */ jsx(
@@ -45157,8 +44622,8 @@ var Arrow$1 = React.forwardRef((props, forwardedRef) => {
     }
   );
 });
-Arrow$1.displayName = NAME;
-var Root$2 = Arrow$1;
+Arrow$1.displayName = NAME$1;
+var Root$3 = Arrow$1;
 
 // packages/react/use-size/src/use-size.tsx
 function useSize(element) {
@@ -45402,7 +44867,7 @@ var PopperArrow = React.forwardRef(function PopperArrow2(props, forwardedRef) {
           visibility: contentContext.shouldHideArrow ? "hidden" : void 0
         },
         children: /* @__PURE__ */ jsx(
-          Root$2,
+          Root$3,
           {
             ...arrowProps,
             ref: forwardedRef,
@@ -45803,7 +45268,7 @@ function focusFirst$1(candidates, preventScroll = false) {
 function wrapArray$1(array, startIndex) {
   return array.map((_, index) => array[(startIndex + index) % array.length]);
 }
-var Root$1 = RovingFocusGroup;
+var Root$2 = RovingFocusGroup;
 var Item = RovingFocusGroupItem;
 
 var getDefaultParent = function (originalTarget) {
@@ -46941,7 +46406,7 @@ var MenuContentImpl = React.forwardRef(
                 onInteractOutside,
                 onDismiss,
                 children: /* @__PURE__ */ jsx(
-                  Root$1,
+                  Root$2,
                   {
                     asChild: true,
                     ...rovingFocusGroupScope,
@@ -47459,7 +46924,7 @@ var Anchor2 = MenuAnchor;
 var Portal$1 = MenuPortal;
 var Content2$2 = MenuContent;
 var Group = MenuGroup;
-var Label = MenuLabel;
+var Label$2 = MenuLabel;
 var Item2$1 = MenuItem;
 var CheckboxItem = MenuCheckboxItem;
 var RadioGroup = MenuRadioGroup;
@@ -47610,7 +47075,7 @@ var DropdownMenuLabel$1 = React.forwardRef(
   (props, forwardedRef) => {
     const { __scopeDropdownMenu, ...labelProps } = props;
     const menuScope = useMenuScope(__scopeDropdownMenu);
-    return /* @__PURE__ */ jsx(Label, { ...menuScope, ...labelProps, ref: forwardedRef });
+    return /* @__PURE__ */ jsx(Label$2, { ...menuScope, ...labelProps, ref: forwardedRef });
   }
 );
 DropdownMenuLabel$1.displayName = LABEL_NAME;
@@ -47714,24 +47179,24 @@ var SubContent2 = DropdownMenuSubContent$1;
 
 const DropdownMenu = Root2$1;
 const DropdownMenuTrigger = Trigger$1;
-const DropdownMenuSubTrigger = React.forwardRef(({ className, inset, children, ...props }, ref) => (jsxs(SubTrigger2, { ref: ref, className: cn$1("flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none focus:bg-accent data-[state=open]:bg-accent [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0", inset && "pl-8", className), ...props, children: [children, jsx(ChevronRight, { className: "ml-auto" })] })));
+const DropdownMenuSubTrigger = React.forwardRef(({ className, inset, children, ...props }, ref) => (jsxs(SubTrigger2, { ref: ref, className: cn("flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none focus:bg-accent data-[state=open]:bg-accent [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0", inset && "pl-8", className), ...props, children: [children, jsx(ChevronRight, { className: "ml-auto" })] })));
 DropdownMenuSubTrigger.displayName =
     SubTrigger2.displayName;
-const DropdownMenuSubContent = React.forwardRef(({ className, ...props }, ref) => (jsx(SubContent2, { ref: ref, className: cn$1("z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-dropdown-menu-content-transform-origin]", className), ...props })));
+const DropdownMenuSubContent = React.forwardRef(({ className, ...props }, ref) => (jsx(SubContent2, { ref: ref, className: cn("z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-dropdown-menu-content-transform-origin]", className), ...props })));
 DropdownMenuSubContent.displayName =
     SubContent2.displayName;
-const DropdownMenuContent = React.forwardRef(({ className, sideOffset = 4, ...props }, ref) => (jsx(Portal2$1, { children: jsx(Content2$1, { ref: ref, sideOffset: sideOffset, className: cn$1("z-50 max-h-[var(--radix-dropdown-menu-content-available-height)] min-w-[8rem] overflow-y-auto overflow-x-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-dropdown-menu-content-transform-origin]", className), ...props }) })));
+const DropdownMenuContent = React.forwardRef(({ className, sideOffset = 4, ...props }, ref) => (jsx(Portal2$1, { children: jsx(Content2$1, { ref: ref, sideOffset: sideOffset, className: cn("z-50 max-h-[var(--radix-dropdown-menu-content-available-height)] min-w-[8rem] overflow-y-auto overflow-x-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-dropdown-menu-content-transform-origin]", className), ...props }) })));
 DropdownMenuContent.displayName = Content2$1.displayName;
-const DropdownMenuItem = React.forwardRef(({ className, inset, ...props }, ref) => (jsx(Item2, { ref: ref, className: cn$1("relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0", inset && "pl-8", className), ...props })));
+const DropdownMenuItem = React.forwardRef(({ className, inset, ...props }, ref) => (jsx(Item2, { ref: ref, className: cn("relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0", inset && "pl-8", className), ...props })));
 DropdownMenuItem.displayName = Item2.displayName;
-const DropdownMenuCheckboxItem = React.forwardRef(({ className, children, checked, ...props }, ref) => (jsxs(CheckboxItem2, { ref: ref, className: cn$1("relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50", className), checked: checked, ...props, children: [jsx("span", { className: "absolute left-2 flex h-3.5 w-3.5 items-center justify-center", children: jsx(ItemIndicator2, { children: jsx(Check, { className: "h-4 w-4" }) }) }), children] })));
+const DropdownMenuCheckboxItem = React.forwardRef(({ className, children, checked, ...props }, ref) => (jsxs(CheckboxItem2, { ref: ref, className: cn("relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50", className), checked: checked, ...props, children: [jsx("span", { className: "absolute left-2 flex h-3.5 w-3.5 items-center justify-center", children: jsx(ItemIndicator2, { children: jsx(Check, { className: "h-4 w-4" }) }) }), children] })));
 DropdownMenuCheckboxItem.displayName =
     CheckboxItem2.displayName;
-const DropdownMenuRadioItem = React.forwardRef(({ className, children, ...props }, ref) => (jsxs(RadioItem2, { ref: ref, className: cn$1("relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50", className), ...props, children: [jsx("span", { className: "absolute left-2 flex h-3.5 w-3.5 items-center justify-center", children: jsx(ItemIndicator2, { children: jsx(Circle, { className: "h-2 w-2 fill-current" }) }) }), children] })));
+const DropdownMenuRadioItem = React.forwardRef(({ className, children, ...props }, ref) => (jsxs(RadioItem2, { ref: ref, className: cn("relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50", className), ...props, children: [jsx("span", { className: "absolute left-2 flex h-3.5 w-3.5 items-center justify-center", children: jsx(ItemIndicator2, { children: jsx(Circle, { className: "h-2 w-2 fill-current" }) }) }), children] })));
 DropdownMenuRadioItem.displayName = RadioItem2.displayName;
-const DropdownMenuLabel = React.forwardRef(({ className, inset, ...props }, ref) => (jsx(Label2, { ref: ref, className: cn$1("px-2 py-1.5 text-sm font-semibold", inset && "pl-8", className), ...props })));
+const DropdownMenuLabel = React.forwardRef(({ className, inset, ...props }, ref) => (jsx(Label2, { ref: ref, className: cn("px-2 py-1.5 text-sm font-semibold", inset && "pl-8", className), ...props })));
 DropdownMenuLabel.displayName = Label2.displayName;
-const DropdownMenuSeparator = React.forwardRef(({ className, ...props }, ref) => (jsx(Separator2, { ref: ref, className: cn$1("-mx-1 my-1 h-px bg-muted", className), ...props })));
+const DropdownMenuSeparator = React.forwardRef(({ className, ...props }, ref) => (jsx(Separator2, { ref: ref, className: cn("-mx-1 my-1 h-px bg-muted", className), ...props })));
 DropdownMenuSeparator.displayName = Separator2.displayName;
 
 const ActionGroup = React.forwardRef(({ group, onActionClick, disabled = false, className, ...props }, ref) => {
@@ -47810,7 +47275,7 @@ const ActionsColumn = ({ actions, record, onActionClick, className = "", }) => {
         let targetAction;
         if (parentAction && parentAction.type === 'group') {
             // Find the action within the group
-            targetAction = parentAction.actions.find(a => a.name === actionName);
+            targetAction = parentAction.actions.find((a) => a.name === actionName);
         }
         else {
             // Find the action in the main actions list
@@ -47829,6 +47294,605 @@ const ActionsColumn = ({ actions, record, onActionClick, className = "", }) => {
             return (jsx(ActionButton, { action: action, onClick: () => handleActionClick(action.name), disabled: action.disabled }, action.name));
         }) }));
 };
+
+function useTableColumns({ result, renderCell, onRecordSelect, onActionClick, }) {
+    const [error, setError] = React.useState(null);
+    const [selectedRows, setSelectedRows] = React.useState(new Set());
+    const { columns, visibleColumns } = React.useMemo(() => {
+        try {
+            setError(null);
+            // Return empty arrays if result is undefined (deferred)
+            if (!result) {
+                return { columns: [], visibleColumns: [] };
+            }
+            const configColumns = result.config?.columns || [];
+            if (!Array.isArray(configColumns)) {
+                throw new Error('Table columns configuration is invalid');
+            }
+            const visibleColumns = configColumns.filter(column => column.visible);
+            const columns = [];
+            // Add selection column if bulk actions exist
+            if (result.bulkActions && result.bulkActions.length > 0) {
+                columns.push({
+                    id: 'select',
+                    header: ({ table }) => {
+                        const allPageRowsSelected = table.getIsAllPageRowsSelected();
+                        const someRowsSelected = table.getIsSomeRowsSelected();
+                        return React.createElement('input', {
+                            type: 'checkbox',
+                            checked: allPageRowsSelected,
+                            ref: (el) => {
+                                if (el)
+                                    el.indeterminate = someRowsSelected && !allPageRowsSelected;
+                            },
+                            onChange: table.getToggleAllPageRowsSelectedHandler(),
+                            className: 'rounded border-gray-300 text-blue-600 focus:ring-blue-500',
+                        });
+                    },
+                    cell: ({ row }) => React.createElement('input', {
+                        type: 'checkbox',
+                        checked: row.getIsSelected(),
+                        onChange: row.getToggleSelectedHandler(),
+                        className: 'rounded border-gray-300 text-blue-600 focus:ring-blue-500',
+                    }),
+                    size: 40,
+                    enableSorting: false,
+                });
+            }
+            // Add data columns
+            visibleColumns.forEach(column => {
+                columns.push({
+                    id: column.key,
+                    accessorFn: (row) => row[column.key],
+                    header: column.label,
+                    cell: ({ row }) => {
+                        const value = row.getValue(column.key);
+                        return renderCell ? renderCell(column, value, row.original) : value;
+                    },
+                    enableSorting: column.sortable,
+                    meta: {
+                        column,
+                    },
+                });
+            });
+            // Add actions column if row actions exist
+            if (result.actions && result.actions.length > 0 && onActionClick) {
+                columns.push({
+                    id: 'actions',
+                    header: 'Actions',
+                    cell: ({ row }) => {
+                        return React.createElement(ActionsColumn, {
+                            actions: result.actions || [],
+                            record: row.original,
+                            onActionClick,
+                        });
+                    },
+                    size: 100,
+                    enableSorting: false,
+                });
+            }
+            return { columns, visibleColumns };
+        }
+        catch (err) {
+            const error = err instanceof Error ? err : new Error('Failed to process table columns');
+            setError(error);
+            return { columns: [], visibleColumns: [] };
+        }
+    }, [result?.config?.columns, result?.actions, result?.bulkActions, renderCell, onRecordSelect, onActionClick]);
+    return {
+        columns,
+        visibleColumns,
+        error,
+    };
+}
+
+function useInertiaTable({ initialSearch = '', preserveState = true, preserveScroll = true, tableState, } = {}) {
+    const [searchValue, setSearchValue] = React.useState(initialSearch);
+    const [isNavigating, setIsNavigating] = React.useState(false);
+    const pendingRequestsRef = React.useRef(0);
+    const { props } = usePage();
+    // Auto-detect table name and prop name
+    const tableName = tableState?.name;
+    const propName = React.useMemo(() => {
+        if (!tableState || !tableName)
+            return null;
+        // Find which prop contains this table state by matching the table name
+        for (const [key, value] of Object.entries(props)) {
+            if (value && typeof value === 'object' && 'name' in value && value.name === tableName) {
+                return key;
+            }
+        }
+        return null;
+    }, [props, tableState, tableName]);
+    const navigate = React.useCallback((params) => {
+        pendingRequestsRef.current++;
+        setIsNavigating(true);
+        // Table name is always required now
+        if (!tableName) {
+            console.error('Table name is required for navigation');
+            pendingRequestsRef.current--;
+            if (pendingRequestsRef.current === 0) {
+                setIsNavigating(false);
+            }
+            return;
+        }
+        // Get current URL parameters to preserve other table states
+        const currentUrl = new URL(window.location.href);
+        const currentParams = {};
+        // Parse existing query parameters
+        for (const [key, value] of currentUrl.searchParams.entries()) {
+            // Handle nested parameters like "users[search]"
+            const match = key.match(/^([^[]+)\[([^]]+)\]$/);
+            if (match) {
+                const [, tableKey, paramKey] = match;
+                if (!currentParams[tableKey]) {
+                    currentParams[tableKey] = {};
+                }
+                currentParams[tableKey][paramKey] = value;
+            }
+            else {
+                currentParams[key] = value;
+            }
+        }
+        // Update only this table's parameters, merging with existing table params
+        const finalParams = {
+            ...currentParams,
+            [tableName]: {
+                ...(currentParams[tableName] || {}),
+                ...params
+            }
+        };
+        const options = {
+            preserveState,
+            preserveScroll,
+            onFinish: () => {
+                pendingRequestsRef.current--;
+                if (pendingRequestsRef.current === 0) {
+                    setIsNavigating(false);
+                }
+            },
+            onError: () => {
+                pendingRequestsRef.current--;
+                if (pendingRequestsRef.current === 0) {
+                    setIsNavigating(false);
+                }
+            },
+        };
+        // Add partial reload if we know the prop name
+        if (propName) {
+            options.only = [propName];
+        }
+        router.get(window.location.pathname, finalParams, options);
+    }, [preserveState, preserveScroll, tableName, propName]);
+    const handleSearch = React.useCallback((query) => {
+        setSearchValue(query);
+        navigate({ search: query });
+    }, [navigate]);
+    const handleSort = React.useCallback((column, direction) => {
+        navigate({ sort: column, direction });
+    }, [navigate]);
+    const handlePageChange = React.useCallback((page) => {
+        navigate({ page });
+    }, [navigate]);
+    return {
+        searchValue,
+        setSearchValue,
+        handleSearch,
+        handleSort,
+        handlePageChange,
+        isNavigating,
+    };
+}
+
+const useTableActions = ({ tableName, onSuccess, onError, }) => {
+    const [isLoading, setIsLoading] = useState(false);
+    const [confirmationDialog, setConfirmationDialog] = useState({
+        isOpen: false,
+        title: "",
+        message: "",
+        confirmButton: "Confirm",
+        cancelButton: "Cancel",
+    });
+    const [formDialog, setFormDialog] = useState({
+        isOpen: false,
+        title: "",
+        description: "",
+        fields: [],
+        submitButton: "Submit",
+        cancelButton: "Cancel",
+    });
+    const [pendingAction, setPendingAction] = useState(null);
+    const handleUrlAction = useCallback((action, record) => {
+        if (!action.url)
+            return;
+        let url = action.url;
+        // Replace record placeholders in URL if record is provided
+        if (record) {
+            Object.keys(record).forEach(key => {
+                url = url.replace(`{${key}}`, record[key]);
+            });
+        }
+        if (action.openUrlInNewTab) {
+            window.open(url, '_blank');
+        }
+        else {
+            router.visit(url);
+        }
+    }, []);
+    const performActionRequest = useCallback(async (action, records = []) => {
+        setIsLoading(true);
+        try {
+            const recordIds = records.map(record => record.id || record.key);
+            const response = await fetch('/inertia-tables/action', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                },
+                body: JSON.stringify({
+                    table: btoa(tableName), // Base64 encode table class name
+                    action: action.name,
+                    records: recordIds,
+                }),
+            });
+            const result = await response.json();
+            if (response.ok) {
+                if (result.redirect_url) {
+                    router.visit(result.redirect_url);
+                }
+                else {
+                    onSuccess?.(result.message);
+                }
+            }
+            else {
+                throw new Error(result.message || 'Action failed');
+            }
+        }
+        catch (error) {
+            onError?.(error instanceof Error ? error.message : 'Action failed');
+        }
+        finally {
+            setIsLoading(false);
+            setPendingAction(null);
+            setConfirmationDialog(prev => ({ ...prev, isOpen: false }));
+        }
+    }, [tableName, onSuccess, onError]);
+    const executeAction = useCallback((action, record) => {
+        if (action.hasUrl && action.url) {
+            handleUrlAction(action, record);
+            return;
+        }
+        if (!action.hasAction) {
+            console.warn('Action has no URL or action handler');
+            return;
+        }
+        if (action.requiresConfirmation) {
+            setPendingAction({ action, record, type: 'single' });
+            setConfirmationDialog({
+                isOpen: true,
+                title: action.confirmationTitle || 'Confirm Action',
+                message: action.confirmationMessage || 'Are you sure you want to perform this action?',
+                confirmButton: action.confirmationButton || 'Confirm',
+                cancelButton: action.cancelButton || 'Cancel',
+            });
+        }
+        else {
+            performActionRequest(action, record ? [record] : []);
+        }
+    }, [handleUrlAction, performActionRequest]);
+    const executeBulkAction = useCallback((action, records) => {
+        if (!action.hasAction) {
+            console.warn('Bulk action has no action handler');
+            return;
+        }
+        if (action.requiresConfirmation) {
+            setPendingAction({ action, records, type: 'bulk' });
+            setConfirmationDialog({
+                isOpen: true,
+                title: action.confirmationTitle || 'Confirm Bulk Action',
+                message: action.confirmationMessage || `Are you sure you want to perform this action on ${records.length} records?`,
+                confirmButton: action.confirmationButton || 'Confirm',
+                cancelButton: action.cancelButton || 'Cancel',
+            });
+        }
+        else {
+            performActionRequest(action, records);
+        }
+    }, [performActionRequest]);
+    const executeHeaderAction = useCallback((action) => {
+        if (action.hasUrl && action.url) {
+            handleUrlAction(action);
+            return;
+        }
+        if (!action.hasAction) {
+            console.warn('Header action has no URL or action handler');
+            return;
+        }
+        if (action.requiresConfirmation) {
+            setPendingAction({ action, type: 'header' });
+            setConfirmationDialog({
+                isOpen: true,
+                title: action.confirmationTitle || 'Confirm Action',
+                message: action.confirmationMessage || 'Are you sure you want to perform this action?',
+                confirmButton: action.confirmationButton || 'Confirm',
+                cancelButton: action.cancelButton || 'Cancel',
+            });
+        }
+        else {
+            performActionRequest(action, []);
+        }
+    }, [handleUrlAction, performActionRequest]);
+    const confirmAction = useCallback(() => {
+        if (!pendingAction)
+            return;
+        const { action, record, records } = pendingAction;
+        if (pendingAction.type === 'bulk' && records) {
+            performActionRequest(action, records);
+        }
+        else if (pendingAction.type === 'single' && record) {
+            performActionRequest(action, [record]);
+        }
+        else {
+            performActionRequest(action, []);
+        }
+    }, [pendingAction, performActionRequest]);
+    const cancelAction = useCallback(() => {
+        setPendingAction(null);
+        setConfirmationDialog(prev => ({ ...prev, isOpen: false }));
+        setFormDialog(prev => ({ ...prev, isOpen: false }));
+    }, []);
+    const submitForm = useCallback((data) => {
+        // Handle form submission
+        // This would extend the action request to include form data
+        console.log('Form submitted:', data);
+    }, []);
+    return {
+        isLoading,
+        confirmationDialog,
+        formDialog,
+        executeAction,
+        executeBulkAction,
+        executeHeaderAction,
+        confirmAction,
+        cancelAction,
+        submitForm,
+    };
+};
+
+const useActionDialog = () => {
+    const [confirmationDialog, setConfirmationDialog] = useState({
+        isOpen: false,
+        title: "",
+        message: "",
+        confirmButton: "Confirm",
+        cancelButton: "Cancel",
+    });
+    const [formDialog, setFormDialog] = useState({
+        isOpen: false,
+        title: "",
+        description: "",
+        fields: [],
+        submitButton: "Submit",
+        cancelButton: "Cancel",
+        initialData: {},
+    });
+    const showConfirmation = useCallback((config) => {
+        setConfirmationDialog(prev => ({
+            ...prev,
+            ...config,
+            isOpen: true,
+        }));
+    }, []);
+    const showForm = useCallback((config) => {
+        setFormDialog(prev => ({
+            ...prev,
+            ...config,
+            isOpen: true,
+        }));
+    }, []);
+    const hideConfirmation = useCallback(() => {
+        setConfirmationDialog(prev => ({ ...prev, isOpen: false }));
+    }, []);
+    const hideForm = useCallback(() => {
+        setFormDialog(prev => ({ ...prev, isOpen: false }));
+    }, []);
+    const hideAll = useCallback(() => {
+        setConfirmationDialog(prev => ({ ...prev, isOpen: false }));
+        setFormDialog(prev => ({ ...prev, isOpen: false }));
+    }, []);
+    return {
+        confirmationDialog,
+        formDialog,
+        showConfirmation,
+        showForm,
+        hideConfirmation,
+        hideForm,
+        hideAll,
+    };
+};
+
+const DefaultErrorFallback = ({ error, retry }) => {
+    // Check if this is likely a deferred prop error
+    const isDeferredError = error.message?.includes('Cannot read properties of undefined') ||
+        error.message?.includes('reading \'search\'') ||
+        error.message?.includes('reading \'config\'') ||
+        error.message?.includes('reading \'pagination\'');
+    const errorTitle = isDeferredError
+        ? 'Table data is loading...'
+        : 'Something went wrong with the table';
+    const errorMessage = isDeferredError
+        ? 'The table data is still being loaded. If this persists, there may be an issue with the deferred data request.'
+        : error.message || 'An unexpected error occurred';
+    return (jsx("div", { className: "flex flex-col items-center justify-center p-8 border border-destructive/20 rounded-md bg-destructive/5", children: jsxs("div", { className: "text-center space-y-4", children: [jsx("div", { className: "text-destructive font-medium", children: errorTitle }), jsx("div", { className: "text-sm text-muted-foreground max-w-md", children: errorMessage }), isDeferredError && (jsx("div", { className: "text-xs text-muted-foreground", children: "\uD83D\uDCA1 If using Inertia deferred props, ensure the table prop is properly set up on the server side." })), jsx("button", { onClick: retry, className: "inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2", children: isDeferredError ? 'Reload table' : 'Try again' })] }) }));
+};
+class ErrorBoundary extends React.Component {
+    constructor(props) {
+        super(props);
+        this.handleRetry = () => {
+            this.setState({ hasError: false, error: null });
+        };
+        this.state = { hasError: false, error: null };
+    }
+    static getDerivedStateFromError(error) {
+        return { hasError: true, error };
+    }
+    componentDidCatch(error, errorInfo) {
+        this.props.onError?.(error, errorInfo);
+        // Enhanced logging for development
+        if (process.env.NODE_ENV === 'development') {
+            const isDeferredError = error.message?.includes('Cannot read properties of undefined');
+            if (isDeferredError) {
+                console.warn('🔄 InertiaTable: Deferred prop error detected. This usually means the table data is still loading.', '\n💡 Consider using Inertia::defer() properly on the server side.', '\n📝 Error details:', error.message);
+                console.error('Full error:', error, errorInfo);
+            }
+            else {
+                console.error('Table ErrorBoundary caught an error:', error, errorInfo);
+            }
+        }
+    }
+    render() {
+        if (this.state.hasError && this.state.error) {
+            const FallbackComponent = this.props.fallback || DefaultErrorFallback;
+            return (jsx(FallbackComponent, { error: this.state.error, retry: this.handleRetry }));
+        }
+        return this.props.children;
+    }
+}
+
+const SortableHeader = React.memo(({ column, sortDirection, onSort, className = "", }) => {
+    const isActive = sortDirection !== null && sortDirection !== undefined;
+    const handleClick = React.useCallback(() => {
+        if (column.sortable && onSort) {
+            const newDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            onSort(column.key, newDirection);
+        }
+    }, [column.key, column.sortable, onSort, sortDirection]);
+    const handleKeyDown = React.useCallback((event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            handleClick();
+        }
+    }, [handleClick]);
+    if (!column.sortable) {
+        return jsx("span", { className: className, children: column.label });
+    }
+    return (jsxs("div", { className: `flex items-center gap-2 cursor-pointer select-none hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-sm ${className}`, onClick: handleClick, onKeyDown: handleKeyDown, tabIndex: 0, role: "button", "aria-label": `Sort by ${column.label} ${sortDirection === 'asc'
+            ? 'descending'
+            : sortDirection === 'desc'
+                ? 'ascending'
+                : 'ascending'}`, "aria-pressed": isActive, children: [column.label, jsxs("div", { className: "flex flex-col", "aria-hidden": "true", children: [jsx(ChevronUp, { className: `h-3 w-3 ${isActive && sortDirection === 'asc'
+                            ? 'text-foreground'
+                            : 'text-muted-foreground'}` }), jsx(ChevronDown, { className: `h-3 w-3 -mt-1 ${isActive && sortDirection === 'desc'
+                            ? 'text-foreground'
+                            : 'text-muted-foreground'}` })] })] }));
+});
+SortableHeader.displayName = "SortableHeader";
+
+const TableHeaderComponent = React.memo(({ headerGroups, result, onSort, }) => {
+    return (jsx(TableHeader, { children: headerGroups.map((headerGroup) => (jsx(TableRow, { children: headerGroup.headers.map((header) => {
+                const column = header.column.columnDef.meta?.column;
+                const sortDirection = column?.key ? result.sort?.[column.key] || null : null;
+                return (jsx(TableHead, { children: header.isPlaceholder ? null : column ? (jsx(SortableHeader, { column: column, sortDirection: sortDirection, onSort: onSort })) : (flexRender(header.column.columnDef.header, header.getContext())) }, header.id));
+            }) }, headerGroup.id))) }));
+});
+TableHeaderComponent.displayName = "TableHeaderComponent";
+
+const TableBodyComponent = React.memo(({ rows, columnsCount, emptyMessage = "No results.", }) => {
+    if (!rows?.length) {
+        return (jsx(TableBody, { children: jsx(TableRow, { children: jsx(TableCell, { colSpan: columnsCount, className: "h-24 text-center", role: "status", "aria-live": "polite", children: emptyMessage }) }) }));
+    }
+    return (jsx(TableBody, { children: rows.map((row) => (jsx(TableRow, { "data-state": row.getIsSelected() && "selected", role: "row", children: row.getVisibleCells().map((cell) => (jsx(TableCell, { role: "gridcell", children: flexRender(cell.column.columnDef.cell, cell.getContext()) }, cell.id))) }, row.id))) }));
+});
+TableBodyComponent.displayName = "TableBodyComponent";
+
+const LoadingOverlay = React.memo(({ isLoading = false, className = "" }) => {
+    if (!isLoading)
+        return null;
+    return (jsx("div", { className: `absolute top-0 left-0 right-0 bottom-0 bg-white/70 dark:bg-black/70 flex items-center justify-center z-10 pointer-events-none rounded-md ${className}`, role: "status", "aria-live": "polite", "aria-label": "Loading new data", children: jsxs("div", { className: "flex items-center gap-2 bg-white dark:bg-black px-3 py-2 rounded-lg shadow-sm border border-gray-200 dark:border-white/20 pointer-events-auto", children: [jsx("div", { className: "animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 dark:border-white" }), jsx("span", { className: "text-sm text-gray-600 dark:text-white", children: "Loading..." })] }) }));
+});
+LoadingOverlay.displayName = "LoadingOverlay";
+
+function renderColumnValue(column, value, record) {
+    return jsx(TextColumn, { column: column, value: value, record: record });
+}
+const DataTable = React.memo(({ result, onSort, className = "", isLoading = false, emptyMessage = "No results.", onRecordSelect, onActionClick }) => {
+    // Handle deferred/undefined result
+    if (!result) {
+        return (jsx("div", { className: `rounded-md border ${className}`, children: jsx("div", { className: "flex items-center justify-center p-8", children: jsxs("div", { className: "flex items-center gap-2", children: [jsx("div", { className: "animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 dark:border-white" }), jsx("span", { className: "text-sm text-gray-600 dark:text-gray-300", children: "Loading table..." })] }) }) }));
+    }
+    const [rowSelection, setRowSelection] = React.useState({});
+    const { sorting, setSorting, handleSort, error: stateError } = useTableState({
+        result,
+        onSort
+    });
+    const { columns, error: columnsError } = useTableColumns({
+        result,
+        renderCell: renderColumnValue,
+        onRecordSelect,
+        onActionClick,
+    });
+    const error = stateError || columnsError;
+    const table = useReactTable({
+        data: result.data || [],
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+        getSortedRowModel: getSortedRowModel(),
+        enableRowSelection: true,
+        state: {
+            sorting,
+            rowSelection,
+        },
+        onSortingChange: setSorting,
+        onRowSelectionChange: setRowSelection,
+        manualSorting: true,
+        getRowId: (row, index) => {
+            // Use the primary key field specified by the backend, or fallback to 'id', then index
+            const primaryKeyField = result.primaryKey || 'id';
+            return row[primaryKeyField]?.toString() || index.toString();
+        },
+    });
+    // Notify parent of selection changes
+    React.useEffect(() => {
+        if (onRecordSelect) {
+            const selectedRows = table.getFilteredSelectedRowModel().rows.map(row => row.original);
+            onRecordSelect(selectedRows);
+        }
+    }, [rowSelection, table, onRecordSelect]);
+    if (error) {
+        throw error;
+    }
+    return (jsx(ErrorBoundary, { children: jsx("div", { className: `rounded-md border ${className}`, children: jsxs("div", { role: "table", "aria-label": "Data table", "aria-rowcount": result.data?.length || 0, className: "relative", children: [jsxs(Table$1, { children: [jsx(TableHeaderComponent, { headerGroups: table.getHeaderGroups(), result: result, onSort: handleSort }), jsx(TableBodyComponent, { rows: table.getRowModel().rows, columnsCount: columns.length, emptyMessage: emptyMessage })] }), jsx(LoadingOverlay, { isLoading: isLoading })] }) }) }));
+});
+DataTable.displayName = "DataTable";
+
+function TableSearch({ value, onChange, placeholder = "Search...", className }) {
+    return (jsxs("div", { className: `relative ${className}`, children: [jsx(Search, { className: "absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" }), jsx("input", { type: "text", placeholder: placeholder, value: value, onChange: (e) => onChange(e.target.value), className: "flex h-10 w-full rounded-md border border-input bg-background pl-10 pr-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" })] }));
+}
+
+function TablePagination({ pagination, onPageChange, className }) {
+    const { current_page, last_page, from, to, total } = pagination;
+    const getPageNumbers = () => {
+        const pages = [];
+        const maxVisible = 5;
+        let start = Math.max(1, current_page - Math.floor(maxVisible / 2));
+        const end = Math.min(last_page, start + maxVisible - 1);
+        if (end - start + 1 < maxVisible) {
+            start = Math.max(1, end - maxVisible + 1);
+        }
+        for (let i = start; i <= end; i++) {
+            pages.push(i);
+        }
+        return pages;
+    };
+    return (jsxs("div", { className: `flex items-center justify-between ${className}`, children: [jsx("div", { className: "text-sm text-muted-foreground", children: from && to ? (`Showing ${from} to ${to} of ${total} results`) : (`${total} results`) }), jsxs("div", { className: "flex items-center gap-2", children: [jsx("button", { onClick: () => onPageChange(current_page - 1), disabled: current_page <= 1, className: "inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 w-8", children: jsx(ChevronLeft, { className: "h-4 w-4" }) }), getPageNumbers().map((page) => (jsx("button", { onClick: () => onPageChange(page), className: `inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-8 w-8 ${page === current_page
+                            ? 'bg-primary text-primary-foreground'
+                            : 'border border-input bg-background hover:bg-accent hover:text-accent-foreground'}`, children: page }, page))), jsx("button", { onClick: () => onPageChange(current_page + 1), disabled: current_page >= last_page, className: "inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 w-8", children: jsx(ChevronRight, { className: "h-4 w-4" }) })] })] }));
+}
+
+const DeferredTableLoader = React.memo(({ className = "", rows = 5, columns = 4, }) => {
+    return (jsxs("div", { className: `relative rounded-md border ${className}`, children: [jsxs(Table$1, { children: [jsx(TableHeader, { children: jsx(TableRow, { children: Array.from({ length: columns }).map((_, index) => (jsx(TableHead, { children: jsx("div", { className: "h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" }) }, index))) }) }), jsx(TableBody, { children: Array.from({ length: rows }).map((_, rowIndex) => (jsx(TableRow, { children: Array.from({ length: columns }).map((_, colIndex) => (jsx(TableCell, { children: jsx("div", { className: "h-4 bg-gray-100 dark:bg-gray-800 rounded animate-pulse" }) }, colIndex))) }, rowIndex))) })] }), jsx("div", { className: "absolute inset-0 flex items-center justify-center bg-white/70 dark:bg-black/70 rounded-md", children: jsxs("div", { className: "flex items-center gap-2 bg-white dark:bg-black px-3 py-2 rounded-lg shadow-sm border border-gray-200 dark:border-white/20", children: [jsx("div", { className: "animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 dark:border-white" }), jsx("span", { className: "text-sm text-gray-600 dark:text-white", children: "Loading table data..." })] }) })] }));
+});
+DeferredTableLoader.displayName = "DeferredTableLoader";
 
 const BulkActions = ({ bulkActions, selectedRecords, onBulkActionClick, className = "", }) => {
     const selectedCount = selectedRecords.length;
@@ -47851,7 +47915,7 @@ const BulkActions = ({ bulkActions, selectedRecords, onBulkActionClick, classNam
         let targetAction;
         if (parentAction && parentAction.type === 'group') {
             // Find the action within the group
-            targetAction = parentAction.actions.find(a => a.name === actionName);
+            targetAction = parentAction.actions.find((a) => a.name === actionName);
         }
         else {
             // Find the action in the main actions list
@@ -47887,7 +47951,7 @@ const HeaderActions = ({ headerActions, onActionClick, className = "", }) => {
         let targetAction;
         if (parentAction && parentAction.type === 'group') {
             // Find the action within the group
-            targetAction = parentAction.actions.find(a => a.name === actionName);
+            targetAction = parentAction.actions.find((a) => a.name === actionName);
         }
         else {
             // Find the action in the main actions list
@@ -48201,7 +48265,7 @@ var DescriptionWarning$1 = ({ contentRef, descriptionId }) => {
   }, [MESSAGE, contentRef, descriptionId]);
   return null;
 };
-var Root = Dialog$1;
+var Root$1 = Dialog$1;
 var Trigger = DialogTrigger;
 var Portal = DialogPortal$1;
 var Overlay = DialogOverlay$1;
@@ -48218,7 +48282,7 @@ var useDialogScope = createDialogScope();
 var AlertDialog$1 = (props) => {
   const { __scopeAlertDialog, ...alertDialogProps } = props;
   const dialogScope = useDialogScope(__scopeAlertDialog);
-  return /* @__PURE__ */ jsx(Root, { ...dialogScope, ...alertDialogProps, modal: true });
+  return /* @__PURE__ */ jsx(Root$1, { ...dialogScope, ...alertDialogProps, modal: true });
 };
 AlertDialog$1.displayName = ROOT_NAME;
 var TRIGGER_NAME = "AlertDialogTrigger";
@@ -48349,22 +48413,22 @@ var Description2 = AlertDialogDescription$1;
 
 const AlertDialog = Root2;
 const AlertDialogPortal = Portal2;
-const AlertDialogOverlay = React.forwardRef(({ className, ...props }, ref) => (jsx(Overlay2, { className: cn$1("fixed inset-0 z-50 bg-black/80  data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0", className), ...props, ref: ref })));
+const AlertDialogOverlay = React.forwardRef(({ className, ...props }, ref) => (jsx(Overlay2, { className: cn("fixed inset-0 z-50 bg-black/80  data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0", className), ...props, ref: ref })));
 AlertDialogOverlay.displayName = Overlay2.displayName;
-const AlertDialogContent = React.forwardRef(({ className, ...props }, ref) => (jsxs(AlertDialogPortal, { children: [jsx(AlertDialogOverlay, {}), jsx(Content2, { ref: ref, className: cn$1("fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg", className), ...props })] })));
+const AlertDialogContent = React.forwardRef(({ className, ...props }, ref) => (jsxs(AlertDialogPortal, { children: [jsx(AlertDialogOverlay, {}), jsx(Content2, { ref: ref, className: cn("fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg", className), ...props })] })));
 AlertDialogContent.displayName = Content2.displayName;
-const AlertDialogHeader = ({ className, ...props }) => (jsx("div", { className: cn$1("flex flex-col space-y-2 text-center sm:text-left", className), ...props }));
+const AlertDialogHeader = ({ className, ...props }) => (jsx("div", { className: cn("flex flex-col space-y-2 text-center sm:text-left", className), ...props }));
 AlertDialogHeader.displayName = "AlertDialogHeader";
-const AlertDialogFooter = ({ className, ...props }) => (jsx("div", { className: cn$1("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2", className), ...props }));
+const AlertDialogFooter = ({ className, ...props }) => (jsx("div", { className: cn("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2", className), ...props }));
 AlertDialogFooter.displayName = "AlertDialogFooter";
-const AlertDialogTitle = React.forwardRef(({ className, ...props }, ref) => (jsx(Title2, { ref: ref, className: cn$1("text-lg font-semibold", className), ...props })));
+const AlertDialogTitle = React.forwardRef(({ className, ...props }, ref) => (jsx(Title2, { ref: ref, className: cn("text-lg font-semibold", className), ...props })));
 AlertDialogTitle.displayName = Title2.displayName;
-const AlertDialogDescription = React.forwardRef(({ className, ...props }, ref) => (jsx(Description2, { ref: ref, className: cn$1("text-sm text-muted-foreground", className), ...props })));
+const AlertDialogDescription = React.forwardRef(({ className, ...props }, ref) => (jsx(Description2, { ref: ref, className: cn("text-sm text-muted-foreground", className), ...props })));
 AlertDialogDescription.displayName =
     Description2.displayName;
-const AlertDialogAction = React.forwardRef(({ className, ...props }, ref) => (jsx(Action, { ref: ref, className: cn$1(buttonVariants$1(), className), ...props })));
+const AlertDialogAction = React.forwardRef(({ className, ...props }, ref) => (jsx(Action, { ref: ref, className: cn(buttonVariants(), className), ...props })));
 AlertDialogAction.displayName = Action.displayName;
-const AlertDialogCancel = React.forwardRef(({ className, ...props }, ref) => (jsx(Cancel, { ref: ref, className: cn$1(buttonVariants$1({ variant: "outline" }), "mt-2 sm:mt-0", className), ...props })));
+const AlertDialogCancel = React.forwardRef(({ className, ...props }, ref) => (jsx(Cancel, { ref: ref, className: cn(buttonVariants({ variant: "outline" }), "mt-2 sm:mt-0", className), ...props })));
 AlertDialogCancel.displayName = Cancel.displayName;
 
 const ActionConfirmationDialog = ({ open, onOpenChange, title, message, confirmButton, cancelButton, onConfirm, onCancel, isLoading = false, }) => {
@@ -48386,19 +48450,19 @@ const ActionConfirmationDialog = ({ open, onOpenChange, title, message, confirmB
     return (jsx(AlertDialog, { open: open, onOpenChange: handleOpenChange, children: jsxs(AlertDialogContent, { children: [jsxs(AlertDialogHeader, { children: [jsx(AlertDialogTitle, { children: title }), jsx(AlertDialogDescription, { children: message })] }), jsxs(AlertDialogFooter, { children: [jsx(AlertDialogCancel, { onClick: handleCancel, disabled: isLoading, children: cancelButton }), jsx(AlertDialogAction, { onClick: handleConfirm, disabled: isLoading, className: "bg-red-600 hover:bg-red-700 focus:ring-red-600", children: isLoading ? "Processing..." : confirmButton })] })] }) }));
 };
 
-const Dialog = Root;
+const Dialog = Root$1;
 const DialogPortal = Portal;
-const DialogOverlay = React.forwardRef(({ className, ...props }, ref) => (jsx(Overlay, { ref: ref, className: cn$1("fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0", className), ...props })));
+const DialogOverlay = React.forwardRef(({ className, ...props }, ref) => (jsx(Overlay, { ref: ref, className: cn("fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0", className), ...props })));
 DialogOverlay.displayName = Overlay.displayName;
-const DialogContent = React.forwardRef(({ className, children, ...props }, ref) => (jsxs(DialogPortal, { children: [jsx(DialogOverlay, {}), jsxs(Content, { ref: ref, className: cn$1("fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg", className), ...props, children: [children, jsxs(Close, { className: "absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground", children: [jsx(X, { className: "h-4 w-4" }), jsx("span", { className: "sr-only", children: "Close" })] })] })] })));
+const DialogContent = React.forwardRef(({ className, children, ...props }, ref) => (jsxs(DialogPortal, { children: [jsx(DialogOverlay, {}), jsxs(Content, { ref: ref, className: cn("fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg", className), ...props, children: [children, jsxs(Close, { className: "absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground", children: [jsx(X, { className: "h-4 w-4" }), jsx("span", { className: "sr-only", children: "Close" })] })] })] })));
 DialogContent.displayName = Content.displayName;
-const DialogHeader = ({ className, ...props }) => (jsx("div", { className: cn$1("flex flex-col space-y-1.5 text-center sm:text-left", className), ...props }));
+const DialogHeader = ({ className, ...props }) => (jsx("div", { className: cn("flex flex-col space-y-1.5 text-center sm:text-left", className), ...props }));
 DialogHeader.displayName = "DialogHeader";
-const DialogFooter = ({ className, ...props }) => (jsx("div", { className: cn$1("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2", className), ...props }));
+const DialogFooter = ({ className, ...props }) => (jsx("div", { className: cn("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2", className), ...props }));
 DialogFooter.displayName = "DialogFooter";
-const DialogTitle = React.forwardRef(({ className, ...props }, ref) => (jsx(Title, { ref: ref, className: cn$1("text-lg font-semibold leading-none tracking-tight", className), ...props })));
+const DialogTitle = React.forwardRef(({ className, ...props }, ref) => (jsx(Title, { ref: ref, className: cn("text-lg font-semibold leading-none tracking-tight", className), ...props })));
 DialogTitle.displayName = Title.displayName;
-const DialogDescription = React.forwardRef(({ className, ...props }, ref) => (jsx(Description, { ref: ref, className: cn$1("text-sm text-muted-foreground", className), ...props })));
+const DialogDescription = React.forwardRef(({ className, ...props }, ref) => (jsx(Description, { ref: ref, className: cn("text-sm text-muted-foreground", className), ...props })));
 DialogDescription.displayName = Description.displayName;
 
 var isCheckBoxInput = (element) => element.type === 'checkbox';
@@ -50730,6 +50794,29 @@ function useForm(props = {}) {
     return _formControl.current;
 }
 
+var NAME = "Label";
+var Label$1 = React.forwardRef((props, forwardedRef) => {
+  return /* @__PURE__ */ jsx(
+    Primitive.label,
+    {
+      ...props,
+      ref: forwardedRef,
+      onMouseDown: (event) => {
+        const target = event.target;
+        if (target.closest("button, input, select, textarea")) return;
+        props.onMouseDown?.(event);
+        if (!event.defaultPrevented && event.detail > 1) event.preventDefault();
+      }
+    }
+  );
+});
+Label$1.displayName = NAME;
+var Root = Label$1;
+
+const labelVariants = cva("text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70");
+const Label = React.forwardRef(({ className, ...props }, ref) => (jsx(Root, { ref: ref, className: cn(labelVariants(), className), ...props })));
+Label.displayName = Root.displayName;
+
 const Form = FormProvider;
 const FormFieldContext = React.createContext({});
 const FormField = ({ ...props }) => {
@@ -50756,12 +50843,12 @@ const useFormField = () => {
 const FormItemContext = React.createContext({});
 const FormItem = React.forwardRef(({ className, ...props }, ref) => {
     const id = React.useId();
-    return (jsx(FormItemContext.Provider, { value: { id }, children: jsx("div", { ref: ref, className: cn$1("space-y-2", className), ...props }) }));
+    return (jsx(FormItemContext.Provider, { value: { id }, children: jsx("div", { ref: ref, className: cn("space-y-2", className), ...props }) }));
 });
 FormItem.displayName = "FormItem";
 const FormLabel = React.forwardRef(({ className, ...props }, ref) => {
     const { error, formItemId } = useFormField();
-    return (jsx(Label$1, { ref: ref, className: cn$1(error && "text-destructive", className), htmlFor: formItemId, ...props }));
+    return (jsx(Label, { ref: ref, className: cn(error && "text-destructive", className), htmlFor: formItemId, ...props }));
 });
 FormLabel.displayName = "FormLabel";
 const FormControl = React.forwardRef(({ ...props }, ref) => {
@@ -50773,7 +50860,7 @@ const FormControl = React.forwardRef(({ ...props }, ref) => {
 FormControl.displayName = "FormControl";
 const FormDescription = React.forwardRef(({ className, ...props }, ref) => {
     const { formDescriptionId } = useFormField();
-    return (jsx("p", { ref: ref, id: formDescriptionId, className: cn$1("text-sm text-muted-foreground", className), ...props }));
+    return (jsx("p", { ref: ref, id: formDescriptionId, className: cn("text-sm text-muted-foreground", className), ...props }));
 });
 FormDescription.displayName = "FormDescription";
 const FormMessage = React.forwardRef(({ className, children, ...props }, ref) => {
@@ -50782,12 +50869,12 @@ const FormMessage = React.forwardRef(({ className, children, ...props }, ref) =>
     if (!body) {
         return null;
     }
-    return (jsx("p", { ref: ref, id: formMessageId, className: cn$1("text-sm font-medium text-destructive", className), ...props, children: body }));
+    return (jsx("p", { ref: ref, id: formMessageId, className: cn("text-sm font-medium text-destructive", className), ...props, children: body }));
 });
 FormMessage.displayName = "FormMessage";
 
 const Input = React.forwardRef(({ className, type, ...props }, ref) => {
-    return (jsx("input", { type: type, className: cn$1("flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm", className), ref: ref, ...props }));
+    return (jsx("input", { type: type, className: cn("flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm", className), ref: ref, ...props }));
 });
 Input.displayName = "Input";
 

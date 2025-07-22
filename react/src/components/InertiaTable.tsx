@@ -8,7 +8,7 @@ import { DeferredTableLoader } from "./DeferredTableLoader";
 import { HeaderActions, BulkActions, ActionConfirmationDialog } from "./actions";
 import { useInertiaTable, useTableActions, useActionDialog } from "../hooks";
 
-const InertiaTableComponent = <T = any>({ 
+const InertiaTableComponent = <T extends Record<string, any> = Record<string, any>>({ 
   state, 
   className = "" 
 }: TableProps<T>) => {

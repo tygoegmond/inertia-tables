@@ -19,6 +19,7 @@ class TableResult implements Arrayable, Jsonable, JsonSerializable
         public readonly array $actions = [],
         public readonly array $bulkActions = [],
         public readonly array $headerActions = [],
+        public readonly ?string $primaryKey = null,
     ) {}
 
     public function toArray(): array

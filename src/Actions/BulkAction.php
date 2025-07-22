@@ -181,7 +181,7 @@ class BulkAction implements Arrayable
 
     public function toArray(): array
     {
-        return [
+        $data = [
             'name' => $this->name,
             'label' => $this->getLabel(),
             'icon' => $this->getIcon(),
@@ -203,5 +203,17 @@ class BulkAction implements Arrayable
             'deselectRecordsAfterCompletion' => $this->deselectRecordsAfterCompletion,
             'type' => 'bulk',
         ];
+
+        // Add signed action URL for bulk actions
+        if ($this->hasAction()) {
+            try {
+                $data['actionUrl'] = $this->getActionUrl();
+            } catch (\Exception $e) {
+                // If we can't generate action URL, it will be handled on frontend
+                $data['actionUrl'] = null;
+            }
+        }
+
+        return $data;
     }
 }

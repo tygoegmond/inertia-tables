@@ -9,7 +9,7 @@ trait GeneratesActionUrls
     public function generateActionUrl(string $tableName, array $recordIds = []): string
     {
         return URL::signedRoute('inertia-tables.action', [
-            'table' => base64_encode(get_class($this->getTable() ?? new \stdClass())),
+            'table' => base64_encode(get_class($this->getTable() ?? new \stdClass)),
             'action' => $this->getName(),
             'records' => $recordIds,
         ]);

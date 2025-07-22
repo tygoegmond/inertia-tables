@@ -36,7 +36,7 @@ class ActionController extends Controller
 
     protected function handleResponse(ActionRequest $request, RedirectResponse $response): JsonResponse|RedirectResponse
     {
-        if ($request->expectsJson() || $request->header('X-Inertia')) {
+        if ($request->expectsJson() && ! $request->header('X-Inertia')) {
             return response()->json([
                 'success' => true,
                 'redirect_url' => $response->getTargetUrl(),

@@ -93,39 +93,9 @@ export interface TableBulkAction {
   type: 'bulk';
 }
 
-export interface TableActionGroup {
-  type: 'group';
-  name: string;
-  label: string;
-  icon?: string;
-  color: string;
-  size: string;
-  style: 'button' | 'link' | 'iconButton';
-  outlined: boolean;
-  tooltip?: string;
-  extraAttributes?: Record<string, any>;
-  actions: TableAction[];
-  hidden?: boolean;
-}
-
-export type TableActionItem = TableAction | TableActionGroup;
-export interface TableBulkActionGroup {
-  type: 'group';
-  name: string;
-  label: string;
-  icon?: string;
-  color: string;
-  size: string;
-  style: 'button' | 'link' | 'iconButton';
-  outlined: boolean;
-  tooltip?: string;
-  extraAttributes?: Record<string, any>;
-  actions: TableBulkAction[];
-  hidden?: boolean;
-}
-
-export type TableBulkActionItem = TableBulkAction | TableBulkActionGroup;
-export type TableHeaderActionItem = TableAction | TableActionGroup;
+export type TableActionItem = TableAction;
+export type TableBulkActionItem = TableBulkAction;
+export type TableHeaderActionItem = TableAction;
 
 export interface TableResult<T = any> {
   config: TableConfig;

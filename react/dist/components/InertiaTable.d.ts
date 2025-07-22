@@ -1,2 +1,3 @@
+import * as React from "react";
 import { TableProps } from "../types";
-export declare function InertiaTable({ state, className }: TableProps): import("react/jsx-runtime").JSX.Element;
+export declare const InertiaTable: React.NamedExoticComponent<TableProps<any>>;

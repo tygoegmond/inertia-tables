@@ -3098,155 +3098,6 @@ function useReactTable(options) {
   return tableRef.current;
 }
 
-/**
- * @license lucide-react v0.475.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-
-const toKebabCase = (string) => string.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
-const mergeClasses = (...classes) => classes.filter((className, index, array) => {
-  return Boolean(className) && className.trim() !== "" && array.indexOf(className) === index;
-}).join(" ").trim();
-
-/**
- * @license lucide-react v0.475.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-
-var defaultAttributes = {
-  xmlns: "http://www.w3.org/2000/svg",
-  width: 24,
-  height: 24,
-  viewBox: "0 0 24 24",
-  fill: "none",
-  stroke: "currentColor",
-  strokeWidth: 2,
-  strokeLinecap: "round",
-  strokeLinejoin: "round"
-};
-
-/**
- * @license lucide-react v0.475.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-
-
-const Icon = forwardRef(
-  ({
-    color = "currentColor",
-    size = 24,
-    strokeWidth = 2,
-    absoluteStrokeWidth,
-    className = "",
-    children,
-    iconNode,
-    ...rest
-  }, ref) => {
-    return createElement(
-      "svg",
-      {
-        ref,
-        ...defaultAttributes,
-        width: size,
-        height: size,
-        stroke: color,
-        strokeWidth: absoluteStrokeWidth ? Number(strokeWidth) * 24 / Number(size) : strokeWidth,
-        className: mergeClasses("lucide", className),
-        ...rest
-      },
-      [
-        ...iconNode.map(([tag, attrs]) => createElement(tag, attrs)),
-        ...Array.isArray(children) ? children : [children]
-      ]
-    );
-  }
-);
-
-/**
- * @license lucide-react v0.475.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-
-
-const createLucideIcon = (iconName, iconNode) => {
-  const Component = forwardRef(
-    ({ className, ...props }, ref) => createElement(Icon, {
-      ref,
-      iconNode,
-      className: mergeClasses(`lucide-${toKebabCase(iconName)}`, className),
-      ...props
-    })
-  );
-  Component.displayName = `${iconName}`;
-  return Component;
-};
-
-/**
- * @license lucide-react v0.475.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-
-
-const __iconNode$4 = [["path", { d: "m6 9 6 6 6-6", key: "qrunsl" }]];
-const ChevronDown = createLucideIcon("ChevronDown", __iconNode$4);
-
-/**
- * @license lucide-react v0.475.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-
-
-const __iconNode$3 = [["path", { d: "m15 18-6-6 6-6", key: "1wnfg3" }]];
-const ChevronLeft = createLucideIcon("ChevronLeft", __iconNode$3);
-
-/**
- * @license lucide-react v0.475.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-
-
-const __iconNode$2 = [["path", { d: "m9 18 6-6-6-6", key: "mthhwq" }]];
-const ChevronRight = createLucideIcon("ChevronRight", __iconNode$2);
-
-/**
- * @license lucide-react v0.475.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-
-
-const __iconNode$1 = [["path", { d: "m18 15-6-6-6 6", key: "153udz" }]];
-const ChevronUp = createLucideIcon("ChevronUp", __iconNode$1);
-
-/**
- * @license lucide-react v0.475.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-
-
-const __iconNode = [
-  ["circle", { cx: "11", cy: "11", r: "8", key: "4ej97u" }],
-  ["path", { d: "m21 21-4.3-4.3", key: "1qie3q" }]
-];
-const Search = createLucideIcon("Search", __iconNode);
-
 function r(e){var t,f,n="";if("string"==typeof e||"number"==typeof e)n+=e;else if("object"==typeof e)if(Array.isArray(e)){var o=e.length;for(t=0;t<o;t++)e[t]&&(f=r(e[t]))&&(n&&(n+=" "),n+=f);}else for(f in e)e[f]&&(n&&(n+=" "),n+=f);return n}function clsx(){for(var e,t,f=0,n="",o=arguments.length;f<o;f++)(e=arguments[f])&&(t=r(e))&&(n&&(n+=" "),n+=t);return n}
 
 const CLASS_PART_SEPARATOR = '-';
@@ -6307,39 +6158,351 @@ function TextColumn({ column, value, record }) {
     return (jsx("div", { className: `${wrapClass} ${column.copyable ? 'cursor-pointer select-all' : ''}`, children: formatted }));
 }
 
+function useTableState({ result, onSort }) {
+    const [sorting, setSorting] = React.useState([]);
+    const [isLoading, setIsLoading] = React.useState(false);
+    const [error, setError] = React.useState(null);
+    const handleSort = React.useCallback((column, direction) => {
+        try {
+            setError(null);
+            setIsLoading(true);
+            onSort?.(column, direction);
+        }
+        catch (err) {
+            setError(err instanceof Error ? err : new Error('Sort operation failed'));
+        }
+        finally {
+            setIsLoading(false);
+        }
+    }, [onSort]);
+    // Sync sorting state with result
+    React.useEffect(() => {
+        if (result.sort) {
+            const newSorting = Object.entries(result.sort).map(([id, desc]) => ({
+                id,
+                desc: desc === 'desc',
+            }));
+            setSorting(newSorting);
+        }
+    }, [result.sort]);
+    return {
+        sorting,
+        setSorting,
+        handleSort,
+        isLoading,
+        error,
+    };
+}
+
+function useTableColumns({ result, renderCell, }) {
+    const [error, setError] = React.useState(null);
+    const { columns, visibleColumns } = React.useMemo(() => {
+        try {
+            setError(null);
+            const configColumns = result.config?.columns || [];
+            if (!Array.isArray(configColumns)) {
+                throw new Error('Table columns configuration is invalid');
+            }
+            const visibleColumns = configColumns.filter(column => column.visible);
+            const columns = visibleColumns.map((column) => ({
+                id: column.key,
+                accessorFn: (row) => row[column.key],
+                header: column.label,
+                cell: ({ row }) => {
+                    const value = row.getValue(column.key);
+                    return renderCell ? renderCell(column, value, row.original) : value;
+                },
+                enableSorting: column.sortable,
+                meta: {
+                    column,
+                },
+            }));
+            return { columns, visibleColumns };
+        }
+        catch (err) {
+            const error = err instanceof Error ? err : new Error('Failed to process table columns');
+            setError(error);
+            return { columns: [], visibleColumns: [] };
+        }
+    }, [result.config?.columns, renderCell]);
+    return {
+        columns,
+        visibleColumns,
+        error,
+    };
+}
+
+function useInertiaTable({ initialSearch = '', preserveState = true, preserveScroll = true, } = {}) {
+    const [searchValue, setSearchValue] = React.useState(initialSearch);
+    const [isNavigating, setIsNavigating] = React.useState(false);
+    const navigate = React.useCallback((params) => {
+        setIsNavigating(true);
+        router.get(window.location.pathname, params, {
+            preserveState,
+            preserveScroll,
+            onFinish: () => setIsNavigating(false),
+            onError: () => setIsNavigating(false),
+        });
+    }, [preserveState, preserveScroll]);
+    const handleSearch = React.useCallback((query) => {
+        setSearchValue(query);
+        navigate({ search: query });
+    }, [navigate]);
+    const handleSort = React.useCallback((column, direction) => {
+        navigate({ sort: column, direction });
+    }, [navigate]);
+    const handlePageChange = React.useCallback((page) => {
+        navigate({ page });
+    }, [navigate]);
+    return {
+        searchValue,
+        setSearchValue,
+        handleSearch,
+        handleSort,
+        handlePageChange,
+        isNavigating,
+    };
+}
+
+const DefaultErrorFallback = ({ error, retry }) => (jsx("div", { className: "flex flex-col items-center justify-center p-8 border border-destructive/20 rounded-md bg-destructive/5", children: jsxs("div", { className: "text-center space-y-4", children: [jsx("div", { className: "text-destructive font-medium", children: "Something went wrong with the table" }), jsx("div", { className: "text-sm text-muted-foreground", children: error.message || 'An unexpected error occurred' }), jsx("button", { onClick: retry, className: "inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2", children: "Try again" })] }) }));
+class ErrorBoundary extends React.Component {
+    constructor(props) {
+        super(props);
+        this.handleRetry = () => {
+            this.setState({ hasError: false, error: null });
+        };
+        this.state = { hasError: false, error: null };
+    }
+    static getDerivedStateFromError(error) {
+        return { hasError: true, error };
+    }
+    componentDidCatch(error, errorInfo) {
+        this.props.onError?.(error, errorInfo);
+        // Log error in development
+        if (process.env.NODE_ENV === 'development') {
+            console.error('Table ErrorBoundary caught an error:', error, errorInfo);
+        }
+    }
+    render() {
+        if (this.state.hasError && this.state.error) {
+            const FallbackComponent = this.props.fallback || DefaultErrorFallback;
+            return (jsx(FallbackComponent, { error: this.state.error, retry: this.handleRetry }));
+        }
+        return this.props.children;
+    }
+}
+
+/**
+ * @license lucide-react v0.475.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+
+const toKebabCase = (string) => string.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
+const mergeClasses = (...classes) => classes.filter((className, index, array) => {
+  return Boolean(className) && className.trim() !== "" && array.indexOf(className) === index;
+}).join(" ").trim();
+
+/**
+ * @license lucide-react v0.475.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+
+var defaultAttributes = {
+  xmlns: "http://www.w3.org/2000/svg",
+  width: 24,
+  height: 24,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: 2,
+  strokeLinecap: "round",
+  strokeLinejoin: "round"
+};
+
+/**
+ * @license lucide-react v0.475.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+
+
+const Icon = forwardRef(
+  ({
+    color = "currentColor",
+    size = 24,
+    strokeWidth = 2,
+    absoluteStrokeWidth,
+    className = "",
+    children,
+    iconNode,
+    ...rest
+  }, ref) => {
+    return createElement(
+      "svg",
+      {
+        ref,
+        ...defaultAttributes,
+        width: size,
+        height: size,
+        stroke: color,
+        strokeWidth: absoluteStrokeWidth ? Number(strokeWidth) * 24 / Number(size) : strokeWidth,
+        className: mergeClasses("lucide", className),
+        ...rest
+      },
+      [
+        ...iconNode.map(([tag, attrs]) => createElement(tag, attrs)),
+        ...Array.isArray(children) ? children : [children]
+      ]
+    );
+  }
+);
+
+/**
+ * @license lucide-react v0.475.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+
+
+const createLucideIcon = (iconName, iconNode) => {
+  const Component = forwardRef(
+    ({ className, ...props }, ref) => createElement(Icon, {
+      ref,
+      iconNode,
+      className: mergeClasses(`lucide-${toKebabCase(iconName)}`, className),
+      ...props
+    })
+  );
+  Component.displayName = `${iconName}`;
+  return Component;
+};
+
+/**
+ * @license lucide-react v0.475.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+
+
+const __iconNode$4 = [["path", { d: "m6 9 6 6 6-6", key: "qrunsl" }]];
+const ChevronDown = createLucideIcon("ChevronDown", __iconNode$4);
+
+/**
+ * @license lucide-react v0.475.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+
+
+const __iconNode$3 = [["path", { d: "m15 18-6-6 6-6", key: "1wnfg3" }]];
+const ChevronLeft = createLucideIcon("ChevronLeft", __iconNode$3);
+
+/**
+ * @license lucide-react v0.475.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+
+
+const __iconNode$2 = [["path", { d: "m9 18 6-6-6-6", key: "mthhwq" }]];
+const ChevronRight = createLucideIcon("ChevronRight", __iconNode$2);
+
+/**
+ * @license lucide-react v0.475.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+
+
+const __iconNode$1 = [["path", { d: "m18 15-6-6-6 6", key: "153udz" }]];
+const ChevronUp = createLucideIcon("ChevronUp", __iconNode$1);
+
+/**
+ * @license lucide-react v0.475.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+
+
+const __iconNode = [
+  ["circle", { cx: "11", cy: "11", r: "8", key: "4ej97u" }],
+  ["path", { d: "m21 21-4.3-4.3", key: "1qie3q" }]
+];
+const Search = createLucideIcon("Search", __iconNode);
+
+const SortableHeader = React.memo(({ column, sortDirection, onSort, className = "", }) => {
+    const isActive = sortDirection !== null && sortDirection !== undefined;
+    const handleClick = React.useCallback(() => {
+        if (column.sortable && onSort) {
+            const newDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            onSort(column.key, newDirection);
+        }
+    }, [column.key, column.sortable, onSort, sortDirection]);
+    const handleKeyDown = React.useCallback((event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            handleClick();
+        }
+    }, [handleClick]);
+    if (!column.sortable) {
+        return jsx("span", { className: className, children: column.label });
+    }
+    return (jsxs("div", { className: `flex items-center gap-2 cursor-pointer select-none hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-sm ${className}`, onClick: handleClick, onKeyDown: handleKeyDown, tabIndex: 0, role: "button", "aria-label": `Sort by ${column.label} ${sortDirection === 'asc'
+            ? 'descending'
+            : sortDirection === 'desc'
+                ? 'ascending'
+                : 'ascending'}`, "aria-pressed": isActive, children: [column.label, jsxs("div", { className: "flex flex-col", "aria-hidden": "true", children: [jsx(ChevronUp, { className: `h-3 w-3 ${isActive && sortDirection === 'asc'
+                            ? 'text-foreground'
+                            : 'text-muted-foreground'}` }), jsx(ChevronDown, { className: `h-3 w-3 -mt-1 ${isActive && sortDirection === 'desc'
+                            ? 'text-foreground'
+                            : 'text-muted-foreground'}` })] })] }));
+});
+SortableHeader.displayName = "SortableHeader";
+
+const TableHeaderComponent = React.memo(({ headerGroups, result, onSort, }) => {
+    return (jsx(TableHeader, { children: headerGroups.map((headerGroup) => (jsx(TableRow, { children: headerGroup.headers.map((header) => {
+                const column = header.column.columnDef.meta?.column;
+                const sortDirection = column?.key ? result.sort?.[column.key] || null : null;
+                return (jsx(TableHead, { children: header.isPlaceholder ? null : column ? (jsx(SortableHeader, { column: column, sortDirection: sortDirection, onSort: onSort })) : (flexRender(header.column.columnDef.header, header.getContext())) }, header.id));
+            }) }, headerGroup.id))) }));
+});
+TableHeaderComponent.displayName = "TableHeaderComponent";
+
+const TableBodyComponent = React.memo(({ rows, columnsCount, isLoading = false, emptyMessage = "No results.", }) => {
+    if (isLoading) {
+        return (jsx(TableBody, { children: jsx(TableRow, { children: jsx(TableCell, { colSpan: columnsCount, className: "h-24 text-center", role: "status", "aria-live": "polite", children: jsxs("div", { className: "flex items-center justify-center gap-2", children: [jsx("div", { className: "animate-spin rounded-full h-4 w-4 border-b-2 border-foreground" }), "Loading..."] }) }) }) }));
+    }
+    if (!rows?.length) {
+        return (jsx(TableBody, { children: jsx(TableRow, { children: jsx(TableCell, { colSpan: columnsCount, className: "h-24 text-center", role: "status", "aria-live": "polite", children: emptyMessage }) }) }));
+    }
+    return (jsx(TableBody, { children: rows.map((row) => (jsx(TableRow, { "data-state": row.getIsSelected() && "selected", role: "row", children: row.getVisibleCells().map((cell) => (jsx(TableCell, { role: "gridcell", children: flexRender(cell.column.columnDef.cell, cell.getContext()) }, cell.id))) }, row.id))) }));
+});
+TableBodyComponent.displayName = "TableBodyComponent";
+
 function renderColumnValue(column, value, record) {
     return jsx(TextColumn, { column: column, value: value, record: record });
 }
-function DataTable({ result, onSort, className }) {
-    const [sorting, setSorting] = React.useState([]);
-    const columns = React.useMemo(() => {
-        const configColumns = result.config?.columns || [];
-        if (!Array.isArray(configColumns)) {
-            console.error('configColumns is not an array:', configColumns);
-            return [];
-        }
-        return configColumns
-            .filter(column => column.visible)
-            .map((column) => ({
-            id: column.key,
-            accessorFn: (row) => row[column.key],
-            header: ({ column: tanstackColumn }) => {
-                const isActive = Object.keys(result.sort || {}).includes(column.key);
-                const direction = result.sort?.[column.key];
-                return (jsxs("div", { className: `flex items-center gap-2 ${column.sortable ? 'cursor-pointer select-none hover:text-foreground' : ''}`, onClick: () => {
-                        if (column.sortable && onSort) {
-                            const newDirection = direction === 'asc' ? 'desc' : 'asc';
-                            onSort(column.key, newDirection);
-                        }
-                    }, children: [column.label, column.sortable && (jsxs("div", { className: "flex flex-col", children: [jsx(ChevronUp, { className: `h-3 w-3 ${isActive && direction === 'asc' ? 'text-foreground' : 'text-muted-foreground'}` }), jsx(ChevronDown, { className: `h-3 w-3 -mt-1 ${isActive && direction === 'desc' ? 'text-foreground' : 'text-muted-foreground'}` })] }))] }));
-            },
-            cell: ({ row }) => {
-                const value = row.getValue(column.key);
-                return renderColumnValue(column, value, row.original);
-            },
-            enableSorting: column.sortable,
-        }));
-    }, [result.config?.columns, result.sort, onSort]);
+const DataTable = React.memo(({ result, onSort, className = "", isLoading = false, emptyMessage = "No results." }) => {
+    const { sorting, setSorting, handleSort, error: stateError } = useTableState({
+        result,
+        onSort
+    });
+    const { columns, error: columnsError } = useTableColumns({
+        result,
+        renderCell: renderColumnValue,
+    });
+    const error = stateError || columnsError;
     const table = useReactTable({
         data: result.data || [],
         columns,
@@ -6351,10 +6514,12 @@ function DataTable({ result, onSort, className }) {
         onSortingChange: setSorting,
         manualSorting: true,
     });
-    return (jsx("div", { className: `rounded-md border ${className}`, children: jsxs(Table, { children: [jsx(TableHeader, { children: table.getHeaderGroups().map((headerGroup) => (jsx(TableRow, { children: headerGroup.headers.map((header) => (jsx(TableHead, { children: header.isPlaceholder
-                                ? null
-                                : flexRender(header.column.columnDef.header, header.getContext()) }, header.id))) }, headerGroup.id))) }), jsx(TableBody, { children: table.getRowModel().rows?.length ? (table.getRowModel().rows.map((row) => (jsx(TableRow, { "data-state": row.getIsSelected() && "selected", children: row.getVisibleCells().map((cell) => (jsx(TableCell, { children: flexRender(cell.column.columnDef.cell, cell.getContext()) }, cell.id))) }, row.id)))) : (jsx(TableRow, { children: jsx(TableCell, { colSpan: columns.length, className: "h-24 text-center", children: "No results." }) })) })] }) }));
-}
+    if (error) {
+        throw error;
+    }
+    return (jsx(ErrorBoundary, { children: jsx("div", { className: `rounded-md border ${className}`, role: "table", "aria-label": "Data table", "aria-rowcount": result.data?.length || 0, children: jsxs(Table, { children: [jsx(TableHeaderComponent, { headerGroups: table.getHeaderGroups(), result: result, onSort: handleSort }), jsx(TableBodyComponent, { rows: table.getRowModel().rows, columnsCount: columns.length, isLoading: isLoading, emptyMessage: emptyMessage })] }) }) }));
+});
+DataTable.displayName = "DataTable";
 
 function TableSearch({ value, onChange, placeholder = "Search...", className }) {
     return (jsxs("div", { className: `relative ${className}`, children: [jsx(Search, { className: "absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" }), jsx("input", { type: "text", placeholder: placeholder, value: value, onChange: (e) => onChange(e.target.value), className: "flex h-10 w-full rounded-md border border-input bg-background pl-10 pr-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" })] }));
@@ -6366,7 +6531,7 @@ function TablePagination({ pagination, onPageChange, className }) {
         const pages = [];
         const maxVisible = 5;
         let start = Math.max(1, current_page - Math.floor(maxVisible / 2));
-        let end = Math.min(last_page, start + maxVisible - 1);
+        const end = Math.min(last_page, start + maxVisible - 1);
         if (end - start + 1 < maxVisible) {
             start = Math.max(1, end - maxVisible + 1);
         }
@@ -6380,29 +6545,13 @@ function TablePagination({ pagination, onPageChange, className }) {
                             : 'border border-input bg-background hover:bg-accent hover:text-accent-foreground'}`, children: page }, page))), jsx("button", { onClick: () => onPageChange(current_page + 1), disabled: current_page >= last_page, className: "inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 w-8", children: jsx(ChevronRight, { className: "h-4 w-4" }) })] })] }));
 }
 
-function InertiaTable({ state, className }) {
-    const [searchValue, setSearchValue] = React.useState(state.search || '');
-    const handleSearch = (query) => {
-        setSearchValue(query);
-        router.get(window.location.pathname, { search: query }, {
-            preserveState: true,
-            preserveScroll: true
-        });
-    };
-    const handleSort = (column, direction) => {
-        router.get(window.location.pathname, { sort: column, direction }, {
-            preserveState: true,
-            preserveScroll: true
-        });
-    };
-    const handlePageChange = (page) => {
-        router.get(window.location.pathname, { page }, {
-            preserveState: true,
-            preserveScroll: true
-        });
-    };
-    return (jsxs("div", { className: `space-y-4 ${className}`, children: [state.config?.searchable && (jsx(TableSearch, { value: searchValue, onChange: handleSearch, placeholder: "Search...", className: "max-w-sm" })), jsx(DataTable, { result: state, onSort: handleSort }), jsx(TablePagination, { pagination: state.pagination, onPageChange: handlePageChange })] }));
-}
+const InertiaTable = React.memo(({ state, className = "" }) => {
+    const { searchValue, handleSearch, handleSort, handlePageChange, isNavigating, } = useInertiaTable({
+        initialSearch: state.search || '',
+    });
+    return (jsx(ErrorBoundary, { children: jsxs("div", { className: `space-y-4 ${className}`, role: "region", "aria-label": "Interactive data table", children: [state.config?.searchable && (jsx(TableSearch, { value: searchValue, onChange: handleSearch, placeholder: "Search...", className: "max-w-sm" })), jsx(DataTable, { result: state, onSort: handleSort, isLoading: isNavigating }), jsx(TablePagination, { pagination: state.pagination, onPageChange: handlePageChange })] }) }));
+});
+InertiaTable.displayName = "InertiaTable";
 
-export { DataTable, InertiaTable, TablePagination, TableSearch, TextColumn, InertiaTable as default };
+export { DataTable, ErrorBoundary, InertiaTable, SortableHeader, TableBodyComponent, TableHeaderComponent, TablePagination, TableSearch, TextColumn, InertiaTable as default, useInertiaTable, useTableColumns, useTableState };
 //# sourceMappingURL=index.esm.js.map

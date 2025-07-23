@@ -157,7 +157,7 @@ export const DataTable = React.memo<DataTableProps>(({
   const error = stateError || columnsError;
 
   const table = useReactTable({
-    data: result!.data || [],
+    data: result?.data || [],
     columns: enhancedColumns,
     state: {
       sorting,
@@ -189,7 +189,7 @@ export const DataTable = React.memo<DataTableProps>(({
     manualSorting: !!onSort, // Use manual sorting when onSort is provided
     getRowId: (row, index) => {
       // Use the primary key field specified by the backend, or fallback to 'id', then index
-      const primaryKeyField = result.primaryKey || 'id';
+      const primaryKeyField = result?.primaryKey || 'id';
       return row[primaryKeyField]?.toString() || index.toString();
     },
   });
@@ -210,10 +210,10 @@ export const DataTable = React.memo<DataTableProps>(({
     <ErrorBoundary>
       <div className="flex flex-col gap-4">
         {/* Enhanced Toolbar */}
-        {(result!.config?.searchable || result!.headerActions?.length) && (
+        {(result?.config?.searchable || result?.headerActions?.length) && (
           <div className="flex items-center justify-between gap-4">
             <div className="flex-1">
-              {result!.config?.searchable && onSearch && (
+              {result?.config?.searchable && onSearch && (
                 <Input
                   placeholder="Search..."
                   value={searchValue || ''}
@@ -225,9 +225,9 @@ export const DataTable = React.memo<DataTableProps>(({
 
             <div className="flex items-center gap-2">
               <DataTableViewOptions table={table} />
-              {result!.headerActions && result!.headerActions.length > 0 && onHeaderActionClick && (
+              {result?.headerActions && result?.headerActions.length > 0 && onHeaderActionClick && (
                 <HeaderActions
-                  headerActions={result!.headerActions}
+                  headerActions={result?.headerActions || []}
                   onActionClick={onHeaderActionClick}
                 />
               )}
@@ -239,7 +239,7 @@ export const DataTable = React.memo<DataTableProps>(({
           <div
             role="table"
             aria-label="Data table"
-            aria-rowcount={result!.data?.length || 0}
+            aria-rowcount={result?.data?.length || 0}
             className="relative"
           >
             <Table>

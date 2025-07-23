@@ -35,7 +35,7 @@ abstract class BaseAction implements Arrayable
 
     public function toArray(): array
     {
-        return array_merge([
+        $data = [
             'name' => $this->name,
             'label' => $this->getLabel(),
             'color' => $this->getColor(),
@@ -46,7 +46,22 @@ abstract class BaseAction implements Arrayable
             'cancelButton' => $this->getCancelButton(),
             'hasAction' => $this->hasAction(),
             'actionUrl' => $this->getActionUrl(),
-        ], $this->getAdditionalArrayData());
+        ];
+
+        return $this->filterDefaults(array_merge($data, $this->getAdditionalArrayData()));
+    }
+
+    protected function filterDefaults(array $data): array
+    {
+        return array_filter($data, function ($value, $key) {
+            // Always include required fields
+            if (in_array($key, ['name', 'label', 'color'])) {
+                return true;
+            }
+            
+            // Filter out false, null, empty strings, and empty arrays
+            return $value !== false && $value !== null && $value !== '' && $value !== [];
+        }, ARRAY_FILTER_USE_BOTH);
     }
 
     protected function getAdditionalArrayData(): array

@@ -209,7 +209,7 @@ class TableBuilder
                 $transformedRecord[$key] = $column->formatValue($value, $recordArray);
 
                 // Add badge variant to meta for TextColumn with badge enabled
-                if ($column instanceof \Egmond\InertiaTables\Columns\TextColumn && $column->toArray()['badge']) {
+                if ($column instanceof \Egmond\InertiaTables\Columns\TextColumn && $column->isBadgeEnabled()) {
                     $badgeVariants[$key] = $column->resolveBadgeVariant($value, $recordArray);
                 }
             }

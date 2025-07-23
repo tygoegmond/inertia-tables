@@ -7,7 +7,7 @@ class DeleteAction extends Action
     public function __construct(string $name = 'delete')
     {
         parent::__construct($name);
-        
+
         $this->label('Delete')
             ->requiresConfirmation()
             ->confirmationTitle('Confirm Deletion')
@@ -17,7 +17,7 @@ class DeleteAction extends Action
             ->color('danger')
             ->action(fn ($record) => $record->delete());
     }
-    
+
     public static function make(string $name = 'delete'): static
     {
         return new static($name);

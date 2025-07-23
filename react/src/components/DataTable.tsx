@@ -41,7 +41,6 @@ interface DataTableProps<T = any> {
   className?: string;
   isLoading?: boolean;
   emptyMessage?: string;
-  onRecordSelect?: (records: T[]) => void;
   onActionClick?: (action: any, record?: Record<string, any>) => void;
   searchValue?: string;
   onSearch?: (value: string) => void;
@@ -60,7 +59,6 @@ export const DataTable = React.memo<DataTableProps>(
     className = '',
     isLoading = false,
     emptyMessage = 'No results.',
-    onRecordSelect,
     onActionClick,
     searchValue,
     onSearch,
@@ -120,7 +118,7 @@ export const DataTable = React.memo<DataTableProps>(
       // Add data columns
       result.config.columns.forEach((column: TableColumn) => {
         columns.push({
-          id: column.key || column.label,
+          id: column.key,
           accessorKey: column.key,
           header: ({ column: tableColumn }: any) => (
             <DataTableColumnHeader
@@ -205,12 +203,6 @@ export const DataTable = React.memo<DataTableProps>(
         .rows.map((row) => row.original);
     }, [rowSelection, table]);
 
-    // Notify parent of selection changes
-    React.useEffect(() => {
-      if (onRecordSelect) {
-        onRecordSelect(selectedRecords);
-      }
-    }, [selectedRecords, onRecordSelect]);
 
     if (error) {
       throw error;

@@ -13,7 +13,6 @@ const InertiaTableComponent = <
   state,
   className = '',
 }: TableProps<T>) => {
-  const [, setSelectedRecords] = React.useState<T[]>([]);
 
   const {
     searchValue,
@@ -39,16 +38,12 @@ const InertiaTableComponent = <
     primaryKey: state?.primaryKey || 'id',
     onSuccess: (_message) => {
       // TODO: Implement user-facing success notification
-      setSelectedRecords([]);
     },
     onError: (_error) => {
       // TODO: Implement user-facing error notification
     },
   });
 
-  const handleRecordSelection = React.useCallback((records: T[]) => {
-    setSelectedRecords(records);
-  }, []);
 
   // Show loading state if data is deferred and not yet available
   if (!state) {
@@ -90,7 +85,6 @@ const InertiaTableComponent = <
           result={state}
           onSort={handleSort}
           isLoading={isNavigating || isActionLoading}
-          onRecordSelect={handleRecordSelection}
           onActionClick={executeAction}
           searchValue={searchValue}
           onSearch={handleSearch}

@@ -29,7 +29,6 @@ export const HeaderActions: React.FC<HeaderActionsProps> = ({
           variant={action.color === 'danger' ? 'destructive' : 'default'}
           onClick={() => onActionClick(action)}
           disabled={action.disabled}
-          title={action.tooltip}
         >
           {action.label}
         </Button>

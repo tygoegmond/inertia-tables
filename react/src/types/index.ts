@@ -45,12 +45,6 @@ export interface TableAction {
   name: string;
   label: string;
   color: string;
-  style: 'button' | 'link' | 'iconButton';
-  outlined: boolean;
-  tooltip?: string;
-  badge?: string;
-  badgeColor?: string;
-  extraAttributes?: Record<string, any>;
   disabled?: boolean;
   hidden?: boolean;
   hasAction?: boolean;
@@ -70,12 +64,6 @@ export interface TableBulkAction {
   name: string;
   label: string;
   color: string;
-  style: 'button' | 'link' | 'iconButton';
-  outlined: boolean;
-  tooltip?: string;
-  badge?: string;
-  badgeColor?: string;
-  extraAttributes?: Record<string, any>;
   disabled?: boolean;
   hidden?: boolean;
   hasAction?: boolean;

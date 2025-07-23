@@ -19,19 +19,6 @@ class Action implements Arrayable
 
     protected string $name;
 
-    protected array $extraAttributes = [];
-
-    protected ?string $tooltip = null;
-
-    protected string $style = 'button'; // button, link, iconButton
-
-    protected bool $outlined = false;
-
-    protected ?string $badge = null;
-
-    protected ?string $badgeColor = null;
-
-    protected array $keyBindings = [];
 
     public function __construct(string $name)
     {
@@ -48,97 +35,7 @@ class Action implements Arrayable
         return $this->name;
     }
 
-    public function button(): static
-    {
-        $this->style = 'button';
 
-        return $this;
-    }
-
-    public function link(): static
-    {
-        $this->style = 'link';
-
-        return $this;
-    }
-
-    public function iconButton(): static
-    {
-        $this->style = 'iconButton';
-
-        return $this;
-    }
-
-    public function outlined(bool $condition = true): static
-    {
-        $this->outlined = $condition;
-
-        return $this;
-    }
-
-    public function tooltip(string $tooltip): static
-    {
-        $this->tooltip = $tooltip;
-
-        return $this;
-    }
-
-    public function badge(string $badge, ?string $color = null): static
-    {
-        $this->badge = $badge;
-        $this->badgeColor = $color;
-
-        return $this;
-    }
-
-    public function keyBindings(array $bindings): static
-    {
-        $this->keyBindings = $bindings;
-
-        return $this;
-    }
-
-    public function extraAttributes(array $attributes): static
-    {
-        $this->extraAttributes = array_merge($this->extraAttributes, $attributes);
-
-        return $this;
-    }
-
-    public function getStyle(): string
-    {
-        return $this->style;
-    }
-
-    public function isOutlined(): bool
-    {
-        return $this->outlined;
-    }
-
-    public function getTooltip(): ?string
-    {
-        return $this->tooltip;
-    }
-
-    public function getBadge(): ?string
-    {
-        return $this->badge;
-    }
-
-    public function getBadgeColor(): ?string
-    {
-        return $this->badgeColor;
-    }
-
-    public function getKeyBindings(): array
-    {
-        return $this->keyBindings;
-    }
-
-    public function getExtraAttributes(): array
-    {
-        return $this->extraAttributes;
-    }
 
     public function toArray(): array
     {
@@ -146,13 +43,6 @@ class Action implements Arrayable
             'name' => $this->name,
             'label' => $this->getLabel(),
             'color' => $this->getColor(),
-            'style' => $this->style,
-            'outlined' => $this->outlined,
-            'tooltip' => $this->tooltip,
-            'badge' => $this->badge,
-            'badgeColor' => $this->badgeColor,
-            'keyBindings' => $this->keyBindings,
-            'extraAttributes' => $this->extraAttributes,
             'requiresConfirmation' => $this->needsConfirmation(),
             'confirmationTitle' => $this->getConfirmationTitle(),
             'confirmationMessage' => $this->getConfirmationMessage(),

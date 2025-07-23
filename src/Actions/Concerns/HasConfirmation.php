@@ -6,13 +6,13 @@ trait HasConfirmation
 {
     protected bool $requiresConfirmation = false;
 
-    protected string $confirmationTitle = 'Confirm Action';
+    protected string $confirmationTitle = '';
 
-    protected string $confirmationMessage = 'Are you sure you want to perform this action?';
+    protected string $confirmationMessage = '';
 
-    protected string $confirmationButton = 'Confirm';
+    protected string $confirmationButton = '';
 
-    protected string $cancelButton = 'Cancel';
+    protected string $cancelButton = '';
 
     public function requiresConfirmation(
         string $title = 'Confirm Action',

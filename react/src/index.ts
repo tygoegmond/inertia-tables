@@ -10,6 +10,7 @@ export * from './components/table';
 export * from './components/actions';
 export * from './hooks';
 export * from './types';
+export * from './lib/actions';
 
 // New enhanced data-table components
 export { DataTable as EnhancedDataTable } from './components/data-table/data-table';

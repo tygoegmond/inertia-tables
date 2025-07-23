@@ -23,10 +23,7 @@ export const BulkActions: React.FC<BulkActionsProps> = ({
     return null;
   }
 
-  // Filter out hidden actions
-  const visibleActions = bulkActions.filter(action => !action.hidden);
-
-  if (visibleActions.length === 0) {
+  if (bulkActions.length === 0) {
     return null;
   }
 
@@ -40,12 +37,11 @@ export const BulkActions: React.FC<BulkActionsProps> = ({
         <div className="h-4 w-px bg-border" />
         
         <div className="flex items-center gap-2">
-          {visibleActions.map((action) => (
+          {bulkActions.map((action) => (
             <ActionButton
               key={action.name}
               action={action}
               onClick={() => onBulkActionClick(action, selectedRecords)}
-              disabled={action.disabled}
             />
           ))}
         </div>

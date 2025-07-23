@@ -134,11 +134,8 @@ export const DataTable = React.memo<DataTableProps>(({
         cell: ({ row }: any) => (
           <DataTableRowActions
             row={row}
-            actions={result.actions?.map((action: any) => ({
-              label: action.label,
-              onClick: (data: any) => onActionClick?.(action, data),
-              variant: action.color === 'danger' ? 'destructive' : 'default',
-            })) || []}
+            staticActions={result.actions || []}
+            onActionClick={(action, record) => onActionClick?.(action, record)}
           />
         ),
         enableSorting: false,

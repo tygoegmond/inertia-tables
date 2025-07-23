@@ -83,17 +83,19 @@ export const taskColumns: ColumnDef<Task>[] = [
     cell: ({ row }) => (
       <DataTableRowActions
         row={row}
-        actions={[
+        staticActions={[
           {
+            name: "edit",
             label: "Edit",
-            onClick: (data) => console.log("Edit", data),
+            color: "primary"
           },
           {
+            name: "delete",
             label: "Delete",
-            onClick: (data) => console.log("Delete", data),
-            variant: "destructive",
+            color: "danger"
           },
         ]}
+        onActionClick={(action, record) => console.log(action.name, record)}
       />
     ),
   },

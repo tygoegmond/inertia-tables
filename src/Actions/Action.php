@@ -10,8 +10,14 @@ class Action extends BaseAction
     protected function getAdditionalArrayData(): array
     {
         return [
-            'openUrlInNewTab' => $this->shouldOpenUrlInNewTab(),
             'hasUrl' => $this->hasUrl(),
+        ];
+    }
+
+    protected function getAdditionalRowData(?\Illuminate\Database\Eloquent\Model $record = null): array
+    {
+        return [
+            'openUrlInNewTab' => $this->shouldOpenUrlInNewTab(),
         ];
     }
 }

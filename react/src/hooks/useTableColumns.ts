@@ -96,7 +96,7 @@ export function useTableColumns({
           header: 'Actions',
           cell: ({ row }) => {
             return React.createElement(ActionsColumn, {
-              actions: result.actions || [],
+              staticActions: result.actions || [],
               record: row.original,
               onActionClick,
             });

@@ -45,13 +45,8 @@ export interface TableAction {
   name: string;
   label: string;
   color: string;
-  disabled?: boolean;
-  hidden?: boolean;
   hasAction?: boolean;
   hasUrl?: boolean;
-  url?: string;
-  actionUrl?: string;
-  openUrlInNewTab?: boolean;
   requiresConfirmation?: boolean;
   confirmationTitle?: string;
   confirmationMessage?: string;
@@ -60,12 +55,16 @@ export interface TableAction {
   type?: 'action';
 }
 
+export interface RowActionData {
+  actionUrl?: string;
+  disabled?: boolean;
+  openUrlInNewTab?: boolean;
+}
+
 export interface TableBulkAction {
   name: string;
   label: string;
   color: string;
-  disabled?: boolean;
-  hidden?: boolean;
   hasAction?: boolean;
   actionUrl?: string;
   requiresConfirmation?: boolean;
@@ -79,9 +78,14 @@ export type TableActionItem = TableAction;
 export type TableBulkActionItem = TableBulkAction;
 export type TableHeaderActionItem = TableAction;
 
+export interface TableRowData {
+  [key: string]: any;
+  actions?: Record<string, RowActionData>;
+}
+
 export interface TableResult<T = any> {
   config: TableConfig;
-  data: T[];
+  data: (T & TableRowData)[];
   pagination: TablePagination;
   sort: Record<string, 'asc' | 'desc'>;
   search: string | null;
@@ -97,11 +101,6 @@ export interface TableProps<T = any> {
   className?: string;
 }
 
-// Legacy interface for backward compatibility
-export interface RequiredTableProps<T = any> {
-  state: TableResult<T>;
-  className?: string;
-}
 
 // Hook interfaces  
 export interface UseTableStateProps {

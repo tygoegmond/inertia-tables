@@ -10,21 +10,26 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu"
+import { TableAction, TableRowData } from "../../types"
+import { getRowActions, MergedAction } from "../../lib/actions"
 
-interface DataTableRowActionsProps<TData> {
+interface DataTableRowActionsProps<TData extends TableRowData> {
   row: Row<TData>
-  actions?: Array<{
-    label: string
-    onClick: (data: TData) => void
-    variant?: "default" | "destructive"
-    shortcut?: string
-  }>
+  staticActions: TableAction[]
+  onActionClick: (action: MergedAction, record: TData) => void
 }
 
-export function DataTableRowActions<TData>({
+export function DataTableRowActions<TData extends TableRowData>({
   row,
-  actions = [],
+  staticActions,
+  onActionClick,
 }: DataTableRowActionsProps<TData>) {
+  const actions = getRowActions(staticActions, row.original);
+  
+  if (actions.length === 0) {
+    return null;
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -39,17 +44,15 @@ export function DataTableRowActions<TData>({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-[160px]">
         {actions.map((action, index) => (
-          <div key={index}>
+          <div key={action.name}>
             <DropdownMenuItem
-              onClick={() => action.onClick(row.original)}
-              className={action.variant === 'destructive' ? 'text-destructive focus:text-destructive' : ''}
+              onClick={() => onActionClick(action, row.original)}
+              disabled={action.disabled}
+              className={action.color === 'danger' ? 'text-destructive focus:text-destructive' : ''}
             >
               {action.label}
-              {action.shortcut && (
-                <DropdownMenuShortcut>{action.shortcut}</DropdownMenuShortcut>
-              )}
             </DropdownMenuItem>
-            {action.variant === "destructive" && index < actions.length - 1 && (
+            {action.color === "danger" && index < actions.length - 1 && (
               <DropdownMenuSeparator />
             )}
           </div>

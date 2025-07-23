@@ -19,7 +19,7 @@ class ForceDeleteAction extends Action
             ->action(fn ($record) => $record->forceDelete());
     }
 
-    public static function make(string $name = 'force-delete'): static
+    public static function make(string $name = 'force_delete'): static
     {
         return new static($name);
     }

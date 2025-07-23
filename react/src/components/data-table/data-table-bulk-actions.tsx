@@ -30,10 +30,7 @@ export function DataTableBulkActions({
     return null
   }
 
-  // Filter out hidden actions
-  const visibleActions = bulkActions.filter(action => !action.hidden)
-
-  if (visibleActions.length === 0) {
+  if (bulkActions.length === 0) {
     return null
   }
 
@@ -57,16 +54,15 @@ export function DataTableBulkActions({
           </Badge>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {visibleActions.map((action, index) => (
+        {bulkActions.map((action, index) => (
           <div key={action.name}>
             <DropdownMenuItem
               onClick={() => onBulkActionClick(action, selectedRecords)}
-              disabled={action.disabled}
               className={action.color === 'danger' ? 'text-destructive focus:text-destructive' : ''}
             >
               {action.label}
             </DropdownMenuItem>
-            {action.color === "danger" && index < visibleActions.length - 1 && (
+            {action.color === "danger" && index < bulkActions.length - 1 && (
               <DropdownMenuSeparator />
             )}
           </div>

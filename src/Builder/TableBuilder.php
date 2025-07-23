@@ -221,6 +221,9 @@ class TableBuilder
                 ];
             }
 
+            // Add row-specific action data
+            $transformedRecord['actions'] = $this->getRowActionData($record);
+
             return $transformedRecord;
         })->toArray();
     }
@@ -390,5 +393,26 @@ class TableBuilder
 
             return $action;
         }, $actions);
+    }
+
+    protected function getRowActionData(\Illuminate\Database\Eloquent\Model $record): array
+    {
+        $rowActions = [];
+
+        foreach ($this->actions as $action) {
+            if (method_exists($action, 'toRowArray')) {
+                // Set table class for URL generation
+                if (method_exists($action, 'setTableClass') && $this->tableClass) {
+                    $action->setTableClass($this->tableClass);
+                }
+
+                // Only include authorized and visible actions
+                if ($action->isAuthorized($record) && $action->isVisible($record)) {
+                    $rowActions[$action->getName()] = $action->toRowArray($record);
+                }
+            }
+        }
+
+        return $rowActions;
     }
 }

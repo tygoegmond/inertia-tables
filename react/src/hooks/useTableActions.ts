@@ -1,32 +1,7 @@
 import { useState, useCallback } from "react";
 import { router } from "@inertiajs/react";
-
-interface Action {
-  name: string;
-  label: string;
-  hasAction?: boolean;
-  hasUrl?: boolean;
-  url?: string;
-  actionUrl?: string;
-  openUrlInNewTab?: boolean;
-  requiresConfirmation?: boolean;
-  confirmationTitle?: string;
-  confirmationMessage?: string;
-  confirmationButton?: string;
-  cancelButton?: string;
-}
-
-interface BulkAction {
-  name: string;
-  label: string;
-  hasAction?: boolean;
-  actionUrl?: string;
-  requiresConfirmation?: boolean;
-  confirmationTitle?: string;
-  confirmationMessage?: string;
-  confirmationButton?: string;
-  cancelButton?: string;
-}
+import { TableAction, TableBulkAction } from "../types";
+import type { MergedAction } from "../lib/actions";
 
 interface UseTableActionsProps {
   tableName: string;
@@ -53,9 +28,9 @@ interface UseTableActionsReturn {
     submitButton: string;
     cancelButton: string;
   };
-  executeAction: (action: Action, record?: Record<string, any>) => void;
-  executeBulkAction: (action: BulkAction, records: Record<string, any>[]) => void;
-  executeHeaderAction: (action: Action) => void;
+  executeAction: (action: MergedAction, record?: Record<string, any>) => void;
+  executeBulkAction: (action: TableBulkAction, records: Record<string, any>[]) => void;
+  executeHeaderAction: (action: TableAction) => void;
   confirmAction: () => void;
   cancelAction: () => void;
   submitForm: (data: Record<string, any>) => void;
@@ -88,32 +63,21 @@ export const useTableActions = ({
   });
 
   const [pendingAction, setPendingAction] = useState<{
-    action: Action | BulkAction;
+    action: MergedAction | TableBulkAction;
     record?: Record<string, any>;
     records?: Record<string, any>[];
   } | null>(null);
 
-  const handleUrlAction = useCallback((action: Action, record?: Record<string, any>) => {
-    if (!action.url) return;
-
-    let url = action.url;
-    
-    // Replace record placeholders in URL if record is provided
-    if (record) {
-      Object.keys(record).forEach(key => {
-        url = url.replace(`{${key}}`, record[key]);
-      });
-    }
-
-    if (action.openUrlInNewTab) {
-      window.open(url, '_blank');
+  const handleActionUrl = useCallback((actionUrl: string, openInNewTab?: boolean) => {
+    if (openInNewTab) {
+      window.open(actionUrl, '_blank');
     } else {
-      router.visit(url);
+      router.visit(actionUrl);
     }
   }, []);
 
   const performActionRequest = useCallback(async (
-    action: Action | BulkAction,
+    action: MergedAction | TableBulkAction,
     records: Record<string, any>[] = []
   ) => {
     setIsLoading(true);
@@ -155,14 +119,9 @@ export const useTableActions = ({
     }
   }, [onSuccess, onError]);
 
-  const executeAction = useCallback((action: Action, record?: Record<string, any>) => {
-    if (action.hasUrl && action.url) {
-      handleUrlAction(action, record);
-      return;
-    }
-
-    if (!action.hasAction) {
-      console.warn('Action has no URL or action handler');
+  const executeAction = useCallback((action: MergedAction, record?: Record<string, any>) => {
+    if (!action.actionUrl) {
+      console.warn('Action has no actionUrl');
       return;
     }
 
@@ -179,11 +138,11 @@ export const useTableActions = ({
     } else {
       performActionRequest(action, record ? [record] : []);
     }
-  }, [handleUrlAction, performActionRequest]);
+  }, [performActionRequest]);
 
-  const executeBulkAction = useCallback((action: BulkAction, records: Record<string, any>[]) => {
-    if (!action.hasAction) {
-      console.warn('Bulk action has no action handler');
+  const executeBulkAction = useCallback((action: TableBulkAction, records: Record<string, any>[]) => {
+    if (!action.actionUrl) {
+      console.warn('Bulk action has no actionUrl');
       return;
     }
 
@@ -202,14 +161,9 @@ export const useTableActions = ({
     }
   }, [performActionRequest]);
 
-  const executeHeaderAction = useCallback((action: Action) => {
-    if (action.hasUrl && action.url) {
-      handleUrlAction(action);
-      return;
-    }
-
+  const executeHeaderAction = useCallback((action: TableAction) => {
     if (!action.hasAction) {
-      console.warn('Header action has no URL or action handler');
+      console.warn('Header action has no action handler');
       return;
     }
 
@@ -226,7 +180,7 @@ export const useTableActions = ({
     } else {
       performActionRequest(action, []);
     }
-  }, [handleUrlAction, performActionRequest]);
+  }, [performActionRequest]);
 
   const confirmAction = useCallback(() => {
     if (!pendingAction) return;

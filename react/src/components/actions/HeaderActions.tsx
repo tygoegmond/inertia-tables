@@ -13,8 +13,8 @@ export const HeaderActions: React.FC<HeaderActionsProps> = ({
   onActionClick,
   className = "",
 }) => {
-  // Filter out hidden actions
-  const visibleActions = headerActions.filter(action => !action.hidden);
+  // Header actions don't have row-specific visibility, so we show all
+  const visibleActions = headerActions;
 
   if (visibleActions.length === 0) {
     return null;
@@ -28,7 +28,6 @@ export const HeaderActions: React.FC<HeaderActionsProps> = ({
           size="sm"
           variant={action.color === 'danger' ? 'destructive' : 'default'}
           onClick={() => onActionClick(action)}
-          disabled={action.disabled}
         >
           {action.label}
         </Button>

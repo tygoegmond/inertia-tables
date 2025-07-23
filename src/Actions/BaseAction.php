@@ -35,6 +35,11 @@ abstract class BaseAction implements Arrayable
 
     public function toArray(): array
     {
+        return $this->getStaticProperties();
+    }
+
+    public function getStaticProperties(): array
+    {
         $data = [
             'name' => $this->name,
             'label' => $this->getLabel(),
@@ -45,10 +50,25 @@ abstract class BaseAction implements Arrayable
             'confirmationButton' => $this->getConfirmationButton(),
             'cancelButton' => $this->getCancelButton(),
             'hasAction' => $this->hasAction(),
-            'actionUrl' => $this->getActionUrl(),
         ];
 
         return $this->filterDefaults(array_merge($data, $this->getAdditionalArrayData()));
+    }
+
+    public function toRowArray(?\Illuminate\Database\Eloquent\Model $record = null): array
+    {
+        $isDisabled = $this->isDisabled($record);
+        
+        $data = [
+            'disabled' => $isDisabled,
+        ];
+
+        // Only generate actionUrl if the action is not disabled
+        if (!$isDisabled) {
+            $data['actionUrl'] = $this->getActionUrl($record ? [$record->getKey()] : []);
+        }
+
+        return $this->filterDefaults(array_merge($data, $this->getAdditionalRowData($record)));
     }
 
     protected function filterDefaults(array $data): array
@@ -58,13 +78,18 @@ abstract class BaseAction implements Arrayable
             if (in_array($key, ['name', 'label', 'color'])) {
                 return true;
             }
-            
+
             // Filter out false, null, empty strings, and empty arrays
             return $value !== false && $value !== null && $value !== '' && $value !== [];
         }, ARRAY_FILTER_USE_BOTH);
     }
 
     protected function getAdditionalArrayData(): array
+    {
+        return [];
+    }
+
+    protected function getAdditionalRowData(?\Illuminate\Database\Eloquent\Model $record = null): array
     {
         return [];
     }

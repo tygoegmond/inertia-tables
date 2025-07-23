@@ -58,7 +58,7 @@ abstract class BaseAction implements Arrayable
             if (in_array($key, ['name', 'label', 'color'])) {
                 return true;
             }
-            
+
             // Filter out false, null, empty strings, and empty arrays
             return $value !== false && $value !== null && $value !== '' && $value !== [];
         }, ARRAY_FILTER_USE_BOTH);

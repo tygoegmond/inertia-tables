@@ -29,7 +29,7 @@ import { ErrorBoundary } from './ErrorBoundary';
 import { LoadingOverlay } from './LoadingOverlay';
 import { DataTableColumnHeader } from './data-table/data-table-column-header';
 import { DataTableRowActions } from './data-table/data-table-row-actions';
-import { DataTableToolbar } from './data-table/data-table-toolbar';
+// import { DataTableToolbar } from './data-table/data-table-toolbar';
 import { DataTableViewOptions } from './data-table/data-table-view-options';
 import { DataTableBulkActions } from './data-table/data-table-bulk-actions';
 import { Input } from './ui/input';

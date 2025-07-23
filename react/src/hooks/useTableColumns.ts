@@ -27,9 +27,7 @@ export function useTableColumns({
   onActionClick,
 }: UseTableColumnsProps): TableColumnsState {
   const [error, setError] = React.useState<Error | null>(null);
-  const [selectedRows, setSelectedRows] = React.useState<Set<string>>(
-    new Set()
-  );
+  const [,] = React.useState<Set<string>>(new Set());
 
   const { columns, visibleColumns } = React.useMemo(() => {
     try {

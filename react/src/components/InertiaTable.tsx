@@ -8,12 +8,12 @@ import { TablePagination } from './TablePagination';
 import { ActionConfirmationDialog } from './actions';
 
 const InertiaTableComponent = <
-  T extends Record<string, any> = Record<string, any>,
+  T extends Record<string, unknown> = Record<string, unknown>,
 >({
   state,
   className = '',
 }: TableProps<T>) => {
-  const [selectedRecords, setSelectedRecords] = React.useState<T[]>([]);
+  const [, setSelectedRecords] = React.useState<T[]>([]);
 
   const {
     searchValue,
@@ -37,11 +37,11 @@ const InertiaTableComponent = <
   } = useTableActions({
     tableName: state?.name || 'table',
     primaryKey: state?.primaryKey || 'id',
-    onSuccess: (message) => {
+    onSuccess: (_message) => {
       // TODO: Implement user-facing success notification
       setSelectedRecords([]);
     },
-    onError: (error) => {
+    onError: (_error) => {
       // TODO: Implement user-facing error notification
     },
   });

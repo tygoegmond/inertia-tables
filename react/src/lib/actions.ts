@@ -1,4 +1,4 @@
-import { TableAction, RowActionData, TableRowData } from '../types';
+import { TableAction, TableRowData } from '../types';
 
 export interface MergedAction extends TableAction {
   actionUrl?: string;

@@ -84,7 +84,7 @@ export const taskColumns: ColumnDef<Task>[] = [
     id: 'actions',
     cell: ({ row }) => (
       <DataTableRowActions
-        row={row}
+        row={row as any}
         staticActions={[
           {
             name: 'edit',

@@ -43,10 +43,11 @@ interface UseTableActionsReturn {
   confirmAction: () => void;
   cancelAction: () => void;
   submitForm: (data: Record<string, any>) => void;
+  handleActionUrl: (actionUrl: string, openInNewTab?: boolean) => void;
 }
 
 export const useTableActions = ({
-  tableName,
+  tableName: _tableName,
   primaryKey,
   onSuccess,
   onError,
@@ -256,5 +257,6 @@ export const useTableActions = ({
     confirmAction,
     cancelAction,
     submitForm,
+    handleActionUrl,
   };
 };

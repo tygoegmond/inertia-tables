@@ -71,7 +71,10 @@ export class ErrorBoundary extends React.Component<
     this.props.onError?.(error, errorInfo);
 
     // Enhanced logging for development
-    if (process.env.NODE_ENV === 'development') {
+    if (
+      typeof process !== 'undefined' &&
+      process.env?.NODE_ENV === 'development'
+    ) {
       const isDeferredError = error.message?.includes(
         'Cannot read properties of undefined'
       );

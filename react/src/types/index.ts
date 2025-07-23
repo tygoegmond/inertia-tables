@@ -1,3 +1,5 @@
+import React from 'react';
+
 export interface TableColumn {
   key: string;
   label: string;
@@ -7,7 +9,7 @@ export interface TableColumn {
   searchable: boolean;
   searchColumn: string | null;
   defaultSort: 'asc' | 'desc' | null;
-  state: any;
+  state: Record<string, unknown>;
   prefix?: string;
   suffix?: string;
   copyable?: boolean;
@@ -79,11 +81,11 @@ export type TableBulkActionItem = TableBulkAction;
 export type TableHeaderActionItem = TableAction;
 
 export interface TableRowData {
-  [key: string]: any;
+  [key: string]: unknown;
   actions?: Record<string, RowActionData>;
 }
 
-export interface TableResult<T = any> {
+export interface TableResult<T = Record<string, unknown>> {
   config: TableConfig;
   data: (T & TableRowData)[];
   pagination: TablePagination;
@@ -96,7 +98,7 @@ export interface TableResult<T = any> {
   primaryKey?: string | null;
 }
 
-export interface TableProps<T = any> {
+export interface TableProps<T = Record<string, unknown>> {
   state: TableResult<T> | undefined;
   className?: string;
 }
@@ -121,8 +123,8 @@ export interface UseTableColumnsProps {
   result: TableResult | undefined;
   renderCell?: (
     column: TableColumn,
-    value: any,
-    record: any
+    value: unknown,
+    record: Record<string, unknown>
   ) => React.ReactNode;
 }
 

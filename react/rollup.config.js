@@ -28,5 +28,5 @@ export default {
     typescript({
       tsconfig: './tsconfig.json'
     })
-  ]
+  ],
 };

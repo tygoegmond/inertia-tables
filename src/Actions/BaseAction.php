@@ -58,13 +58,13 @@ abstract class BaseAction implements Arrayable
     public function toRowArray(?\Illuminate\Database\Eloquent\Model $record = null): array
     {
         $isDisabled = $this->isDisabled($record);
-        
+
         $data = [
             'disabled' => $isDisabled,
         ];
 
         // Only generate actionUrl if the action is not disabled
-        if (!$isDisabled) {
+        if (! $isDisabled) {
             $data['actionUrl'] = $this->getActionUrl($record ? [$record->getKey()] : []);
         }
 

@@ -5,6 +5,9 @@ namespace Egmond\InertiaTables\Concerns;
 use Egmond\InertiaTables\Table;
 use Egmond\InertiaTables\TableResult;
 
+/**
+ * @phpstan-ignore-next-line trait.unused
+ */
 trait InteractsWithTable
 {
     protected ?Table $tableInstance = null;

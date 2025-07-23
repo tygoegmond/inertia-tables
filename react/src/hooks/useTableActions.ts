@@ -1,7 +1,7 @@
-import { useState, useCallback } from "react";
-import { router } from "@inertiajs/react";
-import { TableAction, TableBulkAction } from "../types";
-import type { MergedAction } from "../lib/actions";
+import { useState, useCallback } from 'react';
+import { router } from '@inertiajs/react';
+import { TableAction, TableBulkAction } from '../types';
+import type { MergedAction } from '../lib/actions';
 
 interface UseTableActionsProps {
   tableName: string;
@@ -18,7 +18,13 @@ interface UseTableActionsReturn {
     message: string;
     confirmButton: string;
     cancelButton: string;
-    variant: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+    variant:
+      | 'default'
+      | 'destructive'
+      | 'outline'
+      | 'secondary'
+      | 'ghost'
+      | 'link';
   };
   formDialog: {
     isOpen: boolean;
@@ -29,7 +35,10 @@ interface UseTableActionsReturn {
     cancelButton: string;
   };
   executeAction: (action: MergedAction, record?: Record<string, any>) => void;
-  executeBulkAction: (action: TableBulkAction, records: Record<string, any>[]) => void;
+  executeBulkAction: (
+    action: TableBulkAction,
+    records: Record<string, any>[]
+  ) => void;
   executeHeaderAction: (action: TableAction) => void;
   confirmAction: () => void;
   cancelAction: () => void;
@@ -43,23 +52,23 @@ export const useTableActions = ({
   onError,
 }: UseTableActionsProps): UseTableActionsReturn => {
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const [confirmationDialog, setConfirmationDialog] = useState({
     isOpen: false,
-    title: "",
-    message: "",
-    confirmButton: "Confirm",
-    cancelButton: "Cancel",
-    variant: "destructive" as const,
+    title: '',
+    message: '',
+    confirmButton: 'Confirm',
+    cancelButton: 'Cancel',
+    variant: 'destructive' as const,
   });
 
   const [formDialog, setFormDialog] = useState({
     isOpen: false,
-    title: "",
-    description: "",
+    title: '',
+    description: '',
     fields: [],
-    submitButton: "Submit",
-    cancelButton: "Cancel",
+    submitButton: 'Submit',
+    cancelButton: 'Cancel',
   });
 
   const [pendingAction, setPendingAction] = useState<{
@@ -68,125 +77,154 @@ export const useTableActions = ({
     records?: Record<string, any>[];
   } | null>(null);
 
-  const handleActionUrl = useCallback((actionUrl: string, openInNewTab?: boolean) => {
-    if (openInNewTab) {
-      window.open(actionUrl, '_blank');
-    } else {
-      router.visit(actionUrl);
-    }
-  }, []);
-
-  const performActionRequest = useCallback(async (
-    action: MergedAction | TableBulkAction,
-    records: Record<string, any>[] = []
-  ) => {
-    setIsLoading(true);
-    
-    try {
-      const recordIds = records.map(record => record[primaryKey]);
-      
-      if (!action.actionUrl) {
-        throw new Error(`Action ${action.name} does not have a valid actionUrl`);
+  const handleActionUrl = useCallback(
+    (actionUrl: string, openInNewTab?: boolean) => {
+      if (openInNewTab) {
+        window.open(actionUrl, '_blank');
+      } else {
+        router.visit(actionUrl);
       }
-      
-      router.post(action.actionUrl, {
-        records: recordIds,
-      }, {
-        onSuccess: (page) => {
-          const result = page.props as any;
-          if (result.redirect_url) {
-            router.visit(result.redirect_url);
-          } else {
-            onSuccess?.(result.message);
-          }
-        },
-        onError: (errors) => {
-          const errorMessage = typeof errors === 'string' ? errors : 
-            Object.values(errors)[0] as string || 'Action failed';
-          onError?.(errorMessage);
-        },
-        onFinish: () => {
-          setIsLoading(false);
-          setPendingAction(null);
-          setConfirmationDialog(prev => ({ ...prev, isOpen: false }));
+    },
+    []
+  );
+
+  const performActionRequest = useCallback(
+    async (
+      action: MergedAction | TableBulkAction,
+      records: Record<string, any>[] = []
+    ) => {
+      setIsLoading(true);
+
+      try {
+        const recordIds = records.map((record) => record[primaryKey]);
+
+        if (!action.actionUrl) {
+          throw new Error(
+            `Action ${action.name} does not have a valid actionUrl`
+          );
         }
-      });
-    } catch (error) {
-      onError?.(error instanceof Error ? error.message : 'Action failed');
-      setIsLoading(false);
-      setPendingAction(null);
-      setConfirmationDialog(prev => ({ ...prev, isOpen: false }));
-    }
-  }, [onSuccess, onError]);
 
-  const executeAction = useCallback((action: MergedAction, record?: Record<string, any>) => {
-    if (!action.actionUrl) {
-      console.warn('Action has no actionUrl');
-      return;
-    }
+        router.post(
+          action.actionUrl,
+          {
+            records: recordIds,
+          },
+          {
+            onSuccess: (page) => {
+              const result = page.props as any;
+              if (result.redirect_url) {
+                router.visit(result.redirect_url);
+              } else {
+                onSuccess?.(result.message);
+              }
+            },
+            onError: (errors) => {
+              const errorMessage =
+                typeof errors === 'string'
+                  ? errors
+                  : (Object.values(errors)[0] as string) || 'Action failed';
+              onError?.(errorMessage);
+            },
+            onFinish: () => {
+              setIsLoading(false);
+              setPendingAction(null);
+              setConfirmationDialog((prev) => ({ ...prev, isOpen: false }));
+            },
+          }
+        );
+      } catch (error) {
+        onError?.(error instanceof Error ? error.message : 'Action failed');
+        setIsLoading(false);
+        setPendingAction(null);
+        setConfirmationDialog((prev) => ({ ...prev, isOpen: false }));
+      }
+    },
+    [onSuccess, onError]
+  );
 
-    if (action.requiresConfirmation) {
-      setPendingAction({ action, record });
-      setConfirmationDialog({
-        isOpen: true,
-        title: action.confirmationTitle || 'Confirm Action',
-        message: action.confirmationMessage || 'Are you sure you want to perform this action?',
-        confirmButton: action.confirmationButton || 'Confirm',
-        cancelButton: action.cancelButton || 'Cancel',
-        variant: "destructive",
-      });
-    } else {
-      performActionRequest(action, record ? [record] : []);
-    }
-  }, [performActionRequest]);
+  const executeAction = useCallback(
+    (action: MergedAction, record?: Record<string, any>) => {
+      if (!action.actionUrl) {
+        console.warn('Action has no actionUrl');
+        return;
+      }
 
-  const executeBulkAction = useCallback((action: TableBulkAction, records: Record<string, any>[]) => {
-    if (!action.actionUrl) {
-      console.warn('Bulk action has no actionUrl');
-      return;
-    }
+      if (action.requiresConfirmation) {
+        setPendingAction({ action, record });
+        setConfirmationDialog({
+          isOpen: true,
+          title: action.confirmationTitle || 'Confirm Action',
+          message:
+            action.confirmationMessage ||
+            'Are you sure you want to perform this action?',
+          confirmButton: action.confirmationButton || 'Confirm',
+          cancelButton: action.cancelButton || 'Cancel',
+          variant: 'destructive',
+        });
+      } else {
+        performActionRequest(action, record ? [record] : []);
+      }
+    },
+    [performActionRequest]
+  );
 
-    if (action.requiresConfirmation) {
-      setPendingAction({ action, records });
-      setConfirmationDialog({
-        isOpen: true,
-        title: action.confirmationTitle || 'Confirm Bulk Action',
-        message: action.confirmationMessage || `Are you sure you want to perform this action on ${records.length} records?`,
-        confirmButton: action.confirmationButton || 'Confirm',
-        cancelButton: action.cancelButton || 'Cancel',
-        variant: "destructive",
-      });
-    } else {
-      performActionRequest(action, records);
-    }
-  }, [performActionRequest]);
+  const executeBulkAction = useCallback(
+    (action: TableBulkAction, records: Record<string, any>[]) => {
+      if (!action.actionUrl) {
+        console.warn('Bulk action has no actionUrl');
+        return;
+      }
 
-  const executeHeaderAction = useCallback((action: TableAction) => {
-    if (!action.hasAction) {
-      console.warn('Header action has no action handler');
-      return;
-    }
+      if (action.requiresConfirmation) {
+        setPendingAction({ action, records });
+        setConfirmationDialog({
+          isOpen: true,
+          title: action.confirmationTitle || 'Confirm Bulk Action',
+          message:
+            action.confirmationMessage ||
+            `Are you sure you want to perform this action on ${records.length} records?`,
+          confirmButton: action.confirmationButton || 'Confirm',
+          cancelButton: action.cancelButton || 'Cancel',
+          variant: 'destructive',
+        });
+      } else {
+        performActionRequest(action, records);
+      }
+    },
+    [performActionRequest]
+  );
 
-    if (action.requiresConfirmation) {
-      setPendingAction({ action });
-      setConfirmationDialog({
-        isOpen: true,
-        title: action.confirmationTitle || 'Confirm Action',
-        message: action.confirmationMessage || 'Are you sure you want to perform this action?',
-        confirmButton: action.confirmationButton || 'Confirm',
-        cancelButton: action.cancelButton || 'Cancel',
-        variant: "destructive",
-      });
-    } else {
-      performActionRequest(action, []);
-    }
-  }, [performActionRequest]);
+  const executeHeaderAction = useCallback(
+    (action: TableAction) => {
+      if (!action.hasAction) {
+        console.warn('Header action has no action handler');
+        return;
+      }
+
+      if (action.requiresConfirmation) {
+        setPendingAction({ action });
+        setConfirmationDialog({
+          isOpen: true,
+          title: action.confirmationTitle || 'Confirm Action',
+          message:
+            action.confirmationMessage ||
+            'Are you sure you want to perform this action?',
+          confirmButton: action.confirmationButton || 'Confirm',
+          cancelButton: action.cancelButton || 'Cancel',
+          variant: 'destructive',
+        });
+      } else {
+        performActionRequest(action, []);
+      }
+    },
+    [performActionRequest]
+  );
 
   const confirmAction = useCallback(() => {
     if (!pendingAction) return;
 
     const { action, record, records } = pendingAction;
-    
+
     if (records) {
       performActionRequest(action, records);
     } else if (record) {
@@ -198,8 +236,8 @@ export const useTableActions = ({
 
   const cancelAction = useCallback(() => {
     setPendingAction(null);
-    setConfirmationDialog(prev => ({ ...prev, isOpen: false }));
-    setFormDialog(prev => ({ ...prev, isOpen: false }));
+    setConfirmationDialog((prev) => ({ ...prev, isOpen: false }));
+    setFormDialog((prev) => ({ ...prev, isOpen: false }));
   }, []);
 
   const submitForm = useCallback((data: Record<string, any>) => {

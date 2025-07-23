@@ -1,7 +1,7 @@
-import { Row } from "@tanstack/react-table"
-import { MoreHorizontal } from "lucide-react"
+import { Row } from '@tanstack/react-table';
+import { MoreHorizontal } from 'lucide-react';
 
-import { Button } from "../ui/button"
+import { Button } from '../ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,14 +9,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuTrigger,
-} from "../ui/dropdown-menu"
-import { TableAction, TableRowData } from "../../types"
-import { getRowActions, MergedAction } from "../../lib/actions"
+} from '../ui/dropdown-menu';
+import { TableAction, TableRowData } from '../../types';
+import { getRowActions, MergedAction } from '../../lib/actions';
 
 interface DataTableRowActionsProps<TData extends TableRowData> {
-  row: Row<TData>
-  staticActions: TableAction[]
-  onActionClick: (action: MergedAction, record: TData) => void
+  row: Row<TData>;
+  staticActions: TableAction[];
+  onActionClick: (action: MergedAction, record: TData) => void;
 }
 
 export function DataTableRowActions<TData extends TableRowData>({
@@ -25,7 +25,7 @@ export function DataTableRowActions<TData extends TableRowData>({
   onActionClick,
 }: DataTableRowActionsProps<TData>) {
   const actions = getRowActions(staticActions, row.original);
-  
+
   if (actions.length === 0) {
     return null;
   }
@@ -48,16 +48,20 @@ export function DataTableRowActions<TData extends TableRowData>({
             <DropdownMenuItem
               onClick={() => onActionClick(action, row.original)}
               disabled={action.disabled}
-              className={action.color === 'danger' ? 'text-destructive focus:text-destructive' : ''}
+              className={
+                action.color === 'danger'
+                  ? 'text-destructive focus:text-destructive'
+                  : ''
+              }
             >
               {action.label}
             </DropdownMenuItem>
-            {action.color === "danger" && index < actions.length - 1 && (
+            {action.color === 'danger' && index < actions.length - 1 && (
               <DropdownMenuSeparator />
             )}
           </div>
         ))}
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }

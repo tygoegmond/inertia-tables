@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback } from 'react';
 
 interface DialogState {
   isOpen: boolean;
@@ -31,24 +31,24 @@ interface UseActionDialogReturn {
 export const useActionDialog = (): UseActionDialogReturn => {
   const [confirmationDialog, setConfirmationDialog] = useState<DialogState>({
     isOpen: false,
-    title: "",
-    message: "",
-    confirmButton: "Confirm",
-    cancelButton: "Cancel",
+    title: '',
+    message: '',
+    confirmButton: 'Confirm',
+    cancelButton: 'Cancel',
   });
 
   const [formDialog, setFormDialog] = useState<FormDialogState>({
     isOpen: false,
-    title: "",
-    description: "",
+    title: '',
+    description: '',
     fields: [],
-    submitButton: "Submit",
-    cancelButton: "Cancel",
+    submitButton: 'Submit',
+    cancelButton: 'Cancel',
     initialData: {},
   });
 
   const showConfirmation = useCallback((config: Partial<DialogState>) => {
-    setConfirmationDialog(prev => ({
+    setConfirmationDialog((prev) => ({
       ...prev,
       ...config,
       isOpen: true,
@@ -56,7 +56,7 @@ export const useActionDialog = (): UseActionDialogReturn => {
   }, []);
 
   const showForm = useCallback((config: Partial<FormDialogState>) => {
-    setFormDialog(prev => ({
+    setFormDialog((prev) => ({
       ...prev,
       ...config,
       isOpen: true,
@@ -64,16 +64,16 @@ export const useActionDialog = (): UseActionDialogReturn => {
   }, []);
 
   const hideConfirmation = useCallback(() => {
-    setConfirmationDialog(prev => ({ ...prev, isOpen: false }));
+    setConfirmationDialog((prev) => ({ ...prev, isOpen: false }));
   }, []);
 
   const hideForm = useCallback(() => {
-    setFormDialog(prev => ({ ...prev, isOpen: false }));
+    setFormDialog((prev) => ({ ...prev, isOpen: false }));
   }, []);
 
   const hideAll = useCallback(() => {
-    setConfirmationDialog(prev => ({ ...prev, isOpen: false }));
-    setFormDialog(prev => ({ ...prev, isOpen: false }));
+    setConfirmationDialog((prev) => ({ ...prev, isOpen: false }));
+    setFormDialog((prev) => ({ ...prev, isOpen: false }));
   }, []);
 
   return {

@@ -101,8 +101,7 @@ export interface TableProps<T = any> {
   className?: string;
 }
 
-
-// Hook interfaces  
+// Hook interfaces
 export interface UseTableStateProps {
   result: TableResult | undefined;
   onSort?: (column: string, direction: 'asc' | 'desc') => void;
@@ -110,7 +109,9 @@ export interface UseTableStateProps {
 
 export interface UseTableStateResult {
   sorting: import('@tanstack/react-table').SortingState;
-  setSorting: React.Dispatch<React.SetStateAction<import('@tanstack/react-table').SortingState>>;
+  setSorting: React.Dispatch<
+    React.SetStateAction<import('@tanstack/react-table').SortingState>
+  >;
   handleSort: (column: string, direction: 'asc' | 'desc') => void;
   isLoading: boolean;
   error: Error | null;
@@ -118,7 +119,11 @@ export interface UseTableStateResult {
 
 export interface UseTableColumnsProps {
   result: TableResult | undefined;
-  renderCell?: (column: TableColumn, value: any, record: any) => React.ReactNode;
+  renderCell?: (
+    column: TableColumn,
+    value: any,
+    record: any
+  ) => React.ReactNode;
 }
 
 export interface UseInertiaTableResult {

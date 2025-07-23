@@ -1,7 +1,7 @@
-import * as React from "react";
-import { ActionButton } from "./ActionButton";
-import type { TableAction, TableRowData } from "../../types";
-import { getRowActions, MergedAction } from "../../lib/actions";
+import * as React from 'react';
+import { ActionButton } from './ActionButton';
+import type { TableAction, TableRowData } from '../../types';
+import { getRowActions, MergedAction } from '../../lib/actions';
 
 interface ActionsColumnProps {
   staticActions: TableAction[];
@@ -14,7 +14,7 @@ export const ActionsColumn: React.FC<ActionsColumnProps> = ({
   staticActions,
   record,
   onActionClick,
-  className = "",
+  className = '',
 }) => {
   const actions = getRowActions(staticActions, record);
 

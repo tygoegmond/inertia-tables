@@ -1,6 +1,6 @@
-import * as React from "react";
-import { Button } from "../ui/button";
-import type { TableAction } from "../../types";
+import * as React from 'react';
+import { Button } from '../ui/button';
+import type { TableAction } from '../../types';
 
 interface HeaderActionsProps {
   headerActions: TableAction[];
@@ -11,7 +11,7 @@ interface HeaderActionsProps {
 export const HeaderActions: React.FC<HeaderActionsProps> = ({
   headerActions,
   onActionClick,
-  className = "",
+  className = '',
 }) => {
   // Header actions don't have row-specific visibility, so we show all
   const visibleActions = headerActions;

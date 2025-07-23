@@ -1,4 +1,4 @@
-import * as React from "react";
+import * as React from 'react';
 import {
   Dialog,
   DialogContent,
@@ -6,8 +6,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "../ui/dialog";
-import { Button } from "../ui/button";
+} from '../ui/dialog';
+import { Button } from '../ui/button';
 import {
   Form,
   FormControl,
@@ -15,9 +15,9 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "../ui/form";
-import { Input } from "../ui/input";
-import { useForm } from "react-hook-form";
+} from '../ui/form';
+import { Input } from '../ui/input';
+import { useForm } from 'react-hook-form';
 
 interface FormField {
   name: string;
@@ -51,8 +51,8 @@ export const ActionFormDialog: React.FC<ActionFormDialogProps> = ({
   onSubmit,
   onCancel,
   isLoading = false,
-  submitButton = "Submit",
-  cancelButton = "Cancel",
+  submitButton = 'Submit',
+  cancelButton = 'Cancel',
   initialData = {},
 }) => {
   const form = useForm({
@@ -91,7 +91,9 @@ export const ActionFormDialog: React.FC<ActionFormDialogProps> = ({
         key={field.name}
         control={form.control}
         name={field.name}
-        rules={{ required: field.required ? `${field.label} is required` : false }}
+        rules={{
+          required: field.required ? `${field.label} is required` : false,
+        }}
         render={({ field: formField }) => (
           <FormItem>
             <FormLabel>{field.label}</FormLabel>
@@ -137,17 +139,13 @@ export const ActionFormDialog: React.FC<ActionFormDialogProps> = ({
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
-          {description && (
-            <DialogDescription>{description}</DialogDescription>
-          )}
+          {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
-        
+
         <Form {...form}>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-4">
-              {fields.map(renderField)}
-            </div>
-            
+            <div className="space-y-4">{fields.map(renderField)}</div>
+
             <DialogFooter>
               <Button
                 type="button"
@@ -157,11 +155,8 @@ export const ActionFormDialog: React.FC<ActionFormDialogProps> = ({
               >
                 {cancelButton}
               </Button>
-              <Button
-                type="submit"
-                disabled={isLoading}
-              >
-                {isLoading ? "Processing..." : submitButton}
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? 'Processing...' : submitButton}
               </Button>
             </DialogFooter>
           </form>

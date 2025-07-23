@@ -14,7 +14,7 @@ export function mergeActionWithRowData(
   rowData: TableRowData
 ): MergedAction {
   const rowActionData = rowData.actions?.[staticAction.name] || {};
-  
+
   return {
     ...staticAction,
     ...rowActionData,
@@ -31,8 +31,8 @@ export function getRowActions(
   rowData: TableRowData
 ): MergedAction[] {
   return staticActions
-    .filter(action => rowData.actions?.[action.name] !== undefined)
-    .map(action => mergeActionWithRowData(action, rowData));
+    .filter((action) => rowData.actions?.[action.name] !== undefined)
+    .map((action) => mergeActionWithRowData(action, rowData));
 }
 
 /**
@@ -43,10 +43,12 @@ export function getRowAction(
   staticActions: TableAction[] = [],
   rowData: TableRowData
 ): MergedAction | undefined {
-  const staticAction = staticActions.find(action => action.name === actionName);
+  const staticAction = staticActions.find(
+    (action) => action.name === actionName
+  );
   if (!staticAction) {
     return undefined;
   }
-  
+
   return mergeActionWithRowData(staticAction, rowData);
 }

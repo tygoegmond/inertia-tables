@@ -1,4 +1,4 @@
-import * as React from "react";
+import * as React from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -8,9 +8,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "../ui/alert-dialog";
-import { buttonVariants } from "../ui/button";
-import { cn } from "../../lib/utils";
+} from '../ui/alert-dialog';
+import { buttonVariants } from '../ui/button';
+import { cn } from '../../lib/utils';
 
 interface ActionConfirmationDialogProps {
   open: boolean;
@@ -22,10 +22,18 @@ interface ActionConfirmationDialogProps {
   onConfirm: () => void;
   onCancel?: () => void;
   isLoading?: boolean;
-  variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+  variant?:
+    | 'default'
+    | 'destructive'
+    | 'outline'
+    | 'secondary'
+    | 'ghost'
+    | 'link';
 }
 
-export const ActionConfirmationDialog: React.FC<ActionConfirmationDialogProps> = ({
+export const ActionConfirmationDialog: React.FC<
+  ActionConfirmationDialogProps
+> = ({
   open,
   onOpenChange,
   title,
@@ -35,7 +43,7 @@ export const ActionConfirmationDialog: React.FC<ActionConfirmationDialogProps> =
   onConfirm,
   onCancel,
   isLoading = false,
-  variant = "destructive",
+  variant = 'destructive',
 }) => {
   const handleConfirm = () => {
     onConfirm();
@@ -60,15 +68,10 @@ export const ActionConfirmationDialog: React.FC<ActionConfirmationDialogProps> =
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription>
-            {message}
-          </AlertDialogDescription>
+          <AlertDialogDescription>{message}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel
-            onClick={handleCancel}
-            disabled={isLoading}
-          >
+          <AlertDialogCancel onClick={handleCancel} disabled={isLoading}>
             {cancelButton}
           </AlertDialogCancel>
           <AlertDialogAction
@@ -76,7 +79,7 @@ export const ActionConfirmationDialog: React.FC<ActionConfirmationDialogProps> =
             disabled={isLoading}
             className={cn(buttonVariants({ variant }))}
           >
-            {isLoading ? "Processing..." : confirmButton}
+            {isLoading ? 'Processing...' : confirmButton}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

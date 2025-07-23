@@ -1,20 +1,20 @@
-import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu"
-import { Table } from "@tanstack/react-table"
-import { Settings2 } from "lucide-react"
+import { DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu';
+import { Table } from '@tanstack/react-table';
+import { Settings2 } from 'lucide-react';
 
-import { Button } from "../ui/button"
+import { Button } from '../ui/button';
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-} from "../ui/dropdown-menu"
+} from '../ui/dropdown-menu';
 
 export function DataTableViewOptions<TData>({
   table,
 }: {
-  table: Table<TData>
+  table: Table<TData>;
 }) {
   return (
     <DropdownMenu>
@@ -35,7 +35,7 @@ export function DataTableViewOptions<TData>({
           .getAllColumns()
           .filter(
             (column) =>
-              typeof column.accessorFn !== "undefined" && column.getCanHide()
+              typeof column.accessorFn !== 'undefined' && column.getCanHide()
           )
           .map((column) => {
             return (
@@ -47,9 +47,9 @@ export function DataTableViewOptions<TData>({
               >
                 {column.id}
               </DropdownMenuCheckboxItem>
-            )
+            );
           })}
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }

@@ -21,7 +21,6 @@ class BulkAction implements Arrayable
 
     protected ?Closure $action = null;
 
-
     protected bool $deselectRecordsAfterCompletion = false;
 
     public function __construct(string $name)
@@ -60,14 +59,12 @@ class BulkAction implements Arrayable
         return $this->evaluate($this->action, ['records' => $records]);
     }
 
-
     public function deselectRecordsAfterCompletion(bool $condition = true): static
     {
         $this->deselectRecordsAfterCompletion = $condition;
 
         return $this;
     }
-
 
     public function shouldDeselectRecordsAfterCompletion(): bool
     {

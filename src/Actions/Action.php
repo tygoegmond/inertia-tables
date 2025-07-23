@@ -19,7 +19,6 @@ class Action implements Arrayable
 
     protected string $name;
 
-
     public function __construct(string $name)
     {
         $this->name = $name;
@@ -34,8 +33,6 @@ class Action implements Arrayable
     {
         return $this->name;
     }
-
-
 
     public function toArray(): array
     {

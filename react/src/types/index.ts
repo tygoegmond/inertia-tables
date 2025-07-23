@@ -73,8 +73,6 @@ export interface TableBulkAction {
   confirmationMessage?: string;
   confirmationButton?: string;
   cancelButton?: string;
-  deselectRecordsAfterCompletion?: boolean;
-  type: 'bulk';
 }
 
 export type TableActionItem = TableAction;

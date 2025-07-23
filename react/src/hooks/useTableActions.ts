@@ -26,8 +26,6 @@ interface BulkAction {
   confirmationMessage?: string;
   confirmationButton?: string;
   cancelButton?: string;
-  deselectRecordsAfterCompletion?: boolean;
-  type: 'bulk';
 }
 
 interface UseTableActionsProps {
@@ -93,7 +91,6 @@ export const useTableActions = ({
     action: Action | BulkAction;
     record?: Record<string, any>;
     records?: Record<string, any>[];
-    type: 'single' | 'bulk' | 'header';
   } | null>(null);
 
   const handleUrlAction = useCallback((action: Action, record?: Record<string, any>) => {
@@ -170,7 +167,7 @@ export const useTableActions = ({
     }
 
     if (action.requiresConfirmation) {
-      setPendingAction({ action, record, type: 'single' });
+      setPendingAction({ action, record });
       setConfirmationDialog({
         isOpen: true,
         title: action.confirmationTitle || 'Confirm Action',
@@ -191,7 +188,7 @@ export const useTableActions = ({
     }
 
     if (action.requiresConfirmation) {
-      setPendingAction({ action, records, type: 'bulk' });
+      setPendingAction({ action, records });
       setConfirmationDialog({
         isOpen: true,
         title: action.confirmationTitle || 'Confirm Bulk Action',
@@ -217,7 +214,7 @@ export const useTableActions = ({
     }
 
     if (action.requiresConfirmation) {
-      setPendingAction({ action, type: 'header' });
+      setPendingAction({ action });
       setConfirmationDialog({
         isOpen: true,
         title: action.confirmationTitle || 'Confirm Action',
@@ -236,9 +233,9 @@ export const useTableActions = ({
 
     const { action, record, records } = pendingAction;
     
-    if (pendingAction.type === 'bulk' && records) {
+    if (records) {
       performActionRequest(action, records);
-    } else if (pendingAction.type === 'single' && record) {
+    } else if (record) {
       performActionRequest(action, [record]);
     } else {
       performActionRequest(action, []);

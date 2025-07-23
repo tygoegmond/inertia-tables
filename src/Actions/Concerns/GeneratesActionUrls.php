@@ -22,9 +22,10 @@ trait GeneratesActionUrls
 
     public function generateActionUrl(string $tableClass, array $recordIds = []): string
     {
-        return URL::signedRoute('inertia-tables.action', [
+        return URL::temporarySignedRoute('inertia-tables.action', now()->addMinutes(15), [
             'table' => base64_encode($tableClass),
-            'action' => $this->getName(),
+            'name' => $this->getName(),
+            'action' => base64_encode(static::class),
             'records' => $recordIds,
         ]);
     }

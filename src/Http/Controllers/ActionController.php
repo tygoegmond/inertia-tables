@@ -18,10 +18,14 @@ class ActionController extends Controller
         // Execute the action
         if ($action->hasAction()) {
             if (method_exists($action, 'execute')) {
-                // Regular action with single record or BulkAction with collection
-                $result = $records->count() === 1 && ! ($action instanceof \Egmond\InertiaTables\Actions\BulkAction)
-                    ? $action->execute($records->first())
-                    : $action->execute($records);
+                // Handle regular actions vs bulk actions differently
+                if ($action instanceof \Egmond\InertiaTables\Actions\BulkAction) {
+                    // BulkAction expects a Collection
+                    $result = $action->execute($records);
+                } else {
+                    // Regular Action expects a single Model (first record)
+                    $result = $action->execute($records->first());
+                }
             }
         }
 

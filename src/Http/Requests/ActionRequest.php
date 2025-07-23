@@ -48,6 +48,7 @@ class ActionRequest extends FormRequest
     {
         return [
             'table' => ['required', 'string'],
+            'name' => ['required', 'string'],
             'action' => ['required', 'string'],
             'records' => ['required', 'array'],
             'records.*' => ['required'],
@@ -79,21 +80,26 @@ class ActionRequest extends FormRequest
     {
         if (! $this->action) {
             $table = $this->getTable();
-            $actionName = $this->input('action');
+            $actionName = $this->input('name');
+            $actionClass = base64_decode($this->input('action'));
 
-            // Search through all action types to find the matching action
+            // Get all available actions
             $allActions = array_merge(
                 $table->getActions() ?? [],
                 $table->getBulkActions() ?? [],
                 $table->getHeaderActions() ?? []
             );
 
-            $action = collect($allActions)->first(fn ($a) => $a->getName() === $actionName);
+            // Filter by class first then by name
+            $action = collect($allActions)
+                ->filter(fn ($a) => get_class($a) === $actionClass)
+                ->first(fn ($a) => $a->getName() === $actionName);
 
             if (! $action) {
                 // Debug information
-                $availableActions = collect($allActions)->map(fn ($a) => $a->getName())->toArray();
-                throw new \InvalidArgumentException("Action {$actionName} not found. Available actions: ".implode(', ', $availableActions));
+                $availableActions = collect($allActions)->map(fn ($a) => $a->getName().' ('.get_class($a).')')->toArray();
+                $actionClassInfo = $actionClass ? " of class {$actionClass}" : '';
+                throw new \InvalidArgumentException("Action {$actionName}{$actionClassInfo} not found. Available actions: ".implode(', ', $availableActions));
             }
 
             $this->action = $action;

@@ -9,6 +9,6 @@ use JsonSerializable;
 interface HasTable extends Arrayable, JsonSerializable
 {
     public function table(Table $table): Table;
-    
+
     public function getTable(): Table;
 }

@@ -8,6 +8,7 @@ use Egmond\InertiaTables\Concerns\HasRelationship;
 use Egmond\InertiaTables\Concerns\HasState;
 use Egmond\InertiaTables\Contracts\HasLabel;
 
+/** @phpstan-consistent-constructor */
 abstract class BaseColumn
 {
     use CanBeSearched, CanBeSorted, HasRelationship, HasState;

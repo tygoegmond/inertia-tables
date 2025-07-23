@@ -2,6 +2,7 @@
 
 namespace Egmond\InertiaTables\Actions;
 
+/** @phpstan-consistent-constructor */
 class ForceDeleteAction extends Action
 {
     public function __construct(string $name = 'force_delete')

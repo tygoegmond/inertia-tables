@@ -29,19 +29,13 @@ class ActionRequest extends FormRequest
         $action = $this->getAction();
         $records = $this->getRecords();
 
-        if (method_exists($action, 'isAuthorized')) {
-            // For regular actions, check authorization for each record
-            if ($action instanceof Action) {
-                return $records->every(fn ($record) => $action->isAuthorized($record));
-            }
-
-            // For bulk actions, check general authorization
-            if ($action instanceof BulkAction) {
-                return $action->isAuthorized();
-            }
+        // For regular actions, check authorization for each record
+        if ($action instanceof Action) {
+            return $records->every(fn ($record) => $action->isAuthorized($record));
         }
 
-        return true;
+        // For bulk actions, check general authorization (no record parameter)
+        return $action->isAuthorized();
     }
 
     public function rules(): array
@@ -85,9 +79,9 @@ class ActionRequest extends FormRequest
 
             // Get all available actions
             $allActions = array_merge(
-                $table->getActions() ?? [],
-                $table->getBulkActions() ?? [],
-                $table->getHeaderActions() ?? []
+                $table->getActions(),
+                $table->getBulkActions(),
+                $table->getHeaderActions()
             );
 
             // Filter by class first then by name

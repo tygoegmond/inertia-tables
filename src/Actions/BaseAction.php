@@ -4,6 +4,7 @@ namespace Egmond\InertiaTables\Actions;
 
 use Illuminate\Contracts\Support\Arrayable;
 
+/** @phpstan-consistent-constructor */
 abstract class BaseAction implements Arrayable
 {
     use Concerns\CanBeDisabled;

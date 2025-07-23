@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 
+/** @phpstan-consistent-constructor */
 class TableBuilder
 {
     protected array $columns = [];

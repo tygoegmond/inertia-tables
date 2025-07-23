@@ -9,6 +9,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../ui/alert-dialog";
+import { buttonVariants } from "../ui/button";
+import { cn } from "../../lib/utils";
 
 interface ActionConfirmationDialogProps {
   open: boolean;
@@ -20,6 +22,7 @@ interface ActionConfirmationDialogProps {
   onConfirm: () => void;
   onCancel?: () => void;
   isLoading?: boolean;
+  variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
 }
 
 export const ActionConfirmationDialog: React.FC<ActionConfirmationDialogProps> = ({
@@ -32,6 +35,7 @@ export const ActionConfirmationDialog: React.FC<ActionConfirmationDialogProps> =
   onConfirm,
   onCancel,
   isLoading = false,
+  variant = "destructive",
 }) => {
   const handleConfirm = () => {
     onConfirm();
@@ -70,7 +74,7 @@ export const ActionConfirmationDialog: React.FC<ActionConfirmationDialogProps> =
           <AlertDialogAction
             onClick={handleConfirm}
             disabled={isLoading}
-            className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+            className={cn(buttonVariants({ variant }))}
           >
             {isLoading ? "Processing..." : confirmButton}
           </AlertDialogAction>

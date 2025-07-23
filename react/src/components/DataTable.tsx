@@ -24,7 +24,7 @@ import {
 import { Checkbox } from "./ui/checkbox";
 import { TableResult, TableColumn } from "../types";
 import { TextColumn } from "./columns";
-import { useTableState, useTableColumns } from "../hooks";
+import { useTableState } from "../hooks";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { LoadingOverlay } from "./LoadingOverlay";
 import { DataTableColumnHeader } from "./data-table/data-table-column-header";
@@ -72,9 +72,8 @@ export const DataTable = React.memo<DataTableProps>(({
     result,
     onSort
   });
-
-  // Build enhanced columns with modern components
-  const enhancedColumns = React.useMemo(() => {
+  
+  const tableColumns = React.useMemo(() => {
     if (!result?.config?.columns) return [];
 
     const columns: any[] = [];
@@ -147,18 +146,11 @@ export const DataTable = React.memo<DataTableProps>(({
     return columns;
   }, [result, onActionClick]);
 
-  const { error: columnsError } = useTableColumns({
-    result,
-    renderCell: renderColumnValue,
-    onRecordSelect,
-    onActionClick,
-  });
-
-  const error = stateError || columnsError;
+  const error = stateError;
 
   const table = useReactTable({
     data: result?.data || [],
-    columns: enhancedColumns,
+    columns: tableColumns,
     state: {
       sorting,
       columnVisibility,

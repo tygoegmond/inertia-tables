@@ -32,6 +32,7 @@ interface BulkAction {
 
 interface UseTableActionsProps {
   tableName: string;
+  primaryKey: string;
   onSuccess?: (message?: string) => void;
   onError?: (error: string) => void;
 }
@@ -44,6 +45,7 @@ interface UseTableActionsReturn {
     message: string;
     confirmButton: string;
     cancelButton: string;
+    variant: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
   };
   formDialog: {
     isOpen: boolean;
@@ -63,6 +65,7 @@ interface UseTableActionsReturn {
 
 export const useTableActions = ({
   tableName,
+  primaryKey,
   onSuccess,
   onError,
 }: UseTableActionsProps): UseTableActionsReturn => {
@@ -74,6 +77,7 @@ export const useTableActions = ({
     message: "",
     confirmButton: "Confirm",
     cancelButton: "Cancel",
+    variant: "destructive" as const,
   });
 
   const [formDialog, setFormDialog] = useState({
@@ -118,7 +122,7 @@ export const useTableActions = ({
     setIsLoading(true);
     
     try {
-      const recordIds = records.map(record => record.id || record.key);
+      const recordIds = records.map(record => record[primaryKey]);
       
       if (!action.actionUrl) {
         throw new Error(`Action ${action.name} does not have a valid actionUrl`);
@@ -173,6 +177,7 @@ export const useTableActions = ({
         message: action.confirmationMessage || 'Are you sure you want to perform this action?',
         confirmButton: action.confirmationButton || 'Confirm',
         cancelButton: action.cancelButton || 'Cancel',
+        variant: "destructive",
       });
     } else {
       performActionRequest(action, record ? [record] : []);
@@ -193,6 +198,7 @@ export const useTableActions = ({
         message: action.confirmationMessage || `Are you sure you want to perform this action on ${records.length} records?`,
         confirmButton: action.confirmationButton || 'Confirm',
         cancelButton: action.cancelButton || 'Cancel',
+        variant: "destructive",
       });
     } else {
       performActionRequest(action, records);
@@ -218,6 +224,7 @@ export const useTableActions = ({
         message: action.confirmationMessage || 'Are you sure you want to perform this action?',
         confirmButton: action.confirmationButton || 'Confirm',
         cancelButton: action.cancelButton || 'Cancel',
+        variant: "destructive",
       });
     } else {
       performActionRequest(action, []);

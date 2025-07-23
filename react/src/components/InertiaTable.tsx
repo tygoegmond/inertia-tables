@@ -25,6 +25,7 @@ const InertiaTableComponent = <T extends Record<string, any> = Record<string, an
         cancelAction,
     } = useTableActions({
         tableName: state?.name || 'table',
+        primaryKey: state?.primaryKey || 'id',
         onSuccess: (message) => {
             // TODO: Implement user-facing success notification
             setSelectedRecords([]);
@@ -92,6 +93,7 @@ const InertiaTableComponent = <T extends Record<string, any> = Record<string, an
                     onConfirm={confirmAction}
                     onCancel={cancelAction}
                     isLoading={isActionLoading}
+                    variant={confirmationDialog.variant}
                 />
             </div>
         </ErrorBoundary>

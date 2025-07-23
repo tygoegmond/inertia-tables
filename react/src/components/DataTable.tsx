@@ -273,7 +273,7 @@ export const DataTable = React.memo<DataTableProps>(({
                 ) : (
                   <TableRow>
                     <TableCell
-                      colSpan={enhancedColumns.length}
+                      colSpan={tableColumns.length}
                       className="h-24 text-center"
                     >
                       {emptyMessage}

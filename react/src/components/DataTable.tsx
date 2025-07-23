@@ -31,6 +31,7 @@ import { DataTableColumnHeader } from "./data-table/data-table-column-header";
 import { DataTableRowActions } from "./data-table/data-table-row-actions";
 import { DataTableToolbar } from "./data-table/data-table-toolbar";
 import { DataTableViewOptions } from "./data-table/data-table-view-options";
+import { DataTableBulkActions } from "./data-table/data-table-bulk-actions";
 import { Input } from "./ui/input";
 import { HeaderActions } from "./actions";
 
@@ -45,6 +46,7 @@ interface DataTableProps<T = any> {
   searchValue?: string;
   onSearch?: (value: string) => void;
   onHeaderActionClick?: (action: any) => void;
+  onBulkActionClick?: (action: any, records: Record<string, unknown>[]) => void;
 }
 
 function renderColumnValue(column: TableColumn, value: any, record: any) {
@@ -61,7 +63,8 @@ export const DataTable = React.memo<DataTableProps>(({
   onActionClick,
   searchValue,
   onSearch,
-  onHeaderActionClick
+  onHeaderActionClick,
+  onBulkActionClick
 }) => {
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
@@ -186,13 +189,17 @@ export const DataTable = React.memo<DataTableProps>(({
     },
   });
 
+  // Track selected records for bulk actions
+  const selectedRecords = React.useMemo(() => {
+    return table.getFilteredSelectedRowModel().rows.map(row => row.original);
+  }, [rowSelection, table]);
+
   // Notify parent of selection changes
   React.useEffect(() => {
     if (onRecordSelect) {
-      const selectedRows = table.getFilteredSelectedRowModel().rows.map(row => row.original);
-      onRecordSelect(selectedRows);
+      onRecordSelect(selectedRecords);
     }
-  }, [rowSelection, table, onRecordSelect]);
+  }, [selectedRecords, onRecordSelect]);
 
   if (error) {
     throw error;
@@ -216,6 +223,13 @@ export const DataTable = React.memo<DataTableProps>(({
             </div>
 
             <div className="flex items-center gap-2">
+              {result?.bulkActions && result?.bulkActions.length > 0 && onBulkActionClick && (
+                <DataTableBulkActions
+                  bulkActions={result.bulkActions}
+                  selectedRecords={selectedRecords}
+                  onBulkActionClick={onBulkActionClick}
+                />
+              )}
               <DataTableViewOptions table={table} />
               {result?.headerActions && result?.headerActions.length > 0 && onHeaderActionClick && (
                 <HeaderActions

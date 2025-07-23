@@ -5,7 +5,7 @@ import { DataTable } from './DataTable';
 import { DeferredTableLoader } from './DeferredTableLoader';
 import { ErrorBoundary } from './ErrorBoundary';
 import { TablePagination } from './TablePagination';
-import { ActionConfirmationDialog, BulkActions } from './actions';
+import { ActionConfirmationDialog } from './actions';
 
 const InertiaTableComponent = <T extends Record<string, any> = Record<string, any>>({ state, className = '' }: TableProps<T>) => {
     const [selectedRecords, setSelectedRecords] = React.useState<T[]>([]);
@@ -73,12 +73,9 @@ const InertiaTableComponent = <T extends Record<string, any> = Record<string, an
                     searchValue={searchValue}
                     onSearch={handleSearch}
                     onHeaderActionClick={executeHeaderAction}
+                    onBulkActionClick={executeBulkAction}
                 />
 
-                {/* Bulk actions */}
-                {state.bulkActions && state.bulkActions.length > 0 && (
-                    <BulkActions bulkActions={state.bulkActions} selectedRecords={selectedRecords} onBulkActionClick={executeBulkAction} />
-                )}
 
                 {state.pagination && <TablePagination pagination={state.pagination} onPageChange={handlePageChange} />}
 

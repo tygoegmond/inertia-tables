@@ -407,7 +407,8 @@ class TableBuilder
                 }
 
                 // Only include authorized and visible actions
-                if ($action->isAuthorized($record) && $action->isVisible($record)) {
+                if (method_exists($action, 'isAuthorized') && method_exists($action, 'isVisible') && method_exists($action, 'getName') &&
+                    $action->isAuthorized($record) && $action->isVisible($record)) {
                     $rowActions[$action->getName()] = $action->toRowArray($record);
                 }
             }

@@ -106,7 +106,7 @@ export interface TableProps<T = Record<string, unknown>> {
 // Hook interfaces
 export interface UseTableStateProps {
   result: TableResult | undefined;
-  onSort?: (column: string, direction: 'asc' | 'desc') => void;
+  onSort?: (column: string | null, direction: 'asc' | 'desc' | null) => void;
 }
 
 export interface UseTableStateResult {
@@ -114,7 +114,7 @@ export interface UseTableStateResult {
   setSorting: React.Dispatch<
     React.SetStateAction<import('@tanstack/react-table').SortingState>
   >;
-  handleSort: (column: string, direction: 'asc' | 'desc') => void;
+  handleSort: (column: string | null, direction: 'asc' | 'desc' | null) => void;
   isLoading: boolean;
   error: Error | null;
 }
@@ -132,7 +132,7 @@ export interface UseInertiaTableResult {
   searchValue: string;
   setSearchValue: React.Dispatch<React.SetStateAction<string>>;
   handleSearch: (query: string) => void;
-  handleSort: (column: string, direction: 'asc' | 'desc') => void;
+  handleSort: (column: string | null, direction: 'asc' | 'desc' | null) => void;
   handlePageChange: (page: number) => void;
   isNavigating: boolean;
 }

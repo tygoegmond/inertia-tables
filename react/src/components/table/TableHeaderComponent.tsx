@@ -7,7 +7,7 @@ import { TableColumn, TableResult } from '../../types';
 interface TableHeaderComponentProps<T = unknown> {
   headerGroups: HeaderGroup<T>[];
   result: TableResult<T>;
-  onSort?: (column: string, direction: 'asc' | 'desc') => void;
+  onSort?: (column: string | null, direction: 'asc' | 'desc' | null) => void;
 }
 
 export const TableHeaderComponent = React.memo<TableHeaderComponentProps>(

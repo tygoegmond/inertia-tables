@@ -37,7 +37,7 @@ import { HeaderActions } from './actions';
 
 interface DataTableProps<T = any> {
   result: TableResult<T> | undefined;
-  onSort?: (column: string, direction: 'asc' | 'desc') => void;
+  onSort?: (column: string | null, direction: 'asc' | 'desc' | null) => void;
   className?: string;
   isLoading?: boolean;
   emptyMessage?: string;
@@ -74,7 +74,7 @@ export const DataTable = React.memo<DataTableProps>(
       React.useState<ColumnFiltersState>([]);
     const [sorting, setSorting] = React.useState<SortingState>([]);
 
-    const { handleSort, error: stateError } = useTableState({
+    const { error: stateError } = useTableState({
       result,
       onSort,
     });
@@ -130,7 +130,7 @@ export const DataTable = React.memo<DataTableProps>(
             const value = getValue();
             return renderColumnValue(column, value, row.original);
           },
-          enableSorting: column.sortable !== false,
+          enableSorting: column.sortable ?? false,
         });
       });
 
@@ -170,13 +170,18 @@ export const DataTable = React.memo<DataTableProps>(
       enableRowSelection: true,
       onRowSelectionChange: setRowSelection,
       onSortingChange: (updater) => {
-        setSorting(updater);
+        const newSorting =
+          typeof updater === 'function' ? updater(sorting) : updater;
+        setSorting(newSorting);
+
         // Handle server-side sorting
-        if (typeof updater === 'function') {
-          const newSorting = updater(sorting);
+        if (onSort) {
           if (newSorting.length > 0) {
             const { id, desc } = newSorting[0];
-            handleSort(id, desc ? 'desc' : 'asc');
+            onSort(id, desc ? 'desc' : 'asc');
+          } else {
+            // Clear sorting on the server
+            onSort(null, null);
           }
         }
       },
@@ -211,10 +216,11 @@ export const DataTable = React.memo<DataTableProps>(
       <ErrorBoundary>
         <div className="flex flex-col gap-4">
           {/* Enhanced Toolbar */}
-          {(result?.config?.searchable || result?.headerActions?.length) && (
+          {((result?.config?.searchable ?? false) ||
+            result?.headerActions?.length) && (
             <div className="flex items-center justify-between gap-4">
               <div className="flex-1">
-                {result?.config?.searchable && onSearch && (
+                {(result?.config?.searchable ?? false) && onSearch && (
                   <Input
                     placeholder="Search..."
                     value={searchValue || ''}

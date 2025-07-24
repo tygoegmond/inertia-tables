@@ -44,7 +44,9 @@ export function useTableColumns({
         throw new Error('Table columns configuration is invalid');
       }
 
-      const visibleColumns = configColumns.filter((column) => column.visible);
+      const visibleColumns = configColumns.filter(
+        (column) => column.visible ?? true
+      );
       const columns: ColumnDef<any>[] = [];
 
       // Add selection column if bulk actions exist
@@ -90,7 +92,7 @@ export function useTableColumns({
             const value = row.getValue(column.key);
             return renderCell ? renderCell(column, value, row.original) : value;
           },
-          enableSorting: column.sortable,
+          enableSorting: column.sortable ?? false,
           meta: {
             column,
           },

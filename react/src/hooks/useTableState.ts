@@ -4,13 +4,13 @@ import { TableResult } from '../types';
 
 interface UseTableStateProps {
   result: TableResult | undefined;
-  onSort?: (column: string, direction: 'asc' | 'desc') => void;
+  onSort?: (column: string | null, direction: 'asc' | 'desc' | null) => void;
 }
 
 interface TableState {
   sorting: SortingState;
   setSorting: React.Dispatch<React.SetStateAction<SortingState>>;
-  handleSort: (column: string, direction: 'asc' | 'desc') => void;
+  handleSort: (column: string | null, direction: 'asc' | 'desc' | null) => void;
   isLoading: boolean;
   error: Error | null;
 }
@@ -24,7 +24,7 @@ export function useTableState({
   const [error, setError] = React.useState<Error | null>(null);
 
   const handleSort = React.useCallback(
-    (column: string, direction: 'asc' | 'desc') => {
+    (column: string | null, direction: 'asc' | 'desc' | null) => {
       try {
         setError(null);
         setIsLoading(true);

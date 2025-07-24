@@ -5,7 +5,7 @@ import { TableColumn } from '../../types';
 interface SortableHeaderProps {
   column: TableColumn;
   sortDirection?: 'asc' | 'desc' | null;
-  onSort?: (column: string, direction: 'asc' | 'desc') => void;
+  onSort?: (column: string | null, direction: 'asc' | 'desc' | null) => void;
   className?: string;
 }
 
@@ -14,7 +14,7 @@ export const SortableHeader = React.memo<SortableHeaderProps>(
     const isActive = sortDirection !== null && sortDirection !== undefined;
 
     const handleClick = React.useCallback(() => {
-      if (column.sortable && onSort) {
+      if ((column.sortable ?? false) && onSort) {
         const newDirection = sortDirection === 'asc' ? 'desc' : 'asc';
         onSort(column.key, newDirection);
       }
@@ -30,7 +30,7 @@ export const SortableHeader = React.memo<SortableHeaderProps>(
       [handleClick]
     );
 
-    if (!column.sortable) {
+    if (!(column.sortable ?? false)) {
       return <span className={className}>{column.label}</span>;
     }
 

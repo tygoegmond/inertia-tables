@@ -13,7 +13,7 @@ interface InertiaTableState {
   searchValue: string;
   setSearchValue: React.Dispatch<React.SetStateAction<string>>;
   handleSearch: (query: string) => void;
-  handleSort: (column: string, direction: 'asc' | 'desc') => void;
+  handleSort: (column: string | null, direction: 'asc' | 'desc' | null) => void;
   handlePageChange: (page: number) => void;
   isNavigating: boolean;
 }
@@ -127,8 +127,13 @@ export function useInertiaTable({
   );
 
   const handleSort = React.useCallback(
-    (column: string, direction: 'asc' | 'desc') => {
-      navigate({ sort: column, direction });
+    (column: string | null, direction: 'asc' | 'desc' | null) => {
+      if (column === null || direction === null) {
+        // Clear sorting
+        navigate({ sort: undefined, direction: undefined });
+      } else {
+        navigate({ sort: column, direction });
+      }
     },
     [navigate]
   );

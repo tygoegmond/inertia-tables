@@ -95,10 +95,10 @@ class ActionRequest extends FormRequest
                 $table->getHeaderActions()
             );
 
-            // Filter by class first then by name
-            $action = collect($allActions)
-                ->filter(fn ($a) => get_class($a) === $actionClass)
-                ->first(fn ($a) => $a->getName() === $actionName);
+            // Find action by both class and name in single pass
+            $action = collect($allActions)->first(
+                fn ($a) => get_class($a) === $actionClass && $a->getName() === $actionName
+            );
 
             if (! $action) {
                 // Debug information

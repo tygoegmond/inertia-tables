@@ -2,7 +2,6 @@
 
 namespace Egmond\InertiaTables\Actions\Concerns;
 
-use Egmond\InertiaTables\Actions\Contracts\CallbackAction;
 use Illuminate\Support\Facades\URL;
 
 trait HasCallback

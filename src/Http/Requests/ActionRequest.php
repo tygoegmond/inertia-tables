@@ -34,20 +34,9 @@ class ActionRequest extends FormRequest
             return $action->isAuthorized($record);
         }
 
-        // For bulk actions, check general authorization and each record from POST body
-        if ($action instanceof BulkAction) {
-            // First check general bulk action authorization
-            if (! $action->isAuthorized()) {
-                return false;
-            }
-
-            // Then check authorization for each record in the POST body
-            $records = $this->getRecords();
-
-            return $records->every(fn ($record) => $action->isAuthorized($record));
-        }
-
-        return false;
+        // For bulk actions, check authorization for each record in the POST body
+        $records = $this->getRecords();
+        return $records->every(fn ($record) => $action->isAuthorized($record));
     }
 
     public function rules(): array

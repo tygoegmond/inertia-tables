@@ -36,7 +36,7 @@ trait SerializesToArray
             'disabled' => $isDisabled,
         ];
 
-        if (! $isDisabled && method_exists($this, 'getCallback')) {
+        if (! $isDisabled) {
             $data['callback'] = $this->getCallback($record?->getKey());
         }
 

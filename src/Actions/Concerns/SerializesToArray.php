@@ -37,7 +37,7 @@ trait SerializesToArray
         ];
 
         if (! $isDisabled && method_exists($this, 'getCallback')) {
-            $data['callback'] = $this->getCallback($record ? [$record->getKey()] : []);
+            $data['callback'] = $this->getCallback($record?->getKey());
         }
 
         return $this->filterDefaults(array_merge($data, $this->getAdditionalRowData($record)));

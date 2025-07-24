@@ -5,6 +5,9 @@ namespace Egmond\InertiaTables\Actions\Concerns;
 use Closure;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @deprecated Use ExecutesAction trait instead
+ */
 trait HasAction
 {
     protected ?Closure $action = null;

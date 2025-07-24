@@ -2,14 +2,16 @@
 
 namespace Egmond\InertiaTables\Actions;
 
-class BulkAction extends BaseAction
-{
-    use Concerns\HasBulkAction;
+use Egmond\InertiaTables\Actions\Contracts\ArrayableAction;
+use Egmond\InertiaTables\Actions\Contracts\CallbackAction;
+use Egmond\InertiaTables\Actions\Contracts\ExecutableAction;
+use Illuminate\Contracts\Support\Arrayable;
 
-    public function __construct(string $name)
-    {
-        parent::__construct($name);
-    }
+class BulkAction extends AbstractAction implements ExecutableAction, ArrayableAction, CallbackAction, Arrayable
+{
+    use Concerns\ExecutesAction;
+    use Concerns\HasCallback;
+    use Concerns\SerializesToArray;
 
     public function isAuthorized(?\Illuminate\Database\Eloquent\Model $record = null): bool
     {
@@ -24,7 +26,7 @@ class BulkAction extends BaseAction
     {
         return [
             'disabled' => $this->isDisabled(),
-            'actionUrl' => $this->isDisabled() ? null : $this->getActionUrl(),
+            'callback' => $this->isDisabled() ? null : $this->getCallback(),
         ];
     }
 }

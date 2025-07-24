@@ -5,6 +5,9 @@ namespace Egmond\InertiaTables\Actions\Concerns;
 use Closure;
 use Illuminate\Database\Eloquent\Collection;
 
+/**
+ * @deprecated Use ExecutesAction trait instead
+ */
 trait HasBulkAction
 {
     protected ?Closure $action = null;

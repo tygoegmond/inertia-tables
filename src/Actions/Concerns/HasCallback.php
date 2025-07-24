@@ -2,12 +2,10 @@
 
 namespace Egmond\InertiaTables\Actions\Concerns;
 
+use Egmond\InertiaTables\Actions\Contracts\CallbackAction;
 use Illuminate\Support\Facades\URL;
 
-/**
- * @deprecated Use HasCallback trait instead
- */
-trait GeneratesActionUrls
+trait HasCallback
 {
     protected ?string $tableClass = null;
 
@@ -23,7 +21,7 @@ trait GeneratesActionUrls
         return $this->tableClass;
     }
 
-    public function generateActionUrl(string $tableClass, array $recordIds = []): string
+    public function generateCallback(string $tableClass, array $recordIds = []): string
     {
         return URL::temporarySignedRoute('inertia-tables.action', now()->addMinutes(15), [
             'table' => base64_encode($tableClass),
@@ -33,14 +31,14 @@ trait GeneratesActionUrls
         ]);
     }
 
-    public function getActionUrl(array $recordIds = []): string
+    public function getCallback(array $recordIds = []): string
     {
         $tableClass = $this->getTableClass();
 
         if (! $tableClass) {
-            throw new \Exception('Table class must be set to generate action URL');
+            throw new \Exception('Table class must be set to generate frontend callback');
         }
 
-        return $this->generateActionUrl($tableClass, $recordIds);
+        return $this->generateCallback($tableClass, $recordIds);
     }
 }

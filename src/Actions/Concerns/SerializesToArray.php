@@ -1,38 +1,11 @@
 <?php
 
-namespace Egmond\InertiaTables\Actions;
+namespace Egmond\InertiaTables\Actions\Concerns;
 
-use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Database\Eloquent\Model;
 
-/** @phpstan-consistent-constructor */
-abstract class BaseAction implements Arrayable
+trait SerializesToArray
 {
-    use Concerns\CanBeDisabled;
-    use Concerns\CanBeHidden;
-    use Concerns\HasCallback;
-    use Concerns\HasAuthorization;
-    use Concerns\HasColor;
-    use Concerns\HasConfirmation;
-    use Concerns\HasLabel;
-    use Concerns\InteractsWithTable;
-
-    protected string $name;
-
-    public function __construct(string $name)
-    {
-        $this->name = $name;
-    }
-
-    public static function make(string $name): static
-    {
-        return new static($name);
-    }
-
-    public function getName(): string
-    {
-        return $this->name;
-    }
-
     public function toArray(): array
     {
         return $this->getStaticProperties();
@@ -41,7 +14,7 @@ abstract class BaseAction implements Arrayable
     public function getStaticProperties(): array
     {
         $data = [
-            'name' => $this->name,
+            'name' => $this->getName(),
             'label' => $this->getLabel(),
             'color' => $this->getColor(),
             'requiresConfirmation' => $this->needsConfirmation(),
@@ -55,15 +28,28 @@ abstract class BaseAction implements Arrayable
         return $this->filterDefaults(array_merge($data, $this->getAdditionalArrayData()));
     }
 
+    public function toRowArray(?Model $record = null): array
+    {
+        $isDisabled = $this->isDisabled($record);
+
+        $data = [
+            'disabled' => $isDisabled,
+        ];
+
+        if (! $isDisabled && method_exists($this, 'getCallback')) {
+            $data['callback'] = $this->getCallback($record ? [$record->getKey()] : []);
+        }
+
+        return $this->filterDefaults(array_merge($data, $this->getAdditionalRowData($record)));
+    }
+
     protected function filterDefaults(array $data): array
     {
         return array_filter($data, function ($value, $key) {
-            // Always include required fields
             if (in_array($key, ['name', 'label', 'color'])) {
                 return true;
             }
 
-            // Filter out false, null, empty strings, and empty arrays
             return $value !== false && $value !== null && $value !== '' && $value !== [];
         }, ARRAY_FILTER_USE_BOTH);
     }
@@ -73,5 +59,8 @@ abstract class BaseAction implements Arrayable
         return [];
     }
 
-    abstract public function hasAction(): bool;
+    protected function getAdditionalRowData(?Model $record = null): array
+    {
+        return [];
+    }
 }

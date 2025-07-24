@@ -30,6 +30,7 @@ class ActionRequest extends FormRequest
         // For regular actions, authorize the record from signed URL (secure)
         if ($action instanceof Action) {
             $record = $this->getRecord();
+
             return $action->isAuthorized($record);
         }
 
@@ -42,6 +43,7 @@ class ActionRequest extends FormRequest
 
             // Then check authorization for each record in the POST body
             $records = $this->getRecords();
+
             return $records->every(fn ($record) => $action->isAuthorized($record));
         }
 

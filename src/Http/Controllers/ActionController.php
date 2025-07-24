@@ -33,10 +33,12 @@ class ActionController extends Controller
         if ($action instanceof BulkAction) {
             // BulkActions: Use records from POST body (requires authorization)
             $records = $request->getRecords();
+
             return $action->execute($records);
         } else {
             // Regular Actions: Use single record from signed URL (secure)
             $record = $request->getRecord();
+
             return $action->execute($record);
         }
     }

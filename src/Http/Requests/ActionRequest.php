@@ -36,6 +36,7 @@ class ActionRequest extends FormRequest
 
         // For bulk actions, check authorization for each record in the POST body
         $records = $this->getRecords();
+
         return $records->every(fn ($record) => $action->isAuthorized($record));
     }
 

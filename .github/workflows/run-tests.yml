@@ -54,8 +54,14 @@ jobs:
           composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
           composer update --${{ matrix.stability }} --prefer-dist --no-interaction
 
+      - name: Clear and regenerate autoload
+        run: composer dump-autoload --optimize
+
       - name: List Installed Dependencies
         run: composer show -D
+
+      - name: Verify test models can be loaded
+        run: php -r "require 'vendor/autoload.php'; echo class_exists('Egmond\InertiaTables\Tests\Database\Models\User') ? 'User model loaded successfully' : 'User model not found'; echo PHP_EOL;"
 
       - name: Execute tests
         run: vendor/bin/pest --ci

@@ -2,10 +2,10 @@
 
 namespace Egmond\InertiaTables\Tests\Helpers;
 
-use Egmond\InertiaTables\Tests\Database\Models\User;
-use Egmond\InertiaTables\Tests\Database\Models\Post;
 use Egmond\InertiaTables\Tests\Database\Models\Category;
 use Egmond\InertiaTables\Tests\Database\Models\Comment;
+use Egmond\InertiaTables\Tests\Database\Models\Post;
+use Egmond\InertiaTables\Tests\Database\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 
 class TestDataFactory
@@ -17,21 +17,21 @@ class TestDataFactory
     {
         return User::factory()->count($count)->create($overrides);
     }
-    
+
     /**
      * Create users with specific states
      */
     public static function createUsersWithStates(array $states = ['active', 'inactive'], int $countPerState = 2): array
     {
         $users = [];
-        
+
         foreach ($states as $state) {
             $users[$state] = User::factory()->count($countPerState)->create(['status' => $state]);
         }
-        
+
         return $users;
     }
-    
+
     /**
      * Create categories for testing
      */
@@ -39,7 +39,7 @@ class TestDataFactory
     {
         return Category::factory()->count($count)->create($overrides);
     }
-    
+
     /**
      * Create posts with relationships
      */
@@ -47,13 +47,13 @@ class TestDataFactory
     {
         $users = $users ?? self::createUsers(3);
         $categories = $categories ?? self::createCategories(2);
-        
+
         return Post::factory()->count($count)->create(array_merge([
-            'user_id' => fn() => $users->random()->id,
-            'category_id' => fn() => $categories->random()->id,
+            'user_id' => fn () => $users->random()->id,
+            'category_id' => fn () => $categories->random()->id,
         ], $overrides));
     }
-    
+
     /**
      * Create posts with specific statuses
      */
@@ -62,18 +62,18 @@ class TestDataFactory
         $users = self::createUsers(5);
         $categories = self::createCategories(3);
         $posts = [];
-        
+
         foreach ($statuses as $status) {
             $posts[$status] = Post::factory()->count($countPerStatus)->create([
                 'status' => $status,
-                'user_id' => fn() => $users->random()->id,
-                'category_id' => fn() => $categories->random()->id,
+                'user_id' => fn () => $users->random()->id,
+                'category_id' => fn () => $categories->random()->id,
             ]);
         }
-        
+
         return $posts;
     }
-    
+
     /**
      * Create comments with relationships
      */
@@ -81,13 +81,13 @@ class TestDataFactory
     {
         $users = $users ?? self::createUsers(5);
         $posts = $posts ?? self::createPosts(8, $users);
-        
+
         return Comment::factory()->count($count)->create([
-            'user_id' => fn() => $users->random()->id,
-            'post_id' => fn() => $posts->random()->id,
+            'user_id' => fn () => $users->random()->id,
+            'post_id' => fn () => $posts->random()->id,
         ]);
     }
-    
+
     /**
      * Create a complete test dataset with all relationships
      */
@@ -99,12 +99,12 @@ class TestDataFactory
             'posts' => 25,
             'comments' => 50,
         ], $config);
-        
+
         $users = self::createUsers($config['users']);
         $categories = self::createCategories($config['categories']);
         $posts = self::createPosts($config['posts'], $users, $categories);
         $comments = self::createComments($config['comments'], $users, $posts);
-        
+
         return [
             'users' => $users,
             'categories' => $categories,
@@ -112,7 +112,7 @@ class TestDataFactory
             'comments' => $comments,
         ];
     }
-    
+
     /**
      * Create test data for search functionality
      */
@@ -123,13 +123,13 @@ class TestDataFactory
             User::factory()->create(['name' => 'Jane Doe', 'email' => 'jane@example.com']),
             User::factory()->create(['name' => 'Bob Wilson', 'email' => 'bob@company.com']),
         ]);
-        
+
         $categories = collect([
             Category::factory()->create(['name' => 'Technology']),
             Category::factory()->create(['name' => 'Business']),
             Category::factory()->create(['name' => 'Science']),
         ]);
-        
+
         $posts = collect([
             Post::factory()->create([
                 'title' => 'Laravel Framework Guide',
@@ -147,27 +147,27 @@ class TestDataFactory
                 'category_id' => $categories->last()->id,
             ]),
         ]);
-        
+
         return [
             'users' => $users,
             'categories' => $categories,
             'posts' => $posts,
         ];
     }
-    
+
     /**
      * Create test data for sorting functionality
      */
     public static function createSortableData(): array
     {
         $baseDate = now()->subDays(10);
-        
+
         $users = collect([
             User::factory()->create(['name' => 'Alice', 'created_at' => $baseDate->copy()->addDays(1)]),
             User::factory()->create(['name' => 'Bob', 'created_at' => $baseDate->copy()->addDays(2)]),
             User::factory()->create(['name' => 'Charlie', 'created_at' => $baseDate->copy()->addDays(3)]),
         ]);
-        
+
         $posts = collect([
             Post::factory()->create([
                 'title' => 'First Post',
@@ -185,13 +185,13 @@ class TestDataFactory
                 'user_id' => $users->get(2)->id,
             ]),
         ]);
-        
+
         return [
             'users' => $users,
             'posts' => $posts,
         ];
     }
-    
+
     /**
      * Create test data for pagination functionality
      */
@@ -200,14 +200,14 @@ class TestDataFactory
         $users = self::createUsers($totalRecords);
         $categories = self::createCategories(5);
         $posts = self::createPosts($totalRecords, $users, $categories);
-        
+
         return [
             'users' => $users,
             'categories' => $categories,
             'posts' => $posts,
         ];
     }
-    
+
     /**
      * Create test data for action functionality
      */
@@ -215,35 +215,35 @@ class TestDataFactory
     {
         $users = self::createUsers(5);
         $categories = self::createCategories(3);
-        
+
         $posts = collect([
             // Draft posts (can be published)
             ...Post::factory()->count(3)->create([
                 'status' => 'draft',
-                'user_id' => fn() => $users->random()->id,
-                'category_id' => fn() => $categories->random()->id,
+                'user_id' => fn () => $users->random()->id,
+                'category_id' => fn () => $categories->random()->id,
             ]),
             // Published posts (can be archived)
             ...Post::factory()->count(3)->create([
                 'status' => 'published',
-                'user_id' => fn() => $users->random()->id,
-                'category_id' => fn() => $categories->random()->id,
+                'user_id' => fn () => $users->random()->id,
+                'category_id' => fn () => $categories->random()->id,
             ]),
             // Archived posts (limited actions)
             ...Post::factory()->count(2)->create([
                 'status' => 'archived',
-                'user_id' => fn() => $users->random()->id,
-                'category_id' => fn() => $categories->random()->id,
+                'user_id' => fn () => $users->random()->id,
+                'category_id' => fn () => $categories->random()->id,
             ]),
         ]);
-        
+
         return [
             'users' => $users,
             'categories' => $categories,
             'posts' => $posts,
         ];
     }
-    
+
     /**
      * Create test data for relationship functionality
      */
@@ -253,7 +253,7 @@ class TestDataFactory
         $categories = self::createCategories(2);
         $posts = self::createPosts(6, $users, $categories);
         $comments = self::createComments(12, $users, $posts);
-        
+
         return [
             'users' => $users,
             'categories' => $categories,
@@ -261,7 +261,7 @@ class TestDataFactory
             'comments' => $comments,
         ];
     }
-    
+
     /**
      * Create minimal test data for performance testing
      */
@@ -273,14 +273,14 @@ class TestDataFactory
             'user_id' => $user->id,
             'category_id' => $category->id,
         ]);
-        
+
         return [
             'user' => $user,
             'category' => $category,
             'post' => $post,
         ];
     }
-    
+
     /**
      * Create large dataset for performance testing
      */
@@ -290,7 +290,7 @@ class TestDataFactory
         $categories = self::createCategories(5 * $multiplier);
         $posts = self::createPosts(50 * $multiplier, $users, $categories);
         $comments = self::createComments(100 * $multiplier, $users, $posts);
-        
+
         return [
             'users' => $users,
             'categories' => $categories,
@@ -298,7 +298,7 @@ class TestDataFactory
             'comments' => $comments,
         ];
     }
-    
+
     /**
      * Create test data with specific attribute patterns
      */
@@ -313,13 +313,12 @@ class TestDataFactory
                     User::factory()->create(['name' => 'Diana Prince']),
                 ]);
                 break;
-                
+
             case 'numerical':
-                $users = collect(range(1, 5))->map(fn($i) => 
-                    User::factory()->create(['name' => "User {$i}"])
+                $users = collect(range(1, 5))->map(fn ($i) => User::factory()->create(['name' => "User {$i}"])
                 );
                 break;
-                
+
             case 'mixed':
                 $users = collect([
                     User::factory()->create(['name' => 'Alice', 'email' => 'alice@example.com']),
@@ -327,14 +326,14 @@ class TestDataFactory
                     User::factory()->create(['name' => 'Charlie', 'email' => 'charlie@test.net']),
                 ]);
                 break;
-                
+
             default:
                 $users = self::createUsers(4);
         }
-        
+
         return ['users' => $users];
     }
-    
+
     /**
      * Clean up all test data
      */
@@ -345,7 +344,7 @@ class TestDataFactory
         Category::query()->delete();
         User::query()->delete();
     }
-    
+
     /**
      * Get random record from collection
      */
@@ -353,7 +352,7 @@ class TestDataFactory
     {
         return $collection->random();
     }
-    
+
     /**
      * Get first N records from collection
      */
@@ -361,7 +360,7 @@ class TestDataFactory
     {
         return $collection->take($count);
     }
-    
+
     /**
      * Filter collection by attribute
      */

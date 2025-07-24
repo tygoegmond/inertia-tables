@@ -6,9 +6,9 @@ use Egmond\InertiaTables\Actions\Action;
 use Egmond\InertiaTables\Actions\BulkAction;
 use Egmond\InertiaTables\Columns\TextColumn;
 use Egmond\InertiaTables\Table;
-use Egmond\InertiaTables\Tests\Database\Models\User;
-use Egmond\InertiaTables\Tests\Database\Models\Post;
 use Egmond\InertiaTables\Tests\Database\Models\Category;
+use Egmond\InertiaTables\Tests\Database\Models\Post;
+use Egmond\InertiaTables\Tests\Database\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
 
@@ -20,15 +20,16 @@ trait TableTestTrait
     protected function createSimpleTable(?string $model = null): Table
     {
         $model = $model ?? User::class;
-        
-        return new class($model) extends Table {
+
+        return new class($model) extends Table
+        {
             private string $model;
-            
+
             public function __construct(string $model)
             {
                 $this->model = $model;
             }
-            
+
             public function build(): \Egmond\InertiaTables\TableResult
             {
                 return $this->query($this->model::query())
@@ -38,21 +39,22 @@ trait TableTestTrait
                         TextColumn::make('email')->sortable()->searchable(),
                     ])
                     ->actions([
-                        Action::make('edit')->authorize(fn() => true),
-                        Action::make('delete')->authorize(fn() => true),
+                        Action::make('edit')->authorize(fn () => true),
+                        Action::make('delete')->authorize(fn () => true),
                     ])
                     ->setTableClass(get_class($this))
                     ->build();
             }
         };
     }
-    
+
     /**
      * Create a comprehensive test table with all features
      */
     protected function createComprehensiveTable(): Table
     {
-        return new class extends Table {
+        return new class extends Table
+        {
             public function build(): \Egmond\InertiaTables\TableResult
             {
                 return $this->query(Post::with(['user', 'category']))
@@ -71,7 +73,7 @@ trait TableTestTrait
                             ->label('Category'),
                         TextColumn::make('status')
                             ->sortable()
-                            ->badge(fn($value) => match($value) {
+                            ->badge(fn ($value) => match ($value) {
                                 'published' => 'success',
                                 'draft' => 'warning',
                                 'archived' => 'secondary',
@@ -79,22 +81,22 @@ trait TableTestTrait
                             }),
                         TextColumn::make('created_at')
                             ->sortable()
-                            ->format(fn($value) => $value->format('M j, Y')),
+                            ->format(fn ($value) => $value->format('M j, Y')),
                     ])
                     ->actions([
                         Action::make('edit')
-                            ->authorize(fn($record) => $record->status !== 'archived'),
+                            ->authorize(fn ($record) => $record->status !== 'archived'),
                         Action::make('publish')
-                            ->authorize(fn($record) => $record->status === 'draft'),
+                            ->authorize(fn ($record) => $record->status === 'draft'),
                         Action::make('archive')
                             ->color('danger')
-                            ->authorize(fn($record) => $record->status !== 'archived'),
+                            ->authorize(fn ($record) => $record->status !== 'archived'),
                     ])
                     ->bulkActions([
                         BulkAction::make('bulk_publish')
-                            ->authorize(fn() => true),
+                            ->authorize(fn () => true),
                         BulkAction::make('bulk_archive')
-                            ->authorize(fn() => true),
+                            ->authorize(fn () => true),
                     ])
                     ->defaultSort('created_at', 'desc')
                     ->perPage(10)
@@ -104,7 +106,7 @@ trait TableTestTrait
             }
         };
     }
-    
+
     /**
      * Create test data with relationships
      */
@@ -112,19 +114,19 @@ trait TableTestTrait
     {
         $categories = Category::factory()->count($categoryCount)->create();
         $users = User::factory()->count($userCount)->create();
-        
+
         $posts = Post::factory()->count($postCount)->create([
-            'user_id' => fn() => $users->random()->id,
-            'category_id' => fn() => $categories->random()->id,
+            'user_id' => fn () => $users->random()->id,
+            'category_id' => fn () => $categories->random()->id,
         ]);
-        
+
         return [
             'categories' => $categories,
             'users' => $users,
             'posts' => $posts,
         ];
     }
-    
+
     /**
      * Create a test request with common parameters
      */
@@ -137,12 +139,12 @@ trait TableTestTrait
             'page' => 1,
             'per_page' => 10,
         ];
-        
+
         $params = array_merge($defaultParams, $params);
-        
+
         return Request::create('/test', 'GET', $params);
     }
-    
+
     /**
      * Generate signed URL for action execution
      */
@@ -153,48 +155,48 @@ trait TableTestTrait
             'name' => $actionName,
             'action' => base64_encode($actionClass),
         ];
-        
+
         if ($recordId) {
             $params['record'] = $recordId;
         }
-        
+
         return URL::signedRoute('inertia-tables.action', $params);
     }
-    
+
     /**
      * Execute a regular action via HTTP
      */
     protected function executeAction(string $tableClass, string $actionName, int $recordId, array $additionalData = []): \Illuminate\Testing\TestResponse
     {
         $url = $this->generateActionUrl($tableClass, $actionName, Action::class, $recordId);
-        
+
         $data = array_merge([
             'table' => base64_encode($tableClass),
             'name' => $actionName,
             'action' => base64_encode(Action::class),
             'record' => $recordId,
         ], $additionalData);
-        
+
         return $this->post($url, $data);
     }
-    
+
     /**
      * Execute a bulk action via HTTP
      */
     protected function executeBulkAction(string $tableClass, string $actionName, array $recordIds, array $additionalData = []): \Illuminate\Testing\TestResponse
     {
         $url = $this->generateActionUrl($tableClass, $actionName, BulkAction::class);
-        
+
         $data = array_merge([
             'table' => base64_encode($tableClass),
             'name' => $actionName,
             'action' => base64_encode(BulkAction::class),
             'records' => $recordIds,
         ], $additionalData);
-        
+
         return $this->post($url, $data);
     }
-    
+
     /**
      * Assert table result structure
      */
@@ -208,7 +210,7 @@ trait TableTestTrait
         expect($result['bulkActions'])->toBeArray();
         expect($result['config'])->toBeArray();
     }
-    
+
     /**
      * Assert column structure
      */
@@ -220,7 +222,7 @@ trait TableTestTrait
         expect($column['sortable'])->toBeBool();
         expect($column['searchable'])->toBeBool();
     }
-    
+
     /**
      * Assert action structure
      */
@@ -231,7 +233,7 @@ trait TableTestTrait
         expect($action['label'])->toBeString();
         expect($action['color'])->toBeString();
     }
-    
+
     /**
      * Assert bulk action structure
      */
@@ -242,7 +244,7 @@ trait TableTestTrait
         expect($bulkAction['label'])->toBeString();
         expect($bulkAction['color'])->toBeString();
     }
-    
+
     /**
      * Assert metadata structure
      */
@@ -254,7 +256,7 @@ trait TableTestTrait
         expect($meta['per_page'])->toBeInt();
         expect($meta['last_page'])->toBeInt();
     }
-    
+
     /**
      * Find a record in table data by ID
      */
@@ -265,28 +267,28 @@ trait TableTestTrait
                 return $record;
             }
         }
-        
+
         return null;
     }
-    
+
     /**
      * Find an action in record actions by name
      */
     protected function findActionInRecord(array $record, string $actionName): ?array
     {
-        if (!isset($record['actions'])) {
+        if (! isset($record['actions'])) {
             return null;
         }
-        
+
         foreach ($record['actions'] as $action) {
             if ($action['name'] === $actionName) {
                 return $action;
             }
         }
-        
+
         return null;
     }
-    
+
     /**
      * Assert sorting is applied correctly (ascending)
      */
@@ -295,17 +297,17 @@ trait TableTestTrait
         if (count($data) < 2) {
             return; // Not enough data to test sorting
         }
-        
+
         for ($i = 1; $i < count($data); $i++) {
-            $prev = $this->getNestedValue($data[$i-1], $key);
+            $prev = $this->getNestedValue($data[$i - 1], $key);
             $current = $this->getNestedValue($data[$i], $key);
-            
+
             expect($prev <= $current)->toBeTrue(
                 "Sorting failed: {$prev} should be <= {$current} for key {$key}"
             );
         }
     }
-    
+
     /**
      * Assert sorting is applied correctly (descending)
      */
@@ -314,17 +316,17 @@ trait TableTestTrait
         if (count($data) < 2) {
             return; // Not enough data to test sorting
         }
-        
+
         for ($i = 1; $i < count($data); $i++) {
-            $prev = $this->getNestedValue($data[$i-1], $key);
+            $prev = $this->getNestedValue($data[$i - 1], $key);
             $current = $this->getNestedValue($data[$i], $key);
-            
+
             expect($prev >= $current)->toBeTrue(
                 "Sorting failed: {$prev} should be >= {$current} for key {$key}"
             );
         }
     }
-    
+
     /**
      * Get nested value from array using dot notation
      */
@@ -332,17 +334,17 @@ trait TableTestTrait
     {
         $keys = explode('.', $key);
         $value = $array;
-        
+
         foreach ($keys as $k) {
-            if (!isset($value[$k])) {
+            if (! isset($value[$k])) {
                 return null;
             }
             $value = $value[$k];
         }
-        
+
         return $value;
     }
-    
+
     /**
      * Assert search functionality works
      */
@@ -351,7 +353,7 @@ trait TableTestTrait
         if (empty($data)) {
             return; // No data to search
         }
-        
+
         $found = false;
         foreach ($data as $record) {
             foreach ($searchableFields as $field) {
@@ -362,42 +364,42 @@ trait TableTestTrait
                 }
             }
         }
-        
+
         expect($found)->toBeTrue("Search term '{$searchTerm}' not found in any searchable fields");
     }
-    
+
     /**
      * Create test posts with specific statuses
      */
     protected function createPostsWithStatuses(array $statuses, int $countPerStatus = 2): array
     {
         $posts = [];
-        
+
         foreach ($statuses as $status) {
             $statusPosts = Post::factory()->count($countPerStatus)->create([
                 'status' => $status,
                 'user_id' => User::factory(),
                 'category_id' => Category::factory(),
             ]);
-            
+
             $posts[$status] = $statusPosts;
         }
-        
+
         return $posts;
     }
-    
+
     /**
      * Assert action execution was successful
      */
     protected function assertActionExecuted(\Illuminate\Testing\TestResponse $response, int $expectedStatus = 302): void
     {
         $response->assertStatus($expectedStatus);
-        
+
         if ($expectedStatus === 302) {
             $response->assertRedirect();
         }
     }
-    
+
     /**
      * Assert JSON action response structure
      */

@@ -203,7 +203,6 @@ export const DataTable = React.memo<DataTableProps>(
         .rows.map((row) => row.original);
     }, [rowSelection, table]);
 
-
     if (error) {
       throw error;
     }

@@ -92,47 +92,46 @@ export const useTableActions = ({
   const performActionRequest = useCallback(
     async (
       action: MergedAction | TableBulkAction,
-      records: Record<string, any>[] = []
+      records: Record<string, any>[] = [],
+      isBulkAction: boolean = false
     ) => {
       setIsLoading(true);
 
       try {
-        const recordIds = records.map((record) => record[primaryKey]);
-
         if (!action.callback) {
           throw new Error(
             `Action ${action.name} does not have a valid callback`
           );
         }
 
-        router.post(
-          action.callback,
-          {
-            records: recordIds,
+        // For regular actions: send empty POST body (record comes from signed URL)
+        // For bulk actions: send records in POST body (requires authorization)
+        const postData = isBulkAction
+          ? { records: records.map((record) => record[primaryKey]) }
+          : {};
+
+        router.post(action.callback, postData, {
+          onSuccess: (page) => {
+            const result = page.props as any;
+            if (result.redirect_url) {
+              router.visit(result.redirect_url);
+            } else {
+              onSuccess?.(result.message);
+            }
           },
-          {
-            onSuccess: (page) => {
-              const result = page.props as any;
-              if (result.redirect_url) {
-                router.visit(result.redirect_url);
-              } else {
-                onSuccess?.(result.message);
-              }
-            },
-            onError: (errors) => {
-              const errorMessage =
-                typeof errors === 'string'
-                  ? errors
-                  : (Object.values(errors)[0] as string) || 'Action failed';
-              onError?.(errorMessage);
-            },
-            onFinish: () => {
-              setIsLoading(false);
-              setPendingAction(null);
-              setConfirmationDialog((prev) => ({ ...prev, isOpen: false }));
-            },
-          }
-        );
+          onError: (errors) => {
+            const errorMessage =
+              typeof errors === 'string'
+                ? errors
+                : (Object.values(errors)[0] as string) || 'Action failed';
+            onError?.(errorMessage);
+          },
+          onFinish: () => {
+            setIsLoading(false);
+            setPendingAction(null);
+            setConfirmationDialog((prev) => ({ ...prev, isOpen: false }));
+          },
+        });
       } catch (error) {
         onError?.(error instanceof Error ? error.message : 'Action failed');
         setIsLoading(false);
@@ -163,7 +162,7 @@ export const useTableActions = ({
           variant: 'destructive',
         });
       } else {
-        performActionRequest(action, record ? [record] : []);
+        performActionRequest(action, record ? [record] : [], false);
       }
     },
     [performActionRequest]
@@ -189,7 +188,7 @@ export const useTableActions = ({
           variant: 'destructive',
         });
       } else {
-        performActionRequest(action, records);
+        performActionRequest(action, records, true);
       }
     },
     [performActionRequest]
@@ -215,7 +214,7 @@ export const useTableActions = ({
           variant: 'destructive',
         });
       } else {
-        performActionRequest(action, []);
+        performActionRequest(action, [], false);
       }
     },
     [performActionRequest]
@@ -227,11 +226,14 @@ export const useTableActions = ({
     const { action, record, records } = pendingAction;
 
     if (records) {
-      performActionRequest(action, records);
+      // This is a bulk action
+      performActionRequest(action, records, true);
     } else if (record) {
-      performActionRequest(action, [record]);
+      // This is a regular action with single record
+      performActionRequest(action, [record], false);
     } else {
-      performActionRequest(action, []);
+      // This is a header action
+      performActionRequest(action, [], false);
     }
   }, [pendingAction, performActionRequest]);
 

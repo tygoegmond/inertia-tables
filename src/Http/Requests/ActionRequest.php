@@ -25,17 +25,27 @@ class ActionRequest extends FormRequest
             return false;
         }
 
-        // Check if the action is authorized
         $action = $this->getAction();
-        $records = $this->getRecords();
 
-        // For regular actions, check authorization for each record
+        // For regular actions, authorize the record from signed URL (secure)
         if ($action instanceof Action) {
+            $record = $this->getRecord();
+            return $action->isAuthorized($record);
+        }
+
+        // For bulk actions, check general authorization and each record from POST body
+        if ($action instanceof BulkAction) {
+            // First check general bulk action authorization
+            if (! $action->isAuthorized()) {
+                return false;
+            }
+
+            // Then check authorization for each record in the POST body
+            $records = $this->getRecords();
             return $records->every(fn ($record) => $action->isAuthorized($record));
         }
 
-        // For bulk actions, check general authorization (no record parameter)
-        return $action->isAuthorized();
+        return false;
     }
 
     public function rules(): array
@@ -44,8 +54,9 @@ class ActionRequest extends FormRequest
             'table' => ['required', 'string'],
             'name' => ['required', 'string'],
             'action' => ['required', 'string'],
-            'records' => ['required', 'array'],
-            'records.*' => ['required'],
+            // records is optional in validation - specific requirements handled in getter methods
+            'records' => ['sometimes', 'array'],
+            'records.*' => ['required_with:records'],
         ];
     }
 
@@ -102,11 +113,40 @@ class ActionRequest extends FormRequest
         return $this->action;
     }
 
+    public function getRecord(): ?\Illuminate\Database\Eloquent\Model
+    {
+        $table = $this->getTable();
+        $recordId = $this->query('record');
+
+        if (! $recordId) {
+            throw new \InvalidArgumentException('Record parameter is required for regular actions');
+        }
+
+        // Get the model class from the table's query
+        $query = $table->getQuery();
+        $model = $query->getModel();
+
+        // Fetch the single record
+        $record = $model->newQuery()
+            ->where($model->getKeyName(), $recordId)
+            ->first();
+
+        if (! $record) {
+            throw new \InvalidArgumentException("Record with ID {$recordId} not found");
+        }
+
+        return $record;
+    }
+
     public function getRecords(): Collection
     {
         if (! $this->records) {
             $table = $this->getTable();
             $recordIds = $this->input('records', []);
+
+            if (empty($recordIds)) {
+                throw new \InvalidArgumentException('Records parameter is required for bulk actions');
+            }
 
             // Get the model class from the table's query
             $query = $table->getQuery();

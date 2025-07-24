@@ -13,7 +13,6 @@ const InertiaTableComponent = <
   state,
   className = '',
 }: TableProps<T>) => {
-
   const {
     searchValue,
     handleSearch,
@@ -43,7 +42,6 @@ const InertiaTableComponent = <
       // TODO: Implement user-facing error notification
     },
   });
-
 
   // Show loading state if data is deferred and not yet available
   if (!state) {

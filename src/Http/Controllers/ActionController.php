@@ -2,6 +2,7 @@
 
 namespace Egmond\InertiaTables\Http\Controllers;
 
+use Egmond\InertiaTables\Actions\BulkAction;
 use Egmond\InertiaTables\Http\Requests\ActionRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -11,20 +12,11 @@ class ActionController extends Controller
 {
     public function __invoke(ActionRequest $request): JsonResponse|RedirectResponse
     {
-        $table = $request->getTable();
         $action = $request->getAction();
-        $records = $request->getRecords();
 
-        // Execute the action
+        // Execute the action only if it has action logic
         if ($action->hasAction()) {
-            // Handle regular actions vs bulk actions differently
-            if ($action instanceof \Egmond\InertiaTables\Actions\BulkAction) {
-                // BulkAction expects a Collection
-                $result = $action->execute($records);
-            } else {
-                // Regular Action expects a single Model (first record)
-                $result = $action->execute($records->first());
-            }
+            $result = $this->executeAction($request, $action);
         }
 
         // Handle redirects
@@ -34,6 +26,19 @@ class ActionController extends Controller
 
         // Default redirect back
         return $this->handleResponse($request, back());
+    }
+
+    private function executeAction(ActionRequest $request, $action)
+    {
+        if ($action instanceof BulkAction) {
+            // BulkActions: Use records from POST body (requires authorization)
+            $records = $request->getRecords();
+            return $action->execute($records);
+        } else {
+            // Regular Actions: Use single record from signed URL (secure)
+            $record = $request->getRecord();
+            return $action->execute($record);
+        }
     }
 
     protected function handleResponse(ActionRequest $request, RedirectResponse $response): JsonResponse|RedirectResponse

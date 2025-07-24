@@ -5,6 +5,7 @@ use Egmond\InertiaTables\Actions\BulkAction;
 use Egmond\InertiaTables\Http\Requests\ActionRequest;
 use Egmond\InertiaTables\Table;
 use Egmond\InertiaTables\TableResult;
+use Egmond\InertiaTables\Contracts\HasTable;
 use Egmond\InertiaTables\Tests\Database\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
@@ -17,9 +18,9 @@ describe('ActionRequest Class', function () {
         $this->users = User::factory()->count(3)->create();
 
         // Create a sample table class for testing
-        $this->table = new class extends Table {
-            public function build(): TableResult {
-                return $this->query(User::query())
+        $this->table = new class extends Table implements HasTable {
+            public function __construct() {
+                $this->query(User::query())
                     ->as('users')
                     ->columns([])
                     ->actions([
@@ -28,8 +29,27 @@ describe('ActionRequest Class', function () {
                     ])
                     ->bulkActions([
                         BulkAction::make('bulk_delete')->authorize(fn () => true),
-                    ])
-                    ->build();
+                    ]);
+            }
+
+            public function build(): TableResult {
+                return parent::build();
+            }
+
+            public function getTable(): Table {
+                return $this;
+            }
+
+            public function table(Table $table): Table {
+                return $table;
+            }
+
+            public function toArray(): array {
+                return [];
+            }
+
+            public function jsonSerialize(): mixed {
+                return $this->toArray();
             }
         };
 
@@ -44,10 +64,10 @@ describe('ActionRequest Class', function () {
             $rules = $request->rules();
 
             expect($rules)->toHaveKeys(['table', 'name', 'action', 'records']);
-            expect($rules['table'])->toBe('required|string');
-            expect($rules['name'])->toBe('required|string');
-            expect($rules['action'])->toBe('required|string');
-            expect($rules['records'])->toBe('sometimes|array');
+            expect($rules['table'])->toBe(['required', 'string']);
+            expect($rules['name'])->toBe(['required', 'string']);
+            expect($rules['action'])->toBe(['required', 'string']);
+            expect($rules['records'])->toBe(['sometimes', 'array']);
         });
 
         it('validates required fields', function () {
@@ -111,6 +131,7 @@ describe('ActionRequest Class', function () {
                 'table' => $this->encodedTableClass,
                 'name' => 'edit',
                 'action' => $this->encodedActionClass,
+                'record' => $this->user->id,
             ]);
 
             expect($request->authorize())->toBeTrue();
@@ -172,7 +193,7 @@ describe('ActionRequest Class', function () {
             ]);
 
             expect(fn () => $request->getTable())
-                ->toThrow(Error::class); // Class not found error
+                ->toThrow(InvalidArgumentException::class); // Class not found error
         });
 
         it('throws exception for malformed base64', function () {
@@ -183,7 +204,7 @@ describe('ActionRequest Class', function () {
             ]);
 
             expect(fn () => $request->getTable())
-                ->toThrow(Error::class);
+                ->toThrow(InvalidArgumentException::class);
         });
 
     });
@@ -224,7 +245,7 @@ describe('ActionRequest Class', function () {
             ]);
 
             expect(fn () => $request->getAction())
-                ->toThrow(Exception::class, 'Action not found');
+                ->toThrow(InvalidArgumentException::class);
         });
 
         it('throws exception when action class mismatch', function () {
@@ -258,16 +279,15 @@ describe('ActionRequest Class', function () {
             expect($record->name)->toBe('Test User');
         });
 
-        it('returns null when no record parameter for regular actions', function () {
+        it('throws exception when no record parameter for regular actions', function () {
             $request = createActionRequest([
                 'table' => $this->encodedTableClass,
                 'name' => 'edit',
                 'action' => $this->encodedActionClass,
             ]);
 
-            $record = $request->getRecord();
-
-            expect($record)->toBeNull();
+            expect(fn () => $request->getRecord())
+                ->toThrow(InvalidArgumentException::class, 'Record parameter is required for regular actions');
         });
 
         it('can fetch multiple records for bulk actions', function () {
@@ -287,7 +307,7 @@ describe('ActionRequest Class', function () {
             expect($records->pluck('id')->toArray())->toBe($recordIds);
         });
 
-        it('returns empty collection when no records for bulk actions', function () {
+        it('throws exception when no records for bulk actions', function () {
             $request = createActionRequest([
                 'table' => $this->encodedTableClass,
                 'name' => 'bulk_delete',
@@ -295,13 +315,11 @@ describe('ActionRequest Class', function () {
                 'records' => [],
             ]);
 
-            $records = $request->getRecords();
-
-            expect($records)->toBeInstanceOf(\Illuminate\Database\Eloquent\Collection::class);
-            expect($records->count())->toBe(0);
+            expect(fn () => $request->getRecords())
+                ->toThrow(InvalidArgumentException::class, 'Records parameter is required for bulk actions');
         });
 
-        it('handles non-existent record ids gracefully', function () {
+        it('throws exception for non-existent record ids', function () {
             $request = createActionRequest([
                 'table' => $this->encodedTableClass,
                 'name' => 'edit',
@@ -309,9 +327,8 @@ describe('ActionRequest Class', function () {
                 'record' => 99999, // Non-existent ID
             ]);
 
-            $record = $request->getRecord();
-
-            expect($record)->toBeNull();
+            expect(fn () => $request->getRecord())
+                ->toThrow(InvalidArgumentException::class, 'Record with ID 99999 not found');
         });
 
         it('filters out non-existent records in bulk actions', function () {
@@ -355,7 +372,7 @@ describe('ActionRequest Class', function () {
             ]);
 
             expect(fn () => $request->getTable())
-                ->toThrow(Error::class);
+                ->toThrow(InvalidArgumentException::class);
         });
 
         it('validates action belongs to the specified table', function () {
@@ -379,7 +396,7 @@ describe('ActionRequest Class', function () {
 
             // These should throw exceptions due to missing required data
             expect(fn () => $request->getTable())
-                ->toThrow(TypeError::class); // base64_decode on null
+                ->toThrow(InvalidArgumentException::class);
         });
 
         it('handles malformed base64 encoding', function () {
@@ -390,7 +407,7 @@ describe('ActionRequest Class', function () {
             ]);
 
             expect(fn () => $request->getTable())
-                ->toThrow(Error::class);
+                ->toThrow(InvalidArgumentException::class);
         });
 
         it('handles record parameter as string ID', function () {
@@ -468,7 +485,7 @@ describe('ActionRequest Class', function () {
                 'another_param' => 123,
             ];
 
-            $request = $this->createActionRequest($requestData);
+            $request = createActionRequest($requestData);
 
             expect($request->input('custom_param'))->toBe('custom_value');
             expect($request->input('another_param'))->toBe(123);
@@ -478,12 +495,3 @@ describe('ActionRequest Class', function () {
     });
 
 });
-
-// Helper method to create ActionRequest with given data
-function createActionRequest(array $data): ActionRequest
-{
-    $request = Request::create('/test', 'POST', $data);
-    $actionRequest = ActionRequest::createFrom($request);
-
-    return $actionRequest;
-}

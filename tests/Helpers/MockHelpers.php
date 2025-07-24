@@ -21,9 +21,10 @@ class MockHelpers
         $request->shouldReceive('getTable')->andReturn($config['table'] ?? null);
         $request->shouldReceive('getAction')->andReturn($config['action'] ?? null);
         $request->shouldReceive('getRecord')->andReturn($config['record'] ?? null);
-        $request->shouldReceive('getRecords')->andReturn($config['records'] ?? null);
+        $request->shouldReceive('getRecords')->andReturn($config['records'] ?? new \Illuminate\Database\Eloquent\Collection([]));
         $request->shouldReceive('expectsJson')->andReturn($config['expects_json'] ?? false);
         $request->shouldReceive('hasHeader')->with('X-Inertia')->andReturn($config['has_inertia_header'] ?? false);
+        $request->shouldReceive('header')->with('X-Inertia')->andReturn($config['has_inertia_header'] ? 'true' : null);
         $request->shouldReceive('all')->andReturn($config['all_data'] ?? []);
 
         // Mock session for messages

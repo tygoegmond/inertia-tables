@@ -37,6 +37,10 @@ class TestCase extends Orchestra
             'database' => ':memory:',
             'prefix' => '',
         ]);
+        
+        // Set application key for encryption and signed URLs
+        config()->set('app.key', 'base64:'.base64_encode(str_repeat('a', 32)));
+        config()->set('app.cipher', 'AES-256-CBC');
     }
 
     protected function defineDatabaseMigrations()

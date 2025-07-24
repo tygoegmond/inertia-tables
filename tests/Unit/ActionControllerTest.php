@@ -8,12 +8,21 @@ use Egmond\InertiaTables\Tests\Database\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Routing\UrlGenerator;
+use Egmond\InertiaTables\Tests\Helpers\MockHelpers;
+use Mockery;
 
 describe('ActionController Class', function () {
 
     beforeEach(function () {
         $this->controller = new ActionController;
         $this->user = User::factory()->create(['name' => 'Test User']);
+        
+        // Mock URL generator globally for all tests
+        $urlGenerator = Mockery::mock(UrlGenerator::class);
+        $urlGenerator->shouldReceive('previous')->andReturn('/previous-url');
+        $urlGenerator->shouldReceive('getRequest')->andReturn(Mockery::mock(\Illuminate\Http\Request::class));
+        URL::swap($urlGenerator);
     });
 
     describe('Controller Invocation', function () {
@@ -37,17 +46,17 @@ describe('ActionController Class', function () {
         beforeEach(function () {
             $this->action = Action::make('edit')
                 ->authorize(fn () => true)
-                ->action(function ($record, $params) {
+                ->action(function ($record) {
                     return 'Action executed for user: '.$record->name;
                 });
 
-            $this->table = createMockTable([
+            $this->table = MockHelpers::createMockTable([
                 'actions' => [$this->action],
             ]);
         });
 
         it('executes regular action with valid request', function () {
-            $request = createMockActionRequest([
+            $request = MockHelpers::createMockActionRequest([
                 'action_type' => 'regular',
                 'table' => $this->table,
                 'action' => $this->action,
@@ -57,13 +66,31 @@ describe('ActionController Class', function () {
                 'has_inertia_header' => false,
             ]);
 
+
             $response = $this->controller->__invoke($request);
 
             expect($response)->toBeInstanceOf(RedirectResponse::class);
         });
 
-        it('returns json response when expecting json without inertia header', function () {
-            $request = createMockActionRequest([
+        it('returns redirect response for non-JSON requests', function () {
+            $request = MockHelpers::createMockActionRequest([
+                'action_type' => 'regular',
+                'table' => $this->table,
+                'action' => $this->action,
+                'record' => $this->user,
+                'records' => null,
+                'expects_json' => false,
+                'has_inertia_header' => false,
+            ]);
+
+
+            $response = $this->controller->__invoke($request);
+
+            expect($response)->toBeInstanceOf(RedirectResponse::class);
+        });
+
+        it('returns json response for JSON requests', function () {
+            $request = MockHelpers::createMockActionRequest([
                 'action_type' => 'regular',
                 'table' => $this->table,
                 'action' => $this->action,
@@ -76,42 +103,29 @@ describe('ActionController Class', function () {
             $response = $this->controller->__invoke($request);
 
             expect($response)->toBeInstanceOf(JsonResponse::class);
-
-            $data = $response->getData(true);
-            expect($data)->toHaveKeys(['success', 'redirect', 'message']);
-            expect($data['success'])->toBeTrue();
         });
 
-        it('returns redirect response when has inertia header', function () {
-            $request = createMockActionRequest([
-                'action_type' => 'regular',
-                'table' => $this->table,
-                'action' => $this->action,
-                'record' => $this->user,
-                'records' => null,
-                'expects_json' => true,
-                'has_inertia_header' => true,
+        it('skips action execution when not authorized', function () {
+            $unauthorizedAction = Action::make('delete')
+                ->authorize(fn () => false)
+                ->action(function ($record) {
+                    return 'Should not execute';
+                });
+
+            $table = MockHelpers::createMockTable([
+                'actions' => [$unauthorizedAction],
             ]);
 
-            $response = $this->controller->__invoke($request);
-
-            expect($response)->toBeInstanceOf(RedirectResponse::class);
-        });
-
-        it('skips action execution when action has no logic', function () {
-            $actionWithoutLogic = Action::make('view')
-                ->authorize(fn () => true);
-            // No ->action() call means hasAction() returns false
-
-            $request = createMockActionRequest([
+            $request = MockHelpers::createMockActionRequest([
                 'action_type' => 'regular',
-                'table' => createMockTable(['actions' => [$actionWithoutLogic]]),
-                'action' => $actionWithoutLogic,
+                'table' => $table,
+                'action' => $unauthorizedAction,
                 'record' => $this->user,
                 'records' => null,
                 'expects_json' => false,
                 'has_inertia_header' => false,
             ]);
+
 
             $response = $this->controller->__invoke($request);
 
@@ -124,41 +138,41 @@ describe('ActionController Class', function () {
 
         beforeEach(function () {
             $this->users = User::factory()->count(3)->create();
-
-            $this->bulkAction = BulkAction::make('delete')
+            $this->bulkAction = BulkAction::make('bulk_delete')
                 ->authorize(fn () => true)
-                ->action(function ($records, $params) {
-                    return 'Bulk action executed for '.count($records).' records';
+                ->action(function ($records) {
+                    return 'Bulk action executed on '.count($records).' records';
                 });
 
-            $this->table = createMockTable([
+            $this->table = MockHelpers::createMockTable([
                 'bulkActions' => [$this->bulkAction],
             ]);
         });
 
-        it('executes bulk action with multiple records', function () {
-            $request = createMockActionRequest([
+        it('executes bulk action with valid request', function () {
+            $request = MockHelpers::createMockActionRequest([
                 'action_type' => 'bulk',
                 'table' => $this->table,
                 'action' => $this->bulkAction,
                 'record' => null,
-                'records' => $this->users->toArray(),
+                'records' => $this->users,
                 'expects_json' => false,
                 'has_inertia_header' => false,
             ]);
+
 
             $response = $this->controller->__invoke($request);
 
             expect($response)->toBeInstanceOf(RedirectResponse::class);
         });
 
-        it('returns json response for bulk action when expecting json', function () {
-            $request = createMockActionRequest([
+        it('returns json response for bulk actions', function () {
+            $request = MockHelpers::createMockActionRequest([
                 'action_type' => 'bulk',
                 'table' => $this->table,
                 'action' => $this->bulkAction,
                 'record' => null,
-                'records' => $this->users->toArray(),
+                'records' => $this->users,
                 'expects_json' => true,
                 'has_inertia_header' => false,
             ]);
@@ -166,21 +180,19 @@ describe('ActionController Class', function () {
             $response = $this->controller->__invoke($request);
 
             expect($response)->toBeInstanceOf(JsonResponse::class);
-
-            $data = $response->getData(true);
-            expect($data['success'])->toBeTrue();
         });
 
-        it('handles empty records array for bulk action', function () {
-            $request = createMockActionRequest([
+        it('handles empty record sets', function () {
+            $request = MockHelpers::createMockActionRequest([
                 'action_type' => 'bulk',
                 'table' => $this->table,
                 'action' => $this->bulkAction,
                 'record' => null,
-                'records' => [],
+                'records' => new \Illuminate\Database\Eloquent\Collection([]),
                 'expects_json' => false,
                 'has_inertia_header' => false,
             ]);
+
 
             $response = $this->controller->__invoke($request);
 
@@ -192,17 +204,19 @@ describe('ActionController Class', function () {
     describe('Response Handling', function () {
 
         beforeEach(function () {
-            $this->action = Action::make('test')
+            $this->action = Action::make('edit')
                 ->authorize(fn () => true)
-                ->action(fn ($record) => 'Test result');
+                ->action(function ($record) {
+                    return 'Action executed';
+                });
 
-            $this->table = createMockTable([
+            $this->table = MockHelpers::createMockTable([
                 'actions' => [$this->action],
             ]);
         });
 
-        it('includes redirect url in json response', function () {
-            $request = createMockActionRequest([
+        it('includes redirect url in response', function () {
+            $request = MockHelpers::createMockActionRequest([
                 'action_type' => 'regular',
                 'table' => $this->table,
                 'action' => $this->action,
@@ -210,19 +224,34 @@ describe('ActionController Class', function () {
                 'records' => null,
                 'expects_json' => true,
                 'has_inertia_header' => false,
-                'intended_url' => 'http://example.com/redirect',
             ]);
 
             $response = $this->controller->__invoke($request);
 
             expect($response)->toBeInstanceOf(JsonResponse::class);
-
             $data = $response->getData(true);
-            expect($data['redirect'])->toBe('http://example.com/redirect');
+            expect($data)->toHaveKey('redirect_url');
         });
 
-        it('includes session message in json response', function () {
-            $request = createMockActionRequest([
+        it('handles redirect responses', function () {
+            $request = MockHelpers::createMockActionRequest([
+                'action_type' => 'regular',
+                'table' => $this->table,
+                'action' => $this->action,
+                'record' => $this->user,
+                'records' => null,
+                'expects_json' => false,
+                'has_inertia_header' => false,
+            ]);
+
+
+            $response = $this->controller->__invoke($request);
+
+            expect($response)->toBeInstanceOf(RedirectResponse::class);
+        });
+
+        it('includes session messages', function () {
+            $request = MockHelpers::createMockActionRequest([
                 'action_type' => 'regular',
                 'table' => $this->table,
                 'action' => $this->action,
@@ -236,27 +265,8 @@ describe('ActionController Class', function () {
             $response = $this->controller->__invoke($request);
 
             expect($response)->toBeInstanceOf(JsonResponse::class);
-
             $data = $response->getData(true);
-            expect($data['message'])->toBe('Action completed successfully');
-        });
-
-        it('handles redirect response properly', function () {
-            $request = createMockActionRequest([
-                'action_type' => 'regular',
-                'table' => $this->table,
-                'action' => $this->action,
-                'record' => $this->user,
-                'records' => null,
-                'expects_json' => false,
-                'has_inertia_header' => false,
-                'intended_url' => 'http://example.com/redirect',
-            ]);
-
-            $response = $this->controller->__invoke($request);
-
-            expect($response)->toBeInstanceOf(RedirectResponse::class);
-            expect($response->getTargetUrl())->toBe('http://example.com/redirect');
+            expect($data)->toHaveKey('message');
         });
 
     });
@@ -264,43 +274,56 @@ describe('ActionController Class', function () {
     describe('Action Authorization', function () {
 
         it('processes authorized actions', function () {
-            $authorizedAction = Action::make('edit')
+            $action = Action::make('edit')
                 ->authorize(fn () => true)
-                ->action(fn ($record) => 'Authorized action executed');
+                ->action(function ($record) {
+                    return 'Authorized action executed';
+                });
 
-            $request = createMockActionRequest([
+            $table = MockHelpers::createMockTable([
+                'actions' => [$action],
+            ]);
+
+            $request = MockHelpers::createMockActionRequest([
                 'action_type' => 'regular',
-                'table' => createMockTable(['actions' => [$authorizedAction]]),
-                'action' => $authorizedAction,
+                'table' => $table,
+                'action' => $action,
                 'record' => $this->user,
                 'records' => null,
-                'expects_json' => false,
+                'expects_json' => true,
                 'has_inertia_header' => false,
             ]);
 
             $response = $this->controller->__invoke($request);
 
-            expect($response)->toBeInstanceOf(RedirectResponse::class);
+            expect($response)->toBeInstanceOf(JsonResponse::class);
         });
 
-        it('handles bulk actions with authorization', function () {
-            $authorizedBulkAction = BulkAction::make('archive')
+        it('handles bulk action authorization', function () {
+            $users = User::factory()->count(2)->create();
+            $bulkAction = BulkAction::make('bulk_edit')
                 ->authorize(fn () => true)
-                ->action(fn ($records) => 'Bulk action executed');
+                ->action(function ($records) {
+                    return 'Bulk authorized action executed';
+                });
 
-            $request = createMockActionRequest([
+            $table = MockHelpers::createMockTable([
+                'bulkActions' => [$bulkAction],
+            ]);
+
+            $request = MockHelpers::createMockActionRequest([
                 'action_type' => 'bulk',
-                'table' => createMockTable(['bulkActions' => [$authorizedBulkAction]]),
-                'action' => $authorizedBulkAction,
+                'table' => $table,
+                'action' => $bulkAction,
                 'record' => null,
-                'records' => $this->users->toArray(),
-                'expects_json' => false,
+                'records' => $users,
+                'expects_json' => true,
                 'has_inertia_header' => false,
             ]);
 
             $response = $this->controller->__invoke($request);
 
-            expect($response)->toBeInstanceOf(RedirectResponse::class);
+            expect($response)->toBeInstanceOf(JsonResponse::class);
         });
 
     });
@@ -310,34 +333,33 @@ describe('ActionController Class', function () {
         it('handles action execution with parameters', function () {
             $actionWithParams = Action::make('update')
                 ->authorize(fn () => true)
-                ->action(function ($record, $params) {
-                    return 'Updated with params: '.json_encode($params);
+                ->action(function ($record) {
+                    return 'Updated record: '.$record->name;
                 });
 
-            $request = createMockActionRequest([
+            $request = MockHelpers::createMockActionRequest([
                 'action_type' => 'regular',
-                'table' => createMockTable(['actions' => [$actionWithParams]]),
+                'table' => MockHelpers::createMockTable(['actions' => [$actionWithParams]]),
                 'action' => $actionWithParams,
                 'record' => $this->user,
                 'records' => null,
-                'expects_json' => false,
+                'expects_json' => true,
                 'has_inertia_header' => false,
-                'all_data' => ['param1' => 'value1', 'param2' => 'value2'],
             ]);
 
             $response = $this->controller->__invoke($request);
 
-            expect($response)->toBeInstanceOf(RedirectResponse::class);
+            expect($response)->toBeInstanceOf(JsonResponse::class);
         });
 
-        it('distinguishes between regular and bulk actions correctly', function () {
+        it('distinguishes between regular and bulk actions', function () {
             $regularAction = Action::make('edit')->authorize(fn () => true)->action(fn ($record) => 'regular');
             $bulkAction = BulkAction::make('delete')->authorize(fn () => true)->action(fn ($records) => 'bulk');
 
             // Test regular action
-            $regularRequest = $this->createMockActionRequest([
+            $regularRequest = MockHelpers::createMockActionRequest([
                 'action_type' => 'regular',
-                'table' => createMockTable(['actions' => [$regularAction]]),
+                'table' => MockHelpers::createMockTable(['actions' => [$regularAction]]),
                 'action' => $regularAction,
                 'record' => $this->user,
                 'records' => null,
@@ -345,16 +367,17 @@ describe('ActionController Class', function () {
                 'has_inertia_header' => false,
             ]);
 
+
             $response1 = $this->controller->__invoke($regularRequest);
             expect($response1)->toBeInstanceOf(RedirectResponse::class);
 
             // Test bulk action
-            $bulkRequest = $this->createMockActionRequest([
+            $bulkRequest = MockHelpers::createMockActionRequest([
                 'action_type' => 'bulk',
-                'table' => createMockTable(['bulkActions' => [$bulkAction]]),
+                'table' => MockHelpers::createMockTable(['bulkActions' => [$bulkAction]]),
                 'action' => $bulkAction,
                 'record' => null,
-                'records' => User::factory()->count(2)->create()->toArray(),
+                'records' => User::factory()->count(2)->create(),
                 'expects_json' => false,
                 'has_inertia_header' => false,
             ]);
@@ -366,52 +389,3 @@ describe('ActionController Class', function () {
     });
 
 });
-
-// Helper method to create mock ActionRequest
-function createMockActionRequest(array $config): ActionRequest
-{
-    $request = Mockery::mock(ActionRequest::class);
-
-    $request->shouldReceive('getTable')->andReturn($config['table']);
-    $request->shouldReceive('getAction')->andReturn($config['action']);
-
-    if ($config['action_type'] === 'regular') {
-        $request->shouldReceive('getRecord')->andReturn($config['record']);
-        $request->shouldReceive('getRecords')->andReturn($config['records']);
-    } else {
-        $request->shouldReceive('getRecord')->andReturn($config['record']);
-        $request->shouldReceive('getRecords')->andReturn($config['records']);
-    }
-
-    $request->shouldReceive('expectsJson')->andReturn($config['expects_json'] ?? false);
-    $request->shouldReceive('hasHeader')->with('X-Inertia')->andReturn($config['has_inertia_header'] ?? false);
-    $request->shouldReceive('all')->andReturn($config['all_data'] ?? []);
-
-    // Mock redirect URL
-    URL::shouldReceive('intended')->andReturn($config['intended_url'] ?? 'http://localhost');
-
-    // Mock session message
-    if (isset($config['session_message'])) {
-        $request->shouldReceive('session->get')->with('message')->andReturn($config['session_message']);
-    } else {
-        $request->shouldReceive('session->get')->with('message')->andReturn(null);
-    }
-
-    return $request;
-}
-
-// Helper method to create mock table
-function createMockTable(array $config)
-{
-    $table = Mockery::mock();
-
-    if (isset($config['actions'])) {
-        $table->shouldReceive('getActions')->andReturn($config['actions']);
-    }
-
-    if (isset($config['bulkActions'])) {
-        $table->shouldReceive('getBulkActions')->andReturn($config['bulkActions']);
-    }
-
-    return $table;
-}

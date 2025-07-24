@@ -4,6 +4,7 @@ use Egmond\InertiaTables\Actions\Action;
 use Egmond\InertiaTables\Actions\BulkAction;
 use Egmond\InertiaTables\Http\Requests\ActionRequest;
 use Egmond\InertiaTables\Table;
+use Egmond\InertiaTables\TableResult;
 use Egmond\InertiaTables\Tests\Database\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
@@ -16,10 +17,8 @@ describe('ActionRequest Class', function () {
         $this->users = User::factory()->count(3)->create();
 
         // Create a sample table class for testing
-        $this->table = new class extends Table
-        {
-            public function build()
-            {
+        $this->table = new class extends Table {
+            public function build(): TableResult {
                 return $this->query(User::query())
                     ->as('users')
                     ->columns([])

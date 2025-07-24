@@ -1,31 +1,31 @@
 <?php
 
-use Egmond\InertiaTables\Builder\TableBuilder;
-use Egmond\InertiaTables\Columns\TextColumn;
 use Egmond\InertiaTables\Actions\Action;
 use Egmond\InertiaTables\Actions\BulkAction;
+use Egmond\InertiaTables\Builder\TableBuilder;
+use Egmond\InertiaTables\Columns\TextColumn;
 use Egmond\InertiaTables\TableResult;
-use Egmond\InertiaTables\Tests\Database\Models\User;
-use Egmond\InertiaTables\Tests\Database\Models\Post;
 use Egmond\InertiaTables\Tests\Database\Models\Category;
 use Egmond\InertiaTables\Tests\Database\Models\Comment;
+use Egmond\InertiaTables\Tests\Database\Models\Post;
+use Egmond\InertiaTables\Tests\Database\Models\User;
 use Illuminate\Http\Request;
 
 describe('TableBuilder Class', function () {
-    
+
     beforeEach(function () {
-        $this->request = new Request();
+        $this->request = new Request;
         $this->builder = new TableBuilder($this->request);
     });
 
     describe('Instantiation', function () {
-        
+
         it('can be instantiated with request', function () {
             expect($this->builder)->toBeInstanceOf(TableBuilder::class);
         });
 
         it('can be instantiated without request', function () {
-            $builder = new TableBuilder();
+            $builder = new TableBuilder;
             expect($builder)->toBeInstanceOf(TableBuilder::class);
         });
 
@@ -42,85 +42,85 @@ describe('TableBuilder Class', function () {
     });
 
     describe('Column Management', function () {
-        
+
         it('can add columns fluently', function () {
             $columns = [
                 TextColumn::make('name'),
                 TextColumn::make('email'),
             ];
-            
+
             $result = $this->builder->columns($columns);
-            
+
             expect($result)->toBe($this->builder);
         });
 
         it('can add individual columns', function () {
             $column = TextColumn::make('name');
-            
+
             $result = $this->builder->addColumn($column);
-            
+
             expect($result)->toBe($this->builder);
         });
 
     });
 
     describe('Configuration Methods', function () {
-        
+
         it('can set pagination fluently', function () {
             $result = $this->builder->paginate(50);
-            
+
             expect($result)->toBe($this->builder);
         });
 
         it('can set sorting fluently', function () {
             $result = $this->builder->sortBy('name', 'desc');
-            
+
             expect($result)->toBe($this->builder);
         });
 
         it('can set searchable fluently', function () {
             $result = $this->builder->searchable();
-            
+
             expect($result)->toBe($this->builder);
         });
 
         it('can set name fluently', function () {
             $result = $this->builder->setName('users');
-            
+
             expect($result)->toBe($this->builder);
         });
 
         it('can set table class fluently', function () {
             $result = $this->builder->setTableClass('App\\Tables\\UserTable');
-            
+
             expect($result)->toBe($this->builder);
         });
 
         it('can set actions fluently', function () {
             $actions = [Action::make('edit')];
             $result = $this->builder->actions($actions);
-            
+
             expect($result)->toBe($this->builder);
         });
 
         it('can set bulk actions fluently', function () {
             $bulkActions = [BulkAction::make('delete')];
             $result = $this->builder->bulkActions($bulkActions);
-            
+
             expect($result)->toBe($this->builder);
         });
 
         it('can set header actions fluently', function () {
             $headerActions = [Action::make('create')];
             $result = $this->builder->headerActions($headerActions);
-            
+
             expect($result)->toBe($this->builder);
         });
 
     });
 
     describe('Query Building and Data Processing', function () {
-        
+
         beforeEach(function () {
             // Create test data
             $this->users = User::factory()->count(10)->create();
@@ -136,7 +136,7 @@ describe('TableBuilder Class', function () {
         it('builds table result with basic query', function () {
             $query = User::query();
             $result = $this->builder->build($query);
-            
+
             expect($result)->toBeInstanceOf(TableResult::class);
             expect($result->name)->toBe('users');
             expect($result->data)->toBeArray();
@@ -148,7 +148,7 @@ describe('TableBuilder Class', function () {
             $result = $this->builder
                 ->paginate(5)
                 ->build($query);
-            
+
             expect(count($result->data))->toBe(5);
             expect($result->pagination['per_page'])->toBe(5);
             expect($result->pagination['total'])->toBe(10);
@@ -157,15 +157,15 @@ describe('TableBuilder Class', function () {
         it('includes pagination metadata', function () {
             $query = User::query();
             $result = $this->builder->build($query);
-            
+
             expect($result->pagination)->toHaveKeys([
                 'current_page',
-                'per_page', 
+                'per_page',
                 'total',
                 'last_page',
                 'from',
                 'to',
-                'links'
+                'links',
             ]);
         });
 
@@ -175,18 +175,18 @@ describe('TableBuilder Class', function () {
             $userC = User::factory()->create(['name' => 'Charlie']);
             $userA = User::factory()->create(['name' => 'Alice']);
             $userB = User::factory()->create(['name' => 'Bob']);
-            
-            $builder = new TableBuilder();
+
+            $builder = new TableBuilder;
             $builder
                 ->columns([TextColumn::make('name')->sortable()])
                 ->sortBy('name', 'desc')
                 ->setName('users');
-            
+
             $query = User::query();
             $result = $builder->build($query);
-            
+
             $names = array_column($result->data, 'name');
-            
+
             // Should be sorted in descending order: Charlie, Bob, Alice
             expect(count($names))->toBe(3);
             expect($names[0])->toBe('Charlie');
@@ -196,12 +196,12 @@ describe('TableBuilder Class', function () {
     });
 
     describe('Search Functionality', function () {
-        
+
         beforeEach(function () {
             User::factory()->create(['name' => 'John Doe', 'email' => 'john@example.com']);
             User::factory()->create(['name' => 'Jane Smith', 'email' => 'jane@example.com']);
             User::factory()->create(['name' => 'Bob Wilson', 'email' => 'bob@example.com']);
-            
+
             $this->builder
                 ->columns([
                     TextColumn::make('name')->searchable(),
@@ -222,10 +222,10 @@ describe('TableBuilder Class', function () {
                 ])
                 ->searchable()
                 ->setName('users');
-                
+
             $query = User::query();
             $result = $builder->build($query);
-            
+
             expect(count($result->data))->toBe(1);
             expect($result->data[0]['name'])->toBe('John Doe');
         });
@@ -240,17 +240,17 @@ describe('TableBuilder Class', function () {
                 ])
                 ->searchable()
                 ->setName('users');
-                
+
             $query = User::query();
             $result = $builder->build($query);
-            
+
             expect(count($result->data))->toBe(3);
         });
 
         it('returns all results when no search query', function () {
             $query = User::query();
             $result = $this->builder->build($query);
-            
+
             expect(count($result->data))->toBe(3);
         });
 
@@ -264,22 +264,22 @@ describe('TableBuilder Class', function () {
                 ])
                 ->searchable(false)
                 ->setName('users');
-                
+
             $query = User::query();
             $result = $builder->build($query);
-            
+
             expect(count($result->data))->toBe(3);
         });
 
     });
 
     describe('Sorting Functionality', function () {
-        
+
         beforeEach(function () {
             User::factory()->create(['name' => 'Alice']);
             User::factory()->create(['name' => 'Bob']);
             User::factory()->create(['name' => 'Charlie']);
-            
+
             $this->builder
                 ->columns([
                     TextColumn::make('name')->sortable(),
@@ -294,10 +294,10 @@ describe('TableBuilder Class', function () {
             $builder
                 ->columns([TextColumn::make('name')->sortable()])
                 ->setName('users');
-                
+
             $query = User::query();
             $result = $builder->build($query);
-            
+
             $names = array_column($result->data, 'name');
             expect($names[0])->toBe('Charlie');
             expect($names[2])->toBe('Alice');
@@ -309,10 +309,10 @@ describe('TableBuilder Class', function () {
             $builder
                 ->columns([TextColumn::make('name')->sortable()])
                 ->setName('users');
-                
+
             $query = User::query();
             $result = $builder->build($query);
-            
+
             $names = array_column($result->data, 'name');
             expect($names[0])->toBe('Alice');
             expect($names[2])->toBe('Charlie');
@@ -327,10 +327,10 @@ describe('TableBuilder Class', function () {
                     TextColumn::make('email'), // not sortable
                 ])
                 ->setName('users');
-                
+
             $query = User::query();
             $result = $builder->build($query);
-            
+
             // Should maintain database order since email column is not sortable
             expect(count($result->data))->toBe(3);
         });
@@ -338,7 +338,7 @@ describe('TableBuilder Class', function () {
     });
 
     describe('Relationship Handling', function () {
-        
+
         beforeEach(function () {
             $this->category = Category::factory()->create();
             $this->user = User::factory()->create();
@@ -351,7 +351,7 @@ describe('TableBuilder Class', function () {
         });
 
         it('handles relationship columns with dot notation', function () {
-            $builder = new TableBuilder();
+            $builder = new TableBuilder;
             $builder
                 ->columns([
                     TextColumn::make('title'),
@@ -359,27 +359,27 @@ describe('TableBuilder Class', function () {
                     TextColumn::make('category.name'),
                 ])
                 ->setName('posts');
-                
+
             $query = Post::query();
             $result = $builder->build($query);
-            
+
             expect(count($result->data))->toBe(3);
             expect($result->data[0])->toHaveKey('user.name');
             expect($result->data[0])->toHaveKey('category.name');
         });
 
         it('applies relationship counts', function () {
-            $builder = new TableBuilder();
+            $builder = new TableBuilder;
             $builder
                 ->columns([
                     TextColumn::make('title'),
                     TextColumn::make('comments_count')->counts('comments'),
                 ])
                 ->setName('posts');
-                
+
             $query = Post::query();
             $result = $builder->build($query);
-            
+
             expect($result->data[0]['comments_count'])->toBe('2');
             expect($result->data[1]['comments_count'])->toBe('1');
             expect($result->data[2]['comments_count'])->toBe('0');
@@ -388,7 +388,7 @@ describe('TableBuilder Class', function () {
     });
 
     describe('Data Transformation', function () {
-        
+
         beforeEach(function () {
             $this->user = User::factory()->create();
         });
@@ -399,7 +399,7 @@ describe('TableBuilder Class', function () {
                 ->columns([TextColumn::make('name')])
                 ->setName('users')
                 ->build($query);
-            
+
             expect($result->data[0])->toHaveKey('id');
             expect($result->data[0]['id'])->toBe($this->user->id);
             expect($result->primaryKey)->toBe('id');
@@ -414,7 +414,7 @@ describe('TableBuilder Class', function () {
                 ])
                 ->setName('users')
                 ->build($query);
-            
+
             expect($result->data[0]['name'])->toBe($this->user->name);
             expect($result->data[0]['email'])->toBe($this->user->email);
         });
@@ -422,13 +422,13 @@ describe('TableBuilder Class', function () {
     });
 
     describe('Configuration Data', function () {
-        
+
         it('returns correct configuration', function () {
             $columns = [
                 TextColumn::make('name')->searchable(),
                 TextColumn::make('email'),
             ];
-            
+
             $query = User::factory()->create();
             $result = $this->builder
                 ->columns($columns)
@@ -437,14 +437,14 @@ describe('TableBuilder Class', function () {
                 ->sortBy('name', 'desc')
                 ->setName('users')
                 ->build(User::query());
-            
+
             expect($result->config)->toHaveKeys([
                 'columns',
                 'searchable',
                 'perPage',
-                'defaultSort'
+                'defaultSort',
             ]);
-            
+
             expect($result->config['searchable'])->toBeTrue();
             expect($result->config['perPage'])->toBe(50);
             expect($result->config['defaultSort'])->toBe(['name' => 'desc']);
@@ -454,48 +454,48 @@ describe('TableBuilder Class', function () {
     });
 
     describe('Action Serialization', function () {
-        
+
         beforeEach(function () {
             $this->user = User::factory()->create();
         });
 
         it('serializes actions correctly', function () {
             $actions = [Action::make('edit')];
-            
+
             $result = $this->builder
                 ->columns([TextColumn::make('name')])
                 ->actions($actions)
                 ->setName('users')
                 ->setTableClass('App\\Tables\\UserTable')
                 ->build(User::query());
-            
+
             expect($result->actions)->toBeArray();
             expect(count($result->actions))->toBe(1);
         });
 
         it('serializes bulk actions correctly', function () {
             $bulkActions = [BulkAction::make('delete')];
-            
+
             $result = $this->builder
                 ->columns([TextColumn::make('name')])
                 ->bulkActions($bulkActions)
                 ->setName('users')
                 ->setTableClass('App\\Tables\\UserTable')
                 ->build(User::query());
-            
+
             expect($result->bulkActions)->toBeArray();
             expect(count($result->bulkActions))->toBe(1);
         });
 
         it('serializes header actions correctly', function () {
             $headerActions = [Action::make('create')];
-            
+
             $result = $this->builder
                 ->columns([TextColumn::make('name')])
                 ->headerActions($headerActions)
                 ->setName('users')
                 ->build(User::query());
-            
+
             expect($result->headerActions)->toBeArray();
             expect(count($result->headerActions))->toBe(1);
         });
@@ -503,34 +503,34 @@ describe('TableBuilder Class', function () {
     });
 
     describe('Request Parameter Handling', function () {
-        
+
         it('extracts page number from request', function () {
             $request = new Request(['users' => ['page' => '3']]);
             $builder = new TableBuilder($request);
-            
+
             // Create enough data to have multiple pages
             User::factory()->count(30)->create();
-            
+
             $result = $builder
                 ->columns([TextColumn::make('name')])
                 ->paginate(10)
                 ->setName('users')
                 ->build(User::query());
-            
+
             expect($result->pagination['current_page'])->toBe(3);
         });
 
         it('handles missing request parameters gracefully', function () {
-            $request = new Request();
+            $request = new Request;
             $builder = new TableBuilder($request);
-            
+
             User::factory()->create();
-            
+
             $result = $builder
                 ->columns([TextColumn::make('name')])
                 ->setName('users')
                 ->build(User::query());
-            
+
             expect($result->pagination['current_page'])->toBe(1);
             expect($result->search)->toBeNull();
             expect($result->sort)->toBe([]);

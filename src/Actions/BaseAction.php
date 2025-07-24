@@ -55,22 +55,6 @@ abstract class BaseAction implements Arrayable
         return $this->filterDefaults(array_merge($data, $this->getAdditionalArrayData()));
     }
 
-    public function toRowArray(?\Illuminate\Database\Eloquent\Model $record = null): array
-    {
-        $isDisabled = $this->isDisabled($record);
-
-        $data = [
-            'disabled' => $isDisabled,
-        ];
-
-        // Only generate actionUrl if the action is not disabled
-        if (! $isDisabled) {
-            $data['actionUrl'] = $this->getActionUrl($record ? [$record->getKey()] : []);
-        }
-
-        return $this->filterDefaults(array_merge($data, $this->getAdditionalRowData($record)));
-    }
-
     protected function filterDefaults(array $data): array
     {
         return array_filter($data, function ($value, $key) {
@@ -85,11 +69,6 @@ abstract class BaseAction implements Arrayable
     }
 
     protected function getAdditionalArrayData(): array
-    {
-        return [];
-    }
-
-    protected function getAdditionalRowData(?\Illuminate\Database\Eloquent\Model $record = null): array
     {
         return [];
     }

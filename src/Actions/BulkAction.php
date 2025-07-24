@@ -19,4 +19,12 @@ class BulkAction extends BaseAction
 
         return parent::isAuthorized($record);
     }
+
+    protected function getAdditionalArrayData(): array
+    {
+        return [
+            'disabled' => $this->isDisabled(),
+            'actionUrl' => $this->isDisabled() ? null : $this->getActionUrl(),
+        ];
+    }
 }

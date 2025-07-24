@@ -20,7 +20,7 @@ trait HasCallback
         return $this->tableClass;
     }
 
-    public function generateCallback(string $tableClass, string $recordKey = null): string
+    public function generateCallback(string $tableClass, ?string $recordKey = null): string
     {
         return URL::temporarySignedRoute('inertia-tables.action', now()->addMinutes(15), [
             'table' => base64_encode($tableClass),
@@ -30,7 +30,7 @@ trait HasCallback
         ]);
     }
 
-    public function getCallback(string $recordKey = null): string
+    public function getCallback(?string $recordKey = null): string
     {
         $tableClass = $this->getTableClass();
 

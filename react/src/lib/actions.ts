@@ -1,7 +1,7 @@
 import { TableAction, TableRowData } from '../types';
 
 export interface MergedAction extends TableAction {
-  actionUrl?: string;
+  callback?: string;
   disabled?: boolean;
   openUrlInNewTab?: boolean;
 }

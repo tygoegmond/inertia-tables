@@ -43,7 +43,7 @@ interface UseTableActionsReturn {
   confirmAction: () => void;
   cancelAction: () => void;
   submitForm: (data: Record<string, any>) => void;
-  handleActionUrl: (actionUrl: string, openInNewTab?: boolean) => void;
+  handleCallback: (callback: string, openInNewTab?: boolean) => void;
 }
 
 export const useTableActions = ({
@@ -78,12 +78,12 @@ export const useTableActions = ({
     records?: Record<string, any>[];
   } | null>(null);
 
-  const handleActionUrl = useCallback(
-    (actionUrl: string, openInNewTab?: boolean) => {
+  const handleCallback = useCallback(
+    (callback: string, openInNewTab?: boolean) => {
       if (openInNewTab) {
-        window.open(actionUrl, '_blank');
+        window.open(callback, '_blank');
       } else {
-        router.visit(actionUrl);
+        router.visit(callback);
       }
     },
     []
@@ -99,14 +99,14 @@ export const useTableActions = ({
       try {
         const recordIds = records.map((record) => record[primaryKey]);
 
-        if (!action.actionUrl) {
+        if (!action.callback) {
           throw new Error(
-            `Action ${action.name} does not have a valid actionUrl`
+            `Action ${action.name} does not have a valid callback`
           );
         }
 
         router.post(
-          action.actionUrl,
+          action.callback,
           {
             records: recordIds,
           },
@@ -145,8 +145,8 @@ export const useTableActions = ({
 
   const executeAction = useCallback(
     (action: MergedAction, record?: Record<string, any>) => {
-      if (!action.actionUrl) {
-        console.warn('Action has no actionUrl');
+      if (!action.callback) {
+        console.warn('Action has no callback');
         return;
       }
 
@@ -171,8 +171,8 @@ export const useTableActions = ({
 
   const executeBulkAction = useCallback(
     (action: TableBulkAction, records: Record<string, any>[]) => {
-      if (!action.actionUrl) {
-        console.warn('Bulk action has no actionUrl');
+      if (!action.callback) {
+        console.warn('Bulk action has no callback');
         return;
       }
 
@@ -257,6 +257,6 @@ export const useTableActions = ({
     confirmAction,
     cancelAction,
     submitForm,
-    handleActionUrl,
+    handleCallback,
   };
 };

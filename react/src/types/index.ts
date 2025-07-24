@@ -58,7 +58,7 @@ export interface TableAction {
 }
 
 export interface RowActionData {
-  actionUrl?: string;
+  callback?: string;
   disabled?: boolean;
   openUrlInNewTab?: boolean;
 }
@@ -68,7 +68,7 @@ export interface TableBulkAction {
   label: string;
   color: string;
   hasAction?: boolean;
-  actionUrl?: string;
+  callback?: string;
   requiresConfirmation?: boolean;
   confirmationTitle?: string;
   confirmationMessage?: string;

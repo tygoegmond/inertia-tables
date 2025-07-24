@@ -16,7 +16,7 @@ class PostFactory extends Factory
     {
         $title = $this->faker->sentence();
         $content = $this->faker->paragraphs(5, true);
-        
+
         return [
             'title' => rtrim($title, '.'),
             'slug' => Str::slug($title),

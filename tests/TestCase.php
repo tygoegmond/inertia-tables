@@ -5,7 +5,6 @@ namespace Egmond\InertiaTables\Tests;
 use Egmond\InertiaTables\InertiaTablesServiceProvider;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\File;
 use Orchestra\Testbench\TestCase as Orchestra;
 
 class TestCase extends Orchestra
@@ -20,7 +19,7 @@ class TestCase extends Orchestra
             fn (string $modelName) => 'Egmond\\InertiaTables\\Tests\\Database\\Factories\\'.class_basename($modelName).'Factory'
         );
 
-        $this->loadMigrationsFrom(__DIR__ . '/database/migrations');
+        $this->loadMigrationsFrom(__DIR__.'/database/migrations');
     }
 
     protected function getPackageProviders($app)
@@ -42,6 +41,6 @@ class TestCase extends Orchestra
 
     protected function defineDatabaseMigrations()
     {
-        $this->loadMigrationsFrom(__DIR__ . '/database/migrations');
+        $this->loadMigrationsFrom(__DIR__.'/database/migrations');
     }
 }

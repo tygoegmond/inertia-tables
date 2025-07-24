@@ -184,11 +184,11 @@ class Table
             ->paginate($this->perPage);
 
         $builder->setName($this->name);
-        
+
         if ($this->tableClass) {
             $builder->setTableClass($this->tableClass);
         }
-        
+
         $builder->actions($this->actions);
         $builder->bulkActions($this->bulkActions);
         $builder->headerActions($this->headerActions);

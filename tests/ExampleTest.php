@@ -8,7 +8,7 @@ it('can test', function () {
 
 it('can create test models', function () {
     $user = User::factory()->create();
-    
+
     expect($user)->toBeInstanceOf(User::class);
     expect($user->name)->toBeString();
     expect($user->email)->toBeString();

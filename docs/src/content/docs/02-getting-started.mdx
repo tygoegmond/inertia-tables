@@ -56,12 +56,12 @@ class UserTable implements HasTable
             ])
             ->actions([
                 Action::make('edit')
-                    ->label('Edit User')
-                    ->color('primary'),
+                    ->label('Edit User'),
 
                 Action::make('delete')
                     ->label('Delete')
                     ->color('danger')
+                    ->action(fn (User $record) => $record->delete())
                     ->requiresConfirmation(),
             ])
             ->searchable()
@@ -122,8 +122,8 @@ Let's break down what each part of your table does:
 ### Table Configuration
 
 ```php
-->as('users')                // Sets the table name for frontend state management
-->query(User::query())       // Defines the base Eloquent query
+->as('users')               // Sets the table name for frontend state management
+->query(User::query())      // Defines the base Eloquent query
 ->searchable()              // Enables global search functionality
 ->paginate(15)              // Sets pagination to 15 items per page
 ```
@@ -132,7 +132,7 @@ Let's break down what each part of your table does:
 
 ```php
 TextColumn::make('name')
-    ->searchable()           // Makes this column searchable
+    ->searchable()          // Makes this column searchable
     ->sortable()            // Enables sorting on this column
 ```
 
@@ -141,9 +141,9 @@ TextColumn::make('name')
 ```php
 Action::make('edit')
     ->label('Edit User')     // Display text for the action
-    ->color('primary')       // Sets the button color theme
 
 Action::make('delete')
+    ->action()               // Defines the action to perform
     ->requiresConfirmation() // Shows confirmation dialog before executing
 ```
 
@@ -157,7 +157,6 @@ TextColumn::make('name')
 
 TextColumn::make('email')
     ->searchable()           // Searches in the 'email' column
-    ->searchColumn('email')  // Specify custom search column if needed
 ```
 
 ## Adding Sorting
@@ -167,38 +166,6 @@ Enable sorting on columns by calling the `sortable()` method:
 ```php
 TextColumn::make('created_at')
     ->sortable()
-    ->defaultSort('desc')    // Set default sort direction
-```
-
-You can also set default sorting at the table level:
-
-```php
-public function table(Table $table): Table
-{
-    return $table
-        ->defaultSort('created_at', 'desc')
-        // ... other configuration
-}
-```
-
-## Handling Actions
-
-Actions need to be handled on the backend. Create action methods in your table class:
-
-```php
-public function editAction($record)
-{
-    // Handle edit action
-    return redirect()->route('users.edit', $record);
-}
-
-public function deleteAction($record)
-{
-    // Handle delete action
-    $record->delete();
-
-    return back()->with('success', 'User deleted successfully');
-}
 ```
 
 ## Working with Relationships
@@ -209,25 +176,6 @@ You can easily display and search relationship data using dot notation:
 TextColumn::make('profile.company')
     ->label('Company')
     ->searchable(),
-
-TextColumn::make('posts_count')
-    ->label('Posts')
-    ->sortable(),
-```
-
-Make sure to eager load relationships in your query:
-
-```php
-public function table(Table $table): Table
-{
-    return $table
-        ->query(
-            User::query()
-                ->with('profile')
-                ->withCount('posts')
-        )
-        // ... rest of configuration
-}
 ```
 
 ## Deferred Loading
@@ -246,17 +194,6 @@ public function index(): Response
 
 The React component will show a loading state until the data is available.
 
-## Customizing Appearance
-
-You can customize the table's appearance by passing a `className` prop:
-
-```tsx
-<InertiaTable
-  state={users}
-  className="shadow-lg rounded-xl border-gray-300"
-/>
-```
-
 ## Next Steps
 
 Now that you have a basic table working, you can explore more advanced features:
@@ -265,42 +202,5 @@ Now that you have a basic table working, you can explore more advanced features:
 - **[Actions](/04-actions/01-getting-started)** - Explore row actions, bulk actions, and header actions
 - **[Search & Filtering](/05-search-and-filtering)** - Advanced search and filtering capabilities
 - **[React Integration](/07-react-integration)** - Customize the React components and hooks
-
-## Common Patterns
-
-### Adding a Create Button
-
-You can add header actions for table-level operations:
-
-```php
-->headerActions([
-    Action::make('create')
-        ->label('Create User')
-        ->color('primary'),
-])
-```
-
-### Bulk Actions
-
-Enable bulk operations by adding bulk actions:
-
-```php
-->bulkActions([
-    BulkAction::make('delete')
-        ->label('Delete Selected')
-        ->color('danger')
-        ->requiresConfirmation(),
-])
-```
-
-### Custom Column Formatting
-
-Format column data with closures:
-
-```php
-TextColumn::make('created_at')
-    ->formatStateUsing(fn ($state) => $state->format('M j, Y'))
-    ->label('Joined Date'),
-```
 
 This completes your first Inertia Tables implementation! The table will automatically handle search, sorting, pagination, and actions with a clean, responsive interface.

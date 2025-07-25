@@ -1,0 +1,54 @@
+---
+title: Installation
+description: Complete guide to installing and setting up Inertia Tables in your Laravel application.
+---
+
+## Requirements
+
+Inertia Tables requires the following to run:
+
+- **PHP 8.2+**
+- **Laravel v12.0+**
+- **Inertia.js v2+**
+- **React 18.2.0+**
+- **Tailwind CSS v4.0+**
+
+## Backend Installation
+
+Require the package using Composer:
+
+```bash
+composer require tygoegmond/inertia-tables
+```
+
+The package will automatically register its service provider via Laravel's package auto-discovery.
+
+## Frontend Installation
+
+Install the React components package:
+
+```bash
+npm install @tygoegmond/inertia-tables-react
+```
+
+### 2. Import Styles
+
+Use the `@source` directive to import the Inertia Tables styles in your `app.css` file:
+
+```css
+@source '../../vendor/tygoegmond/inertia-tables/react/src/**/*.{js,jsx}';
+```
+
+### 3. Compile Assets
+
+Compile your assets:
+
+```bash
+npm run dev
+# or for production
+npm run build
+```
+
+## Next Steps
+
+Now that you have Inertia Tables installed, continue to the [Getting Started](/getting-started) guide to learn how to build your first table with all the available features.

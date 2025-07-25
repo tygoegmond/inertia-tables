@@ -1,0 +1,73 @@
+---
+title: Actions
+description: Learn about the action system in Inertia Tables and how to add interactive functionality to your tables.
+---
+
+Actions in Inertia Tables provide interactive functionality that allows users to perform operations on table data. The action system supports three types of actions:
+
+1. **Row Actions** - Actions that operate on individual table rows
+2. **Bulk Actions** - Actions that operate on multiple selected rows
+
+## Row Actions
+
+Row actions are interactive buttons that appear for each row in your table, allowing users to perform operations on individual records.
+
+```php
+use Egmond\InertiaTables\Table;
+
+public function table(Table $table): Table
+{
+    return $table
+        ->actions([
+            // ...
+        ]);
+}
+```
+
+Actions may be created using the static `make()` method, passing its unique name.
+
+You can then pass a function to `action()` which executes the task, or a function to `url()` which creates a link:
+
+```php
+use App\Models\Post;
+use Egmond\InertiaTables\Actions\Action;
+
+Action::make('edit')
+    ->url(fn (Post $record): string => route('posts.edit', $record))
+    ->openUrlInNewTab()
+
+Action::make('delete')
+    ->requiresConfirmation()
+    ->action(fn (Post $record) => $record->delete())
+```
+
+All methods on the action accept callback functions, where you can access the current table `$record` that was clicked.
+
+## Bulk actions
+
+Tables also support "bulk actions". These actions operate on multiple selected rows and appear when rows are selected.
+
+```php
+use Egmond\InertiaTables\Table;
+
+public function table(Table $table): Table
+{
+    return $table
+        ->bulkActions([
+            // ...
+        ]);
+}
+```
+
+Bulk actions may be created using the static `make()` method, passing its unique name. You should then pass a callback to `action()` which executes the task:
+
+```php
+use Egmond\InertiaTables\Actions\BulkAction;
+use Illuminate\Database\Eloquent\Collection;
+
+BulkAction::make('delete')
+    ->requiresConfirmation()
+    ->action(fn (Collection $records) => $records->each->delete())
+```
+
+The function allows you to access the current table `$records` that are selected. It is an Eloquent collection of models.

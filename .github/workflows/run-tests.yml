@@ -21,15 +21,12 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        php: [8.4, 8.3]
+        php: [8.4, 8.3, 8.2]
         laravel: [12.*]
         stability: [prefer-lowest, prefer-stable]
         include:
           - laravel: 12.*
             testbench: 10.*
-          - laravel: 11.*
-            testbench: 9.*
-
 
     name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.stability }} - ${{ matrix.os }}
 
@@ -69,9 +66,3 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: tygoegmond/inertia-tables
-
-      - name: Upload test results to Codecov
-        if: ${{ !cancelled() && matrix.os == 'ubuntu-latest' && matrix.php == '8.4' && matrix.laravel == '12.*' && matrix.stability == 'prefer-stable' }}
-        uses: codecov/test-results-action@v1
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}

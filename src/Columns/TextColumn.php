@@ -48,9 +48,9 @@ class TextColumn extends BaseColumn
         return $this;
     }
 
-    public function wrap(string $wrap): static
+    public function wrap(): static
     {
-        $this->wrap = $wrap;
+        $this->wrap = 'break-words';
 
         return $this;
     }

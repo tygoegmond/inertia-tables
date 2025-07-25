@@ -2,12 +2,11 @@
 
 use Egmond\InertiaTables\Actions\Action;
 use Egmond\InertiaTables\Actions\BulkAction;
+use Egmond\InertiaTables\Contracts\HasTable;
 use Egmond\InertiaTables\Http\Requests\ActionRequest;
 use Egmond\InertiaTables\Table;
 use Egmond\InertiaTables\TableResult;
-use Egmond\InertiaTables\Contracts\HasTable;
 use Egmond\InertiaTables\Tests\Database\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
 
@@ -18,8 +17,10 @@ describe('ActionRequest Class', function () {
         $this->users = User::factory()->count(3)->create();
 
         // Create a sample table class for testing
-        $this->table = new class extends Table implements HasTable {
-            public function __construct() {
+        $this->table = new class extends Table implements HasTable
+        {
+            public function __construct()
+            {
                 $this->query(User::query())
                     ->as('users')
                     ->columns([])
@@ -32,23 +33,28 @@ describe('ActionRequest Class', function () {
                     ]);
             }
 
-            public function build(): TableResult {
+            public function build(): TableResult
+            {
                 return parent::build();
             }
 
-            public function getTable(): Table {
+            public function getTable(): Table
+            {
                 return $this;
             }
 
-            public function table(Table $table): Table {
+            public function table(Table $table): Table
+            {
                 return $table;
             }
 
-            public function toArray(): array {
+            public function toArray(): array
+            {
                 return [];
             }
 
-            public function jsonSerialize(): mixed {
+            public function jsonSerialize(): mixed
+            {
                 return $this->toArray();
             }
         };

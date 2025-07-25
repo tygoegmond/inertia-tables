@@ -187,26 +187,26 @@ class TableBuilder
                     $parts = explode('.', $column);
                     $relationshipName = $parts[0];
                     $relationshipColumn = $parts[1];
-                    
+
                     // Get the relationship instance to determine the table name and foreign key
                     $model = $query->getModel();
                     $relationship = $model->{$relationshipName}();
                     $relatedTable = $relationship->getRelated()->getTable();
                     $foreignKey = $relationship->getForeignKeyName();
                     $ownerKey = $relationship->getOwnerKeyName();
-                    
+
                     // Only join if not already joined to prevent duplicate joins
-                    $joinAlias = $relatedTable . '_for_sort';
+                    $joinAlias = $relatedTable.'_for_sort';
                     $hasJoin = collect($query->getQuery()->joins ?? [])->contains(function ($join) use ($relatedTable, $joinAlias) {
                         return $join->table === $relatedTable || $join->table === $joinAlias;
                     });
-                    
-                    if (!$hasJoin) {
+
+                    if (! $hasJoin) {
                         // Use a left join to avoid filtering out records without relationships
-                        $query->leftJoin($relatedTable . ' as ' . $joinAlias, $model->getTable() . '.' . $foreignKey, '=', $joinAlias . '.' . $ownerKey);
+                        $query->leftJoin($relatedTable.' as '.$joinAlias, $model->getTable().'.'.$foreignKey, '=', $joinAlias.'.'.$ownerKey);
                     }
-                    
-                    $query->orderBy($joinAlias . '.' . $relationshipColumn, $direction);
+
+                    $query->orderBy($joinAlias.'.'.$relationshipColumn, $direction);
                 } else {
                     // Handle regular columns
                     $query->orderBy($column, $direction);

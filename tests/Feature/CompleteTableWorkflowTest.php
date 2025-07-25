@@ -4,7 +4,6 @@ use Egmond\InertiaTables\Actions\Action;
 use Egmond\InertiaTables\Actions\BulkAction;
 use Egmond\InertiaTables\Columns\TextColumn;
 use Egmond\InertiaTables\Contracts\HasTable;
-use Egmond\InertiaTables\Facades\InertiaTables;
 use Egmond\InertiaTables\Table;
 use Egmond\InertiaTables\TableResult;
 use Egmond\InertiaTables\Tests\Database\Models\Category;
@@ -111,19 +110,23 @@ describe('Complete Table Workflow Feature Tests', function () {
                 return parent::build();
             }
 
-            public function getTable(): Table {
+            public function getTable(): Table
+            {
                 return $this;
             }
 
-            public function table(Table $table): Table {
+            public function table(Table $table): Table
+            {
                 return $table;
             }
 
-            public function toArray(): array {
+            public function toArray(): array
+            {
                 return [];
             }
 
-            public function jsonSerialize(): mixed {
+            public function jsonSerialize(): mixed
+            {
                 return $this->toArray();
             }
         };
@@ -175,7 +178,7 @@ describe('Complete Table Workflow Feature Tests', function () {
             // Get a post to search for by title (since title is searchable)
             $post = $this->posts->first();
             $searchTerm = substr($post->title, 0, 5); // Search for first 5 chars of title
-            
+
             $request = Request::create('/test', 'GET', [
                 'posts' => [
                     'search' => $searchTerm,
@@ -338,7 +341,7 @@ describe('Complete Table Workflow Feature Tests', function () {
 
             // Ensure we found the archived post and test the authorization
             expect($archivedPostData)->not->toBeNull();
-            
+
             // The edit action should not be available for archived posts
             if (isset($archivedPostData['actions'])) {
                 $editActionAvailable = false;
@@ -363,7 +366,7 @@ describe('Complete Table Workflow Feature Tests', function () {
             // Get a post to search for by title (since title is searchable)
             $post = $this->posts->first();
             $searchTerm = substr($post->title, 0, 5); // Search for first 5 chars of title
-            
+
             $request = Request::create('/test', 'GET', [
                 'posts' => [
                     'search' => $searchTerm,
@@ -559,7 +562,7 @@ describe('Complete Table Workflow Feature Tests', function () {
             // Simulate admin dashboard with sort, filter (search removed due to relationship column issues)
             $request = Request::create('/admin/posts', 'GET', [
                 'posts' => [
-                    'sort' => 'created_at',  
+                    'sort' => 'created_at',
                     'direction' => 'desc',
                     'per_page' => 15,
                 ],

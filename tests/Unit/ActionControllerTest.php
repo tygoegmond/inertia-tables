@@ -5,11 +5,11 @@ use Egmond\InertiaTables\Actions\BulkAction;
 use Egmond\InertiaTables\Http\Controllers\ActionController;
 use Egmond\InertiaTables\Http\Requests\ActionRequest;
 use Egmond\InertiaTables\Tests\Database\Models\User;
+use Egmond\InertiaTables\Tests\Helpers\MockHelpers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\URL;
 use Illuminate\Routing\UrlGenerator;
-use Egmond\InertiaTables\Tests\Helpers\MockHelpers;
+use Illuminate\Support\Facades\URL;
 use Mockery;
 
 describe('ActionController Class', function () {
@@ -17,7 +17,7 @@ describe('ActionController Class', function () {
     beforeEach(function () {
         $this->controller = new ActionController;
         $this->user = User::factory()->create(['name' => 'Test User']);
-        
+
         // Mock URL generator globally for all tests
         $urlGenerator = Mockery::mock(UrlGenerator::class);
         $urlGenerator->shouldReceive('previous')->andReturn('/previous-url');
@@ -66,7 +66,6 @@ describe('ActionController Class', function () {
                 'has_inertia_header' => false,
             ]);
 
-
             $response = $this->controller->__invoke($request);
 
             expect($response)->toBeInstanceOf(RedirectResponse::class);
@@ -82,7 +81,6 @@ describe('ActionController Class', function () {
                 'expects_json' => false,
                 'has_inertia_header' => false,
             ]);
-
 
             $response = $this->controller->__invoke($request);
 
@@ -126,7 +124,6 @@ describe('ActionController Class', function () {
                 'has_inertia_header' => false,
             ]);
 
-
             $response = $this->controller->__invoke($request);
 
             expect($response)->toBeInstanceOf(RedirectResponse::class);
@@ -160,7 +157,6 @@ describe('ActionController Class', function () {
                 'has_inertia_header' => false,
             ]);
 
-
             $response = $this->controller->__invoke($request);
 
             expect($response)->toBeInstanceOf(RedirectResponse::class);
@@ -192,7 +188,6 @@ describe('ActionController Class', function () {
                 'expects_json' => false,
                 'has_inertia_header' => false,
             ]);
-
 
             $response = $this->controller->__invoke($request);
 
@@ -243,7 +238,6 @@ describe('ActionController Class', function () {
                 'expects_json' => false,
                 'has_inertia_header' => false,
             ]);
-
 
             $response = $this->controller->__invoke($request);
 
@@ -366,7 +360,6 @@ describe('ActionController Class', function () {
                 'expects_json' => false,
                 'has_inertia_header' => false,
             ]);
-
 
             $response1 = $this->controller->__invoke($regularRequest);
             expect($response1)->toBeInstanceOf(RedirectResponse::class);

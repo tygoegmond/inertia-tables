@@ -2,9 +2,9 @@
 
 use Egmond\InertiaTables\Actions\Action;
 use Egmond\InertiaTables\Actions\BulkAction;
+use Egmond\InertiaTables\Contracts\HasTable;
 use Egmond\InertiaTables\Table;
 use Egmond\InertiaTables\TableResult;
-use Egmond\InertiaTables\Contracts\HasTable;
 use Egmond\InertiaTables\Tests\Database\Models\User;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
@@ -18,8 +18,10 @@ describe('Action HTTP Integration Tests', function () {
         $this->users = User::factory()->count(5)->create();
 
         // Create a test table class
-        $this->table = new class extends Table implements HasTable {
-            public function __construct() {
+        $this->table = new class extends Table implements HasTable
+        {
+            public function __construct()
+            {
                 $this->query(User::query())
                     ->as('users')
                     ->columns([])
@@ -68,23 +70,29 @@ describe('Action HTTP Integration Tests', function () {
                     ])
                     ->setTableClass(get_class($this));
             }
-            
-            public function getTable(): Table {
+
+            public function getTable(): Table
+            {
                 return $this;
             }
 
-            public function table(Table $table): Table {
+            public function table(Table $table): Table
+            {
                 return $table;
             }
 
-            public function toArray(): array {
+            public function toArray(): array
+            {
                 return [];
             }
 
-            public function jsonSerialize(): mixed {
+            public function jsonSerialize(): mixed
+            {
                 return $this->toArray();
             }
-            public function build(): TableResult {
+
+            public function build(): TableResult
+            {
                 return parent::build();
             }
         };

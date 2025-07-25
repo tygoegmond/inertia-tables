@@ -37,8 +37,6 @@ export default defineConfig({
 				{ label: 'Sorting & Pagination', slug: '06-sorting-pagination' },
 				{ label: 'React Integration', slug: '07-react-integration' },
 				{ label: 'Advanced Usage', slug: '08-advanced-usage' },
-				{ label: 'API Reference', slug: '09-api-reference' },
-				{ label: 'Examples', slug: '10-examples' },
 			],
 		}),
 	],

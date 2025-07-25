@@ -19,7 +19,7 @@ class TestCase extends Orchestra
             fn (string $modelName) => 'Egmond\\InertiaTables\\Tests\\Database\\Factories\\'.class_basename($modelName).'Factory'
         );
 
-        $this->loadMigrationsFrom(__DIR__.'/database/migrations');
+        $this->loadMigrationsFrom(__DIR__.'/Database/Migrations');
     }
 
     protected function getPackageProviders($app)
@@ -45,6 +45,6 @@ class TestCase extends Orchestra
 
     protected function defineDatabaseMigrations()
     {
-        $this->loadMigrationsFrom(__DIR__.'/database/migrations');
+        $this->loadMigrationsFrom(__DIR__.'/Database/Migrations');
     }
 }

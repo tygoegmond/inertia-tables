@@ -1,0 +1,193 @@
+---
+title: Installation
+description: Complete guide to installing and setting up Inertia Tables in your Laravel application.
+---
+
+## Requirements
+
+Inertia Tables requires the following to run:
+
+- **PHP 8.2+**
+- **Laravel v11.0+** (also compatible with v10.0+)
+- **Inertia.js v1.3.0+** (also compatible with v2.0+)
+- **React 18.2.0+** (also compatible with v19.0+)
+- **Tailwind CSS v3.0+**
+
+## Backend Installation
+
+### 1. Install the PHP Package
+
+Require the package using Composer:
+
+```bash
+composer require tygoegmond/inertia-tables
+```
+
+The package will automatically register its service provider via Laravel's package auto-discovery.
+
+### 2. Publish Configuration (Optional)
+
+You can publish the configuration file to customize default settings:
+
+```bash
+php artisan vendor:publish --tag="inertia-tables-config"
+```
+
+This will create a `config/inertia-tables.php` file where you can customize default pagination settings, table classes, and more.
+
+## Frontend Installation
+
+### 1. Install the React Package
+
+Install the React components package:
+
+```bash
+npm install @tygoegmond/inertia-tables-react
+```
+
+### 2. Configure Tailwind CSS
+
+Add the package paths to your `tailwind.config.js` to ensure all styles are compiled:
+
+```js
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./resources/**/*.blade.php",
+    "./resources/**/*.js",
+    "./resources/**/*.jsx",
+    "./resources/**/*.ts",
+    "./resources/**/*.tsx",
+    // Add this line to include Inertia Tables styles
+    "./vendor/tygoegmond/inertia-tables/react/src/**/*.{js,jsx,ts,tsx}",
+    // Or if using npm package directly:
+    "./node_modules/@tygoegmond/inertia-tables-react/dist/**/*.{js,jsx,ts,tsx}",
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+```
+
+### 3. Import Base Styles
+
+Add the base styles to your main CSS file (typically `resources/css/app.css`):
+
+```css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Add any custom table styles here if needed */
+```
+
+### 4. Install Peer Dependencies
+
+The package requires several peer dependencies. Install them if they're not already in your project:
+
+```bash
+npm install @inertiajs/react react react-dom
+```
+
+### 5. Compile Assets
+
+Compile your assets:
+
+```bash
+npm run dev
+# or for production
+npm run build
+```
+
+## Verification
+
+To verify your installation is working correctly, try creating a simple table:
+
+### 1. Create a Table Class
+
+```php
+<?php
+
+namespace App\Tables;
+
+use App\Models\User;
+use Egmond\InertiaTables\Concerns\InteractsWithTable;
+use Egmond\InertiaTables\Contracts\HasTable;
+use Egmond\InertiaTables\Table;
+use Egmond\InertiaTables\Columns\TextColumn;
+
+class UserTable implements HasTable
+{
+    use InteractsWithTable;
+
+    public function table(Table $table): Table
+    {
+        return $table->as('users')
+            ->query(User::query())
+            ->columns([
+                TextColumn::make('name'),
+                TextColumn::make('email'),
+            ])
+            ->paginate(10);
+    }
+}
+```
+
+### 2. Use in Controller
+
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Tables\UserTable;
+use Inertia\Inertia;
+
+class DashboardController extends Controller
+{
+    public function index()
+    {
+        return Inertia::render('Dashboard', [
+            'users' => UserTable::make(),
+        ]);
+    }
+}
+```
+
+### 3. Render in React
+
+```tsx
+import { InertiaTable } from '@tygoegmond/inertia-tables-react';
+
+export default function Dashboard({ users }) {
+  return (
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-6">Users</h1>
+      <InertiaTable state={users} />
+    </div>
+  );
+}
+```
+
+## Troubleshooting
+
+### Common Issues
+
+**Styles not loading**: Make sure you've added the package paths to your Tailwind config and compiled your assets.
+
+**Type errors**: Ensure you have the correct peer dependencies installed and your TypeScript configuration includes the package types.
+
+**Table not rendering**: Check that your table class implements the `HasTable` interface and uses the `InteractsWithTable` trait.
+
+### Getting Help
+
+If you encounter issues:
+
+1. Check the [API Reference](/09-api-reference) for detailed method documentation
+2. Review the [Examples](/10-examples) for common patterns
+3. Open an issue on [GitHub](https://github.com/tygoegmond/inertia-tables/issues)
+
+## Next Steps
+
+Now that you have Inertia Tables installed, continue to the [Getting Started](/02-getting-started) guide to learn how to build your first table with all the available features.

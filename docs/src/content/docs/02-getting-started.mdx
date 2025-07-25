@@ -1,0 +1,328 @@
+---
+title: Getting Started
+description: Learn how to create your first data table with Inertia Tables through a step-by-step tutorial.
+---
+
+## Overview
+
+Inertia Tables allows you to create interactive data tables that seamlessly integrate between your Laravel backend and React frontend. This guide will walk you through building your first table with common features like columns, search, sorting, and actions.
+
+## Creating Your First Table
+
+Let's build a complete users table that demonstrates the core features of Inertia Tables.
+
+### Step 1: Create a Table Class
+
+First, create a table class that defines your table structure. Run this Artisan command:
+
+```bash
+php artisan make:table UserTable
+```
+
+Or create the file manually at `app/Tables/UserTable.php`:
+
+```php
+<?php
+
+namespace App\Tables;
+
+use App\Models\User;
+use Egmond\InertiaTables\Concerns\InteractsWithTable;
+use Egmond\InertiaTables\Contracts\HasTable;
+use Egmond\InertiaTables\Table;
+use Egmond\InertiaTables\Columns\TextColumn;
+use Egmond\InertiaTables\Actions\Action;
+
+class UserTable implements HasTable
+{
+    use InteractsWithTable;
+
+    public function table(Table $table): Table
+    {
+        return $table->as('users')
+            ->query(User::query())
+            ->columns([
+                TextColumn::make('name')
+                    ->searchable()
+                    ->sortable(),
+                
+                TextColumn::make('email')
+                    ->searchable()
+                    ->sortable(),
+                
+                TextColumn::make('created_at')
+                    ->sortable()
+                    ->label('Joined'),
+            ])
+            ->actions([
+                Action::make('edit')
+                    ->label('Edit User')
+                    ->color('primary'),
+                
+                Action::make('delete')
+                    ->label('Delete')
+                    ->color('danger')
+                    ->requiresConfirmation(),
+            ])
+            ->searchable()
+            ->paginate(15);
+    }
+}
+```
+
+### Step 2: Use the Table in Your Controller
+
+Update your controller to return the table data:
+
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Tables\UserTable;
+use Inertia\Inertia;
+use Inertia\Response;
+
+class DashboardController extends Controller
+{
+    public function index(): Response
+    {
+        return Inertia::render('Dashboard', [
+            'users' => UserTable::make(),
+        ]);
+    }
+}
+```
+
+### Step 3: Render the Table in React
+
+Create or update your React component to display the table:
+
+```tsx
+import { InertiaTable } from '@tygoegmond/inertia-tables-react';
+import { TableResult } from '@tygoegmond/inertia-tables-react/types';
+
+interface DashboardProps {
+  users: TableResult;
+}
+
+export default function Dashboard({ users }: DashboardProps) {
+  return (
+    <div className="p-6">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+        <p className="mt-2 text-gray-600">Manage your users</p>
+      </div>
+      
+      <InertiaTable 
+        state={users}
+        className="shadow-sm border border-gray-200 rounded-lg"
+      />
+    </div>
+  );
+}
+```
+
+### Step 4: Set Up Routes
+
+Make sure your routes are configured correctly in `routes/web.php`:
+
+```php
+<?php
+
+use App\Http\Controllers\DashboardController;
+use Illuminate\Support\Facades\Route;
+
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->name('dashboard');
+```
+
+## Understanding Table Components
+
+Let's break down what each part of your table does:
+
+### Table Configuration
+
+```php
+->as('users')                // Sets the table name for frontend state management
+->query(User::query())       // Defines the base Eloquent query
+->searchable()              // Enables global search functionality
+->paginate(15)              // Sets pagination to 15 items per page
+```
+
+### Columns
+
+```php
+TextColumn::make('name')
+    ->searchable()           // Makes this column searchable
+    ->sortable()            // Enables sorting on this column
+```
+
+### Actions
+
+```php
+Action::make('edit')
+    ->label('Edit User')     // Display text for the action
+    ->color('primary')       // Sets the button color theme
+    
+Action::make('delete')
+    ->requiresConfirmation() // Shows confirmation dialog before executing
+```
+
+## Adding Search and Filtering
+
+The table automatically includes a search input when you call `->searchable()` on the table. Individual columns can be made searchable:
+
+```php
+TextColumn::make('name')
+    ->searchable()           // Searches in the 'name' column
+    
+TextColumn::make('email')
+    ->searchable()           // Searches in the 'email' column
+    ->searchColumn('email')  // Specify custom search column if needed
+```
+
+## Adding Sorting
+
+Enable sorting on columns by calling the `sortable()` method:
+
+```php
+TextColumn::make('created_at')
+    ->sortable()
+    ->defaultSort('desc')    // Set default sort direction
+```
+
+You can also set default sorting at the table level:
+
+```php
+public function table(Table $table): Table
+{
+    return $table
+        ->defaultSort('created_at', 'desc')
+        // ... other configuration
+}
+```
+
+## Handling Actions
+
+Actions need to be handled on the backend. Create action methods in your table class:
+
+```php
+public function editAction($record)
+{
+    // Handle edit action
+    return redirect()->route('users.edit', $record);
+}
+
+public function deleteAction($record)
+{
+    // Handle delete action
+    $record->delete();
+    
+    return back()->with('success', 'User deleted successfully');
+}
+```
+
+## Working with Relationships
+
+You can easily display and search relationship data using dot notation:
+
+```php
+TextColumn::make('profile.company')
+    ->label('Company')
+    ->searchable(),
+
+TextColumn::make('posts_count')
+    ->label('Posts')
+    ->sortable(),
+```
+
+Make sure to eager load relationships in your query:
+
+```php
+public function table(Table $table): Table
+{
+    return $table
+        ->query(
+            User::query()
+                ->with('profile')
+                ->withCount('posts')
+        )
+        // ... rest of configuration
+}
+```
+
+## Deferred Loading
+
+For better performance, you can defer table loading:
+
+```php
+// In your controller
+public function index(): Response
+{
+    return Inertia::render('Dashboard', [
+        'users' => Inertia::defer(fn () => UserTable::make()),
+    ]);
+}
+```
+
+The React component will show a loading state until the data is available.
+
+## Customizing Appearance
+
+You can customize the table's appearance by passing a `className` prop:
+
+```tsx
+<InertiaTable 
+  state={users}
+  className="shadow-lg rounded-xl border-gray-300"
+/>
+```
+
+## Next Steps
+
+Now that you have a basic table working, you can explore more advanced features:
+
+- **[Columns](/03-columns/01-getting-started)** - Learn about different column types and customization options
+- **[Actions](/04-actions/01-getting-started)** - Explore row actions, bulk actions, and header actions
+- **[Search & Filtering](/05-search-and-filtering)** - Advanced search and filtering capabilities
+- **[React Integration](/07-react-integration)** - Customize the React components and hooks
+
+## Common Patterns
+
+### Adding a Create Button
+
+You can add header actions for table-level operations:
+
+```php
+->headerActions([
+    Action::make('create')
+        ->label('Create User')
+        ->color('primary'),
+])
+```
+
+### Bulk Actions
+
+Enable bulk operations by adding bulk actions:
+
+```php
+->bulkActions([
+    BulkAction::make('delete')
+        ->label('Delete Selected')
+        ->color('danger')
+        ->requiresConfirmation(),
+])
+```
+
+### Custom Column Formatting
+
+Format column data with closures:
+
+```php
+TextColumn::make('created_at')
+    ->formatStateUsing(fn ($state) => $state->format('M j, Y'))
+    ->label('Joined Date'),
+```
+
+This completes your first Inertia Tables implementation! The table will automatically handle search, sorting, pagination, and actions with a clean, responsive interface.

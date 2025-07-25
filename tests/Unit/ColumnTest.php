@@ -407,12 +407,12 @@ describe('TextColumn Class', function () {
         });
 
         it('can set wrap mode', function () {
-            $result = $this->column->wrap('break-all');
+            $result = $this->column->wrap();
 
             expect($result)->toBe($this->column);
 
             $array = $this->column->toArray();
-            expect($array['wrap'])->toBe('break-all');
+            expect($array['wrap'])->toBe('break-words');
         });
 
     });

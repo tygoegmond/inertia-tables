@@ -3,39 +3,26 @@
 [![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/tygoegmond/inertia-tables/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/tygoegmond/inertia-tables/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/tygoegmond/inertia-tables.svg?style=flat-square)](https://packagist.org/packages/tygoegmond/inertia-tables)
 
-This is still a WIP!
+# Inertia Tables
 
-## Installation
+Inertia Tables provides a powerful and flexible way to create interactive data tables in your Laravel Inertia.js applications.
 
-You can install the package via composer:
+<img width="1702" height="805" alt="An example of a user table" src="https://github.com/user-attachments/assets/7324a041-1088-448f-bcc5-b6f493b4db92" />
 
-```bash
-composer require tygoegmond/inertia-tables
-```
 
-You can publish the config file with:
+## 📚 Documentation
 
-```bash
-php artisan vendor:publish --tag="inertia-tables-config"
-```
+For complete documentation, installation guide, and examples, visit:
+- **[Documentation](https://inertia-tables.tygoegmond.com/)**
+- **[Installation Guide](https://inertia-tables.tygoegmond.com/installation/)**
 
 ## Usage
 
--
-
-## Testing
-
-```bash
-composer test
-```
+Please refer to the [documentation](https://inertia-tables.tygoegmond.com/) for comprehensive usage examples and API reference.
 
 ## Changelog
 
 Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
-
-## Contributing
-
-Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 
 ## Security Vulnerabilities
 
@@ -44,6 +31,7 @@ Please review [our security policy](../../security/policy) on how to report secu
 ## Credits
 
 - [Tygo Egmond](https://github.com/tygoegmond)
+- [FilamentPHP](https://github.com/filamentphp/filament) contributors for inspiration and code examples
 - [All Contributors](../../contributors)
 
 ## License

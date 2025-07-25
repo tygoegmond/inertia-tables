@@ -1,7 +1,6 @@
 name: run-tests
 
 on:
-  pull_request: 
   push:
     paths:
       - '**.php'
@@ -72,7 +71,7 @@ jobs:
           slug: tygoegmond/inertia-tables
 
       - name: Upload test results to Codecov
-        if: ${{ !cancelled() && matrix.os == 'ubuntu-latest' && matrix.php == '8.4' && matrix.laravel == '12.*' && matrix.stability == 'prefer-stable' }}
+        if: matrix.os == 'ubuntu-latest' && matrix.php == '8.4' && matrix.laravel == '12.*' && matrix.stability == 'prefer-stable'
         uses: codecov/test-results-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}

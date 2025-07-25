@@ -10,10 +10,6 @@ hero:
     - text: Get Started
       link: /01-installation/
       icon: right-arrow
-    - text: View Examples
-      link: /10-examples/
-      icon: external
-      variant: minimal
 ---
 
 import { Card, CardGrid } from '@astrojs/starlight/components';
@@ -24,7 +20,7 @@ Inertia Tables is a powerful Laravel package that provides seamless integration 
 
 ## Key Features
 
-<CardGrid stagger>
+<CardGrid>
 	<Card title="🚀 Easy Setup" icon="rocket">
 		Get started in minutes with simple installation and intuitive API design. No complex configuration required.
 	</Card>
@@ -45,163 +41,10 @@ Inertia Tables is a powerful Laravel package that provides seamless integration 
 	</Card>
 </CardGrid>
 
-## Quick Start
-
-### 1. Install the Package
-
-```bash
-# Install the Laravel package
-composer require tygoegmond/inertia-tables
-
-# Install the React components
-npm install @tygoegmond/inertia-tables-react
-```
-
-### 2. Create a Table Class
-
-```php
-<?php
-
-namespace App\Tables;
-
-use App\Models\User;
-use Egmond\InertiaTables\Concerns\InteractsWithTable;
-use Egmond\InertiaTables\Contracts\HasTable;
-use Egmond\InertiaTables\Table;
-use Egmond\InertiaTables\Columns\TextColumn;
-use Egmond\InertiaTables\Actions\Action;
-
-class UserTable implements HasTable
-{
-    use InteractsWithTable;
-
-    public function table(Table $table): Table
-    {
-        return $table->as('users')
-            ->query(User::query())
-            ->columns([
-                TextColumn::make('name')->searchable()->sortable(),
-                TextColumn::make('email')->searchable()->sortable(),
-                TextColumn::make('created_at')->sortable(),
-            ])
-            ->actions([
-                Action::make('edit')->label('Edit User'),
-                Action::make('delete')->label('Delete')->color('danger'),
-            ])
-            ->searchable()
-            ->paginate(15);
-    }
-}
-```
-
-### 3. Use in Your Controller
-
-```php
-<?php
-
-namespace App\Http\Controllers;
-
-use App\Tables\UserTable;
-use Inertia\Inertia;
-
-class DashboardController extends Controller
-{
-    public function index()
-    {
-        return Inertia::render('Dashboard', [
-            'users' => UserTable::make(),
-        ]);
-    }
-}
-```
-
-### 4. Render in React
-
-```tsx
-import { InertiaTable } from '@tygoegmond/inertia-tables-react';
-
-export default function Dashboard({ users }) {
-  return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Users</h1>
-      <InertiaTable state={users} />
-    </div>
-  );
-}
-```
-
-## Core Concepts
-
-### Tables
-The foundation of the package. Tables define the structure, data source, and behavior of your data display.
-
-### Columns
-Flexible column types for displaying different kinds of data, from simple text to complex formatted values with badges, prefixes, and custom formatting.
-
-### Actions
-Interactive operations that users can perform on your data:
-- **Row Actions**: Operations on individual records (edit, delete, view)
-- **Bulk Actions**: Operations on multiple selected records
-- **Header Actions**: Table-level operations (create, export, import)
-
-### Search & Filtering
-Built-in search functionality with support for column-specific searching, relationship searching, and custom search logic.
-
-### Sorting & Pagination
-Efficient sorting and pagination with support for multiple columns, relationship sorting, and custom pagination logic.
-
-## Why Choose Inertia Tables?
-
-### 🎯 **Purpose-Built for Inertia.js**
-Designed specifically for Laravel + Inertia.js + React applications, providing seamless integration without the complexity of generic solutions.
-
-### 🔧 **Developer Experience**
-Intuitive API design, comprehensive TypeScript support, and excellent documentation make development fast and enjoyable.
-
-### 🎨 **Modern UI**
-Built with shadcn/ui components and Tailwind CSS for beautiful, consistent, and customizable interfaces.
-
-### 📈 **Scalable**
-Handles everything from simple tables to complex enterprise data management with performance optimizations and advanced features.
-
-### 🔒 **Secure by Design**
-Built-in authorization support, CSRF protection, and security best practices ensure your data is protected.
-
-## Documentation Structure
-
-Our comprehensive documentation covers everything you need to know:
-
-<CardGrid>
-	<Card title="Installation" icon="document">
-		Complete setup guide for both Laravel and React components.
-		[Get Started →](/01-installation/)
-	</Card>
-	<Card title="Getting Started" icon="rocket">
-		Step-by-step tutorial to build your first table.
-		[Learn More →](/02-getting-started/)
-	</Card>
-	<Card title="Columns" icon="list-format">
-		Everything about displaying and formatting data.
-		[Explore →](/03-columns/01-getting-started/)
-	</Card>
-	<Card title="Actions" icon="setting">
-		Interactive operations and user actions.
-		[Discover →](/04-actions/01-getting-started/)
-	</Card>
-	<Card title="Search & Filtering" icon="magnifier">
-		Powerful search and filtering capabilities.
-		[Read More →](/05-search-and-filtering/)
-	</Card>
-	<Card title="React Integration" icon="external">
-		Frontend customization and component usage.
-		[Learn →](/07-react-integration/)
-	</Card>
-</CardGrid>
-
 ## Community and Support
 
 - **GitHub**: [tygoegmond/inertia-tables](https://github.com/tygoegmond/inertia-tables)
-- **Issues**: Report bugs and request features
+- **Issues**: Report bugs
 - **Discussions**: Ask questions and share ideas
 
 ## Ready to Build Amazing Tables?

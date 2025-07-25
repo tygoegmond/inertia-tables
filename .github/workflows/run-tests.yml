@@ -18,7 +18,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 5
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
         php: [8.4, 8.3]
@@ -61,7 +61,7 @@ jobs:
         run: composer show -D
 
       - name: Execute tests
-        run: vendor/bin/pest --ci
+        run: vendor/bin/pest --ci -p --display-deprecations --fail-on-deprecation --stop-on-failure --coverage-cobertura coverage.xml --log-junit junit.xml
 
       - name: Upload coverage reports to Codecov
         if: matrix.os == 'ubuntu-latest' && matrix.php == '8.4' && matrix.laravel == '12.*' && matrix.stability == 'prefer-stable'

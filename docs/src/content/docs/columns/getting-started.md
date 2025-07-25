@@ -135,4 +135,4 @@ TextColumn::make('name')
 
 Now that you understand the basics of columns, explore specific column types and their features:
 
-- **[Text Column](/03-columns/02-text-column)** - Learn about all TextColumn features and customization options
+- **[Text Column](/columns/text-column)** - Learn about all TextColumn features and customization options

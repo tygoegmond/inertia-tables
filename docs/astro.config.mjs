@@ -1,13 +1,22 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
-import starlightThemeRapide from 'starlight-theme-rapide'
+import starlightThemeBlack from 'starlight-theme-black'
 
 // https://astro.build/config
 export default defineConfig({
 	integrations: [
 		starlight({
-            plugins: [starlightThemeRapide()],
+            plugins: [
+                starlightThemeBlack({
+                    navLinks: [{ // optional
+                        label: 'Docs',
+                        link: '/getting-started',
+                    }],
+                    footerText: //optional
+                        'The source code is available on [GitHub](https://github.com/tygoegmond/inertia-tables).'
+                })
+            ],
 			title: 'Inertia Tables',
 			social: [
 				{ icon: 'github', label: 'GitHub', href: 'https://github.com/tygoegmond/inertia-tables' }

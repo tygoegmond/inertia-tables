@@ -70,4 +70,4 @@ TextColumn::make('email')
 
 ## Next Steps
 
-- **[Actions](/04-actions/01-getting-started)** - Add interactive actions to your tables
+- **[Actions](/actions)** - Add interactive actions to your tables

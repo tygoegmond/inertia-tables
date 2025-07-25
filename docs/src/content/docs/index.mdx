@@ -4,42 +4,18 @@ description: Build powerful, interactive data tables for Laravel and React with 
 template: splash
 hero:
   tagline: Create beautiful, functional data tables with minimal configuration
-  image:
-    file: ../../assets/houston.webp
   actions:
     - text: Get Started
       link: /installation/
       icon: right-arrow
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
+import { ContainerSection } from 'starlight-theme-black/components'
 
+<ContainerSection>
 ## What is Inertia Tables?
 
 Inertia Tables is a powerful Laravel package that provides seamless integration between your Laravel backend and React frontend for building interactive data tables. Built specifically for Inertia.js applications, it offers a complete solution for displaying, searching, sorting, and managing tabular data with minimal configuration.
-
-## Key Features
-
-<CardGrid>
-	<Card title="🚀 Easy Setup" icon="rocket">
-		Get started in minutes with simple installation and intuitive API design. No complex configuration required.
-	</Card>
-	<Card title="🔍 Powerful Search" icon="magnifier">
-		Built-in search functionality with support for multiple columns, relationships, and custom search logic.
-	</Card>
-	<Card title="⚡ Interactive Actions" icon="lightning">
-		Row actions, bulk operations, and header actions with confirmation dialogs and authorization support.
-	</Card>
-	<Card title="📱 Responsive Design" icon="tablet">
-		Beautiful, responsive tables built with shadcn/ui components that work seamlessly across all devices.
-	</Card>
-	<Card title="🎨 Customizable" icon="setting">
-		Extensive customization options for columns, actions, styling, and behavior to match your application's needs.
-	</Card>
-	<Card title="⚡ Performance Optimized" icon="approve-check">
-		Efficient database queries, pagination, and caching support for handling large datasets with excellent performance.
-	</Card>
-</CardGrid>
 
 ## Community and Support
 
@@ -52,3 +28,5 @@ Inertia Tables is a powerful Laravel package that provides seamless integration 
 Start building powerful, interactive data tables for your Laravel and React applications today.
 
 [Get Started with Installation →](/installation/)
+
+</ContainerSection>

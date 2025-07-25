@@ -136,27 +136,3 @@ TextColumn::make('name')
 Now that you understand the basics of columns, explore specific column types and their features:
 
 - **[Text Column](/03-columns/02-text-column)** - Learn about all TextColumn features and customization options
-
-## Column Reference
-
-### Common Column Methods
-
-| Method | Description | Example |
-|--------|-------------|---------|
-| `make(string $name)` | Create a new column | `TextColumn::make('name')` |
-| `label(string $label)` | Set column label | `->label('Full Name')` |
-| `sortable(bool $sortable = true)` | Enable/disable sorting | `->sortable()` |
-| `searchable(bool $searchable = true)` | Enable/disable searching | `->searchable()` |
-| `visible(bool\|Closure $visible = true)` | Control visibility | `->visible(false)` |
-| `formatStateUsing(Closure $callback)` | Format the displayed value | `->formatStateUsing(fn($state) => ucfirst($state))` |
-
-### Column Properties
-
-Each column instance contains:
-- `key`: The database column or accessor name
-- `label`: The display label for the column
-- `type`: The column type (e.g., 'text')
-- `visible`: Whether the column should be displayed
-- `sortable`: Whether the column can be sorted
-- `searchable`: Whether the column can be searched
-- `state`: Additional configuration options specific to the column type

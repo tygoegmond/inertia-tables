@@ -13,13 +13,13 @@ Let's build a complete users table that demonstrates the core features of Inerti
 
 ### Step 1: Create a Table Class
 
-First, create a table class that defines your table structure. Run this Artisan command:
+{/* First, create a table class that defines your table structure. Run this Artisan command: */}
 
-```bash
-php artisan make:table UserTable
-```
+{/* ```bash */}
+{/* php artisan make:table UserTable */}
+{/* ``` */}
 
-Or create the file manually at `app/Tables/UserTable.php`:
+Create the file manually at `app/Tables/UserTable.php`:
 
 ```php
 <?php
@@ -45,11 +45,11 @@ class UserTable implements HasTable
                 TextColumn::make('name')
                     ->searchable()
                     ->sortable(),
-                
+
                 TextColumn::make('email')
                     ->searchable()
                     ->sortable(),
-                
+
                 TextColumn::make('created_at')
                     ->sortable()
                     ->label('Joined'),
@@ -58,7 +58,7 @@ class UserTable implements HasTable
                 Action::make('edit')
                     ->label('Edit User')
                     ->color('primary'),
-                
+
                 Action::make('delete')
                     ->label('Delete')
                     ->color('danger')
@@ -108,33 +108,11 @@ interface DashboardProps {
 
 export default function Dashboard({ users }: DashboardProps) {
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="mt-2 text-gray-600">Manage your users</p>
-      </div>
-      
-      <InertiaTable 
+      <InertiaTable
         state={users}
-        className="shadow-sm border border-gray-200 rounded-lg"
       />
-    </div>
   );
 }
-```
-
-### Step 4: Set Up Routes
-
-Make sure your routes are configured correctly in `routes/web.php`:
-
-```php
-<?php
-
-use App\Http\Controllers\DashboardController;
-use Illuminate\Support\Facades\Route;
-
-Route::get('/dashboard', [DashboardController::class, 'index'])
-    ->name('dashboard');
 ```
 
 ## Understanding Table Components
@@ -164,7 +142,7 @@ TextColumn::make('name')
 Action::make('edit')
     ->label('Edit User')     // Display text for the action
     ->color('primary')       // Sets the button color theme
-    
+
 Action::make('delete')
     ->requiresConfirmation() // Shows confirmation dialog before executing
 ```
@@ -176,7 +154,7 @@ The table automatically includes a search input when you call `->searchable()` o
 ```php
 TextColumn::make('name')
     ->searchable()           // Searches in the 'name' column
-    
+
 TextColumn::make('email')
     ->searchable()           // Searches in the 'email' column
     ->searchColumn('email')  // Specify custom search column if needed
@@ -218,7 +196,7 @@ public function deleteAction($record)
 {
     // Handle delete action
     $record->delete();
-    
+
     return back()->with('success', 'User deleted successfully');
 }
 ```
@@ -273,7 +251,7 @@ The React component will show a loading state until the data is available.
 You can customize the table's appearance by passing a `className` prop:
 
 ```tsx
-<InertiaTable 
+<InertiaTable
   state={users}
   className="shadow-lg rounded-xl border-gray-300"
 />

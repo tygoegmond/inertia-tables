@@ -20,7 +20,6 @@ export default defineConfig({
 					items: [
 						{ label: 'Getting Started', slug: '03-columns/01-getting-started' },
 						{ label: 'Text Column', slug: '03-columns/02-text-column' },
-						{ label: 'Custom Columns', slug: '03-columns/03-custom-columns' },
 					],
 				},
 				{
@@ -33,7 +32,6 @@ export default defineConfig({
 						{ label: 'Custom Actions', slug: '04-actions/05-custom-actions' },
 					],
 				},
-				{ label: 'Search & Filtering', slug: '05-search-and-filtering' },
 				{ label: 'Sorting & Pagination', slug: '06-sorting-pagination' },
 				{ label: 'React Integration', slug: '07-react-integration' },
 				{ label: 'Advanced Usage', slug: '08-advanced-usage' },

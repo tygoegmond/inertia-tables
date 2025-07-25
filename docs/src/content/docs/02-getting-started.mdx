@@ -122,9 +122,9 @@ Let's break down what each part of your table does:
 ### Table Configuration
 
 ```php
-->as('users')               // Sets the table name for frontend state management
+->as('users')               // Sets the table name for state management
 ->query(User::query())      // Defines the base Eloquent query
-->searchable()              // Enables global search functionality
+->searchable()              // Enables search functionality
 ->paginate(15)              // Sets pagination to 15 items per page
 ```
 
@@ -153,10 +153,7 @@ The table automatically includes a search input when you call `->searchable()` o
 
 ```php
 TextColumn::make('name')
-    ->searchable()           // Searches in the 'name' column
-
-TextColumn::make('email')
-    ->searchable()           // Searches in the 'email' column
+    ->searchable()
 ```
 
 ## Adding Sorting

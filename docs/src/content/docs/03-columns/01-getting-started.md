@@ -7,6 +7,20 @@ description: Learn about the column system in Inertia Tables and how to configur
 
 Columns are the fundamental building blocks of your data tables. They define how your data is displayed, formatted, and interacted with. Inertia Tables provides a flexible column system that allows you to customize every aspect of your table's appearance and behavior.
 
+Column classes can be found in the `Egmond\InertiaTables\Columns` namespace. You can put them inside the `$table->columns()` method:
+
+```php
+use Egmond\InertiaTables\Table;
+
+public function table(Table $table): Table
+{
+    return $table
+        ->columns([
+            // ...
+        ]);
+}
+```
+
 ## Basic Column Structure
 
 All columns in Inertia Tables extend from the `BaseColumn` class and follow a consistent API pattern:
@@ -15,36 +29,17 @@ All columns in Inertia Tables extend from the `BaseColumn` class and follow a co
 use Egmond\InertiaTables\Columns\TextColumn;
 
 TextColumn::make('name')
-    ->label('Full Name')
-    ->sortable()
-    ->searchable()
 ```
 
 ## Available Column Types
 
 Inertia Tables currently provides the following column types:
 
-### Text Column
+- [Text Column](/03-columns/02-text-column)
 
-The most common column type for displaying text data:
-
-```php
-TextColumn::make('name')
-    ->label('Name')
-    ->searchable()
-    ->sortable()
-```
-
-More column types are planned for future releases, including:
-- Image Column
-- Icon Column  
-- Color Column
-- Boolean Column
-- Date Column
+More column types are planned for future releases.
 
 ## Column Creation
-
-### Using the `make()` Method
 
 All columns are created using the static `make()` method, which accepts the column name as its parameter:
 
@@ -58,7 +53,6 @@ The column name should correspond to:
 - A column in your database table
 - An accessor on your model
 - A relationship using dot notation
-- An aggregated field (like `posts_count`)
 
 ### Column Labels
 
@@ -77,8 +71,10 @@ Control column visibility:
 
 ```php
 TextColumn::make('email')
-    ->visible(true)              // Always visible
+    ->visible(true)              // Visible
+    ->hidden(false)              // Visible
     ->visible(false)             // Always hidden
+    ->hidden(true)               // Always hidden
     ->visible(fn() => auth()->user()->isAdmin()) // Conditional visibility
 ```
 
@@ -88,9 +84,7 @@ Enable sorting on columns:
 
 ```php
 TextColumn::make('name')
-    ->sortable()                 // Enable sorting
-    ->sortable(false)            // Disable sorting
-    ->defaultSort('asc')         // Set default sort direction
+    ->sortable()
 ```
 
 ### Searching
@@ -99,17 +93,7 @@ Make columns searchable:
 
 ```php
 TextColumn::make('name')
-    ->searchable()               // Enable search on this column
-    ->searchColumn('full_name')  // Search a different database column
-```
-
-### State Management
-
-Each column maintains state that can be accessed and modified:
-
-```php
-TextColumn::make('status')
-    ->formatStateUsing(fn ($state) => ucfirst($state))
+    ->searchable()
 ```
 
 ## Working with Relationships
@@ -123,39 +107,7 @@ TextColumn::make('author.name')
     ->sortable()
 ```
 
-Make sure to eager load the relationship in your table query:
-
-```php
-public function table(Table $table): Table
-{
-    return $table
-        ->query(
-            Post::query()->with('author')
-        )
-        ->columns([
-            TextColumn::make('title'),
-            TextColumn::make('author.name'),
-        ]);
-}
-```
-
-## Aggregated Columns
-
-Display aggregated data using Laravel's query builder methods:
-
-```php
-// In your table
-->query(
-    User::query()->withCount('posts')
-)
-->columns([
-    TextColumn::make('name'),
-    TextColumn::make('posts_count')
-        ->label('Total Posts'),
-])
-```
-
-## Column Configuration Chain
+## Method Chaining
 
 Columns support method chaining for clean, readable configuration:
 
@@ -169,27 +121,6 @@ TextColumn::make('email')
     ->wrap('truncate')
 ```
 
-## Custom Column Formatting
-
-You can customize how column data is formatted:
-
-```php
-TextColumn::make('price')
-    ->formatStateUsing(fn ($state) => '$' . number_format($state, 2))
-    ->label('Price')
-```
-
-## Column State
-
-Each column has access to the full row data through closures:
-
-```php
-TextColumn::make('status')
-    ->formatStateUsing(function ($state, $record) {
-        return $record->is_active ? 'Active' : 'Inactive';
-    })
-```
-
 ## Conditional Column Behavior
 
 Make columns behave differently based on conditions:
@@ -200,31 +131,11 @@ TextColumn::make('name')
     ->sortable(fn () => request()->has('sort'))
 ```
 
-## Column Collections
-
-When defining multiple columns, you can organize them in arrays:
-
-```php
-public function table(Table $table): Table
-{
-    return $table->columns([
-        // Basic info columns
-        TextColumn::make('name')->searchable(),
-        TextColumn::make('email')->searchable(), 
-        
-        // Metadata columns
-        TextColumn::make('created_at')->sortable(),
-        TextColumn::make('updated_at')->sortable(),
-    ]);
-}
-```
-
 ## Next Steps
 
 Now that you understand the basics of columns, explore specific column types and their features:
 
 - **[Text Column](/03-columns/02-text-column)** - Learn about all TextColumn features and customization options
-- **[Custom Columns](/03-columns/03-custom-columns)** - Create your own custom column types
 
 ## Column Reference
 

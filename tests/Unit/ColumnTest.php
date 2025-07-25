@@ -407,12 +407,12 @@ describe('TextColumn Class', function () {
         });
 
         it('can set wrap mode', function () {
-            $result = $this->column->wrap('break-all');
+            $result = $this->column->wrap();
 
             expect($result)->toBe($this->column);
 
             $array = $this->column->toArray();
-            expect($array['wrap'])->toBe('break-all');
+            expect($array['wrap'])->toBe('break-words');
         });
 
     });
@@ -470,7 +470,7 @@ describe('TextColumn Class', function () {
                 ->suffix(' USD')
                 ->copyable()
                 ->limit(50)
-                ->wrap('break-all')
+                ->wrap()
                 ->badge();
 
             $array = $this->column->toArray();
@@ -479,7 +479,7 @@ describe('TextColumn Class', function () {
             expect($array['suffix'])->toBe(' USD');
             expect($array['copyable'])->toBeTrue();
             expect($array['limit'])->toBe(50);
-            expect($array['wrap'])->toBe('break-all');
+            expect($array['wrap'])->toBe('break-words');
             expect($array['badge'])->toBeTrue();
         });
 
@@ -510,7 +510,7 @@ describe('TextColumn Class', function () {
                 ->suffix(' (end)')
                 ->limit(100)
                 ->copyable()
-                ->wrap('break-all')
+                ->wrap()
                 ->badge()
                 ->badgeVariant('info')
                 ->state(['custom' => 'data']);

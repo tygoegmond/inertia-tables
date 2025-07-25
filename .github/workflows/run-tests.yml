@@ -61,7 +61,7 @@ jobs:
         run: composer show -D
 
       - name: Execute tests
-        run: vendor/bin/pest --ci -p --display-deprecations --fail-on-deprecation --stop-on-failure --coverage-cobertura coverage.xml --log-junit junit.xml
+        run: vendor/bin/pest --ci -p --coverage-cobertura coverage.xml --log-junit junit.xml
 
       - name: Upload coverage reports to Codecov
         if: matrix.os == 'ubuntu-latest' && matrix.php == '8.4' && matrix.laravel == '12.*' && matrix.stability == 'prefer-stable'

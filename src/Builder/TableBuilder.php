@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 
+/** @phpstan-consistent-constructor */
 class TableBuilder
 {
     protected array $columns = [];
@@ -21,6 +22,14 @@ class TableBuilder
     protected ?Request $request = null;
 
     protected ?string $name = null;
+
+    protected array $actions = [];
+
+    protected array $bulkActions = [];
+
+    protected array $headerActions = [];
+
+    protected ?string $tableClass = null;
 
     public function __construct(?Request $request = null)
     {
@@ -76,6 +85,34 @@ class TableBuilder
         return $this;
     }
 
+    public function actions(array $actions): static
+    {
+        $this->actions = $actions;
+
+        return $this;
+    }
+
+    public function bulkActions(array $bulkActions): static
+    {
+        $this->bulkActions = $bulkActions;
+
+        return $this;
+    }
+
+    public function headerActions(array $headerActions): static
+    {
+        $this->headerActions = $headerActions;
+
+        return $this;
+    }
+
+    public function setTableClass(string $tableClass): static
+    {
+        $this->tableClass = $tableClass;
+
+        return $this;
+    }
+
     public function build(Builder $query): TableResult
     {
         // Apply relationship aggregations
@@ -104,6 +141,10 @@ class TableBuilder
             sort: $this->getSortData(),
             search: $this->getSearchQuery(),
             name: $this->name,
+            actions: $this->serializeActions($this->actions),
+            bulkActions: $this->serializeActions($this->bulkActions),
+            headerActions: $this->serializeActions($this->headerActions),
+            primaryKey: $this->primaryKey,
         );
     }
 
@@ -141,12 +182,42 @@ class TableBuilder
 
         foreach ($sortData as $column => $direction) {
             if (isset($this->columns[$column]) && $this->columns[$column]->isSortable()) {
-                $query->orderBy($column, $direction);
+                // Handle relationship columns (e.g., 'user.name')
+                if (str_contains($column, '.')) {
+                    $parts = explode('.', $column);
+                    $relationshipName = $parts[0];
+                    $relationshipColumn = $parts[1];
+
+                    // Get the relationship instance to determine the table name and foreign key
+                    $model = $query->getModel();
+                    $relationship = $model->{$relationshipName}();
+                    $relatedTable = $relationship->getRelated()->getTable();
+                    $foreignKey = $relationship->getForeignKeyName();
+                    $ownerKey = $relationship->getOwnerKeyName();
+
+                    // Only join if not already joined to prevent duplicate joins
+                    $joinAlias = $relatedTable.'_for_sort';
+                    $hasJoin = collect($query->getQuery()->joins ?? [])->contains(function ($join) use ($relatedTable, $joinAlias) {
+                        return $join->table === $relatedTable || $join->table === $joinAlias;
+                    });
+
+                    if (! $hasJoin) {
+                        // Use a left join to avoid filtering out records without relationships
+                        $query->leftJoin($relatedTable.' as '.$joinAlias, $model->getTable().'.'.$foreignKey, '=', $joinAlias.'.'.$ownerKey);
+                    }
+
+                    $query->orderBy($joinAlias.'.'.$relationshipColumn, $direction);
+                } else {
+                    // Handle regular columns
+                    $query->orderBy($column, $direction);
+                }
             }
         }
 
         return $query;
     }
+
+    protected ?string $primaryKey = null;
 
     protected function transformData(LengthAwarePaginator $results): array
     {
@@ -155,13 +226,18 @@ class TableBuilder
             $transformedRecord = [];
             $badgeVariants = [];
 
+            // Always include the primary key for row identification
+            $primaryKey = $record->getKeyName();
+            $this->primaryKey = $primaryKey; // Store for TableResult
+            $transformedRecord[$primaryKey] = $record->getKey();
+
             foreach ($this->columns as $column) {
                 $key = $column->getKey();
                 $value = data_get($record, $key);
                 $transformedRecord[$key] = $column->formatValue($value, $recordArray);
 
                 // Add badge variant to meta for TextColumn with badge enabled
-                if ($column instanceof \Egmond\InertiaTables\Columns\TextColumn && $column->toArray()['badge']) {
+                if ($column instanceof \Egmond\InertiaTables\Columns\TextColumn && $column->isBadgeEnabled()) {
                     $badgeVariants[$key] = $column->resolveBadgeVariant($value, $recordArray);
                 }
             }
@@ -172,6 +248,9 @@ class TableBuilder
                     'badgeVariant' => $badgeVariants,
                 ];
             }
+
+            // Add row-specific action data
+            $transformedRecord['actions'] = $this->getRowActionData($record);
 
             return $transformedRecord;
         })->toArray();
@@ -323,5 +402,46 @@ class TableBuilder
         } else {
             $query->withSum($relationship, $column);
         }
+    }
+
+    protected function serializeActions(array $actions): array
+    {
+        return array_map(function ($action) {
+            if (method_exists($action, 'toArray')) {
+                // Set table class for URL generation
+                if (method_exists($action, 'setTableClass') && $this->tableClass) {
+                    $action->setTableClass($this->tableClass);
+                }
+
+                $actionData = $action->toArray();
+                $actionData['tableName'] = $this->name;
+
+                return $actionData;
+            }
+
+            return $action;
+        }, $actions);
+    }
+
+    protected function getRowActionData(\Illuminate\Database\Eloquent\Model $record): array
+    {
+        $rowActions = [];
+
+        foreach ($this->actions as $action) {
+            if (method_exists($action, 'toRowArray')) {
+                // Set table class for URL generation
+                if (method_exists($action, 'setTableClass') && $this->tableClass) {
+                    $action->setTableClass($this->tableClass);
+                }
+
+                // Only include authorized and visible actions
+                if (method_exists($action, 'isAuthorized') && method_exists($action, 'isVisible') && method_exists($action, 'getName') &&
+                    $action->isAuthorized($record) && $action->isVisible($record)) {
+                    $rowActions[$action->getName()] = $action->toRowArray($record);
+                }
+            }
+        }
+
+        return $rowActions;
     }
 }

@@ -8,6 +8,7 @@ use Egmond\InertiaTables\Concerns\HasRelationship;
 use Egmond\InertiaTables\Concerns\HasState;
 use Egmond\InertiaTables\Contracts\HasLabel;
 
+/** @phpstan-consistent-constructor */
 abstract class BaseColumn
 {
     use CanBeSearched, CanBeSorted, HasRelationship, HasState;
@@ -51,7 +52,7 @@ abstract class BaseColumn
 
     public function toArray(): array
     {
-        return [
+        $data = [
             'key' => $this->getKey(),
             'label' => $this->getLabel(),
             'type' => $this->getType(),
@@ -62,6 +63,26 @@ abstract class BaseColumn
             'defaultSort' => $this->getDefaultSortDirection(),
             'state' => $this->getState(),
         ];
+
+        return $this->filterDefaults($data);
+    }
+
+    protected function filterDefaults(array $data): array
+    {
+        return array_filter($data, function ($value, $key) {
+            // Always include required fields
+            if (in_array($key, ['key', 'label', 'type'])) {
+                return true;
+            }
+
+            // For visible field, only include if false (since true is default)
+            if ($key === 'visible') {
+                return $value === false;
+            }
+
+            // Filter out false, null, empty strings, and empty arrays for other fields
+            return $value !== false && $value !== null && $value !== '' && $value !== [];
+        }, ARRAY_FILTER_USE_BOTH);
     }
 
     protected function generateLabel(string $key): string

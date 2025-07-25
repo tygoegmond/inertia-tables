@@ -18,6 +18,10 @@ class Serializer
             'sort' => static::serializeSort($result->sort),
             'search' => $result->search,
             'name' => $result->name,
+            'actions' => static::serializeActions($result->actions),
+            'bulkActions' => static::serializeBulkActions($result->bulkActions),
+            'headerActions' => static::serializeHeaderActions($result->headerActions),
+            'primaryKey' => $result->primaryKey,
         ];
     }
 
@@ -83,5 +87,38 @@ class Serializer
     public static function serializeSort(array $sort): array
     {
         return $sort;
+    }
+
+    public static function serializeActions(array $actions): array
+    {
+        return array_map(function ($action) {
+            if ($action instanceof Arrayable) {
+                return $action->toArray();
+            }
+
+            return $action;
+        }, $actions);
+    }
+
+    public static function serializeBulkActions(array $bulkActions): array
+    {
+        return array_map(function ($action) {
+            if ($action instanceof Arrayable) {
+                return $action->toArray();
+            }
+
+            return $action;
+        }, $bulkActions);
+    }
+
+    public static function serializeHeaderActions(array $headerActions): array
+    {
+        return array_map(function ($action) {
+            if ($action instanceof Arrayable) {
+                return $action->toArray();
+            }
+
+            return $action;
+        }, $headerActions);
     }
 }

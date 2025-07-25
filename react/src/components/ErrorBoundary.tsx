@@ -1,4 +1,4 @@
-import * as React from "react";
+import * as React from 'react';
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
@@ -11,18 +11,19 @@ interface ErrorBoundaryState {
   error: Error | null;
 }
 
-const DefaultErrorFallback: React.FC<{ error: Error; retry: () => void }> = ({ 
-  error, 
-  retry 
+const DefaultErrorFallback: React.FC<{ error: Error; retry: () => void }> = ({
+  error,
+  retry,
 }) => {
   // Check if this is likely a deferred prop error
-  const isDeferredError = error.message?.includes('Cannot read properties of undefined') ||
-    error.message?.includes('reading \'search\'') ||
-    error.message?.includes('reading \'config\'') ||
-    error.message?.includes('reading \'pagination\'');
+  const isDeferredError =
+    error.message?.includes('Cannot read properties of undefined') ||
+    error.message?.includes("reading 'search'") ||
+    error.message?.includes("reading 'config'") ||
+    error.message?.includes("reading 'pagination'");
 
-  const errorTitle = isDeferredError 
-    ? 'Table data is loading...' 
+  const errorTitle = isDeferredError
+    ? 'Table data is loading...'
     : 'Something went wrong with the table';
 
   const errorMessage = isDeferredError
@@ -32,15 +33,14 @@ const DefaultErrorFallback: React.FC<{ error: Error; retry: () => void }> = ({
   return (
     <div className="flex flex-col items-center justify-center p-8 border border-destructive/20 rounded-md bg-destructive/5">
       <div className="text-center space-y-4">
-        <div className="text-destructive font-medium">
-          {errorTitle}
-        </div>
+        <div className="text-destructive font-medium">{errorTitle}</div>
         <div className="text-sm text-muted-foreground max-w-md">
           {errorMessage}
         </div>
         {isDeferredError && (
           <div className="text-xs text-muted-foreground">
-            💡 If using Inertia deferred props, ensure the table prop is properly set up on the server side.
+            💡 If using Inertia deferred props, ensure the table prop is
+            properly set up on the server side.
           </div>
         )}
         <button
@@ -69,16 +69,22 @@ export class ErrorBoundary extends React.Component<
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     this.props.onError?.(error, errorInfo);
-    
+
     // Enhanced logging for development
-    if (process.env.NODE_ENV === 'development') {
-      const isDeferredError = error.message?.includes('Cannot read properties of undefined');
-      
+    if (
+      typeof process !== 'undefined' &&
+      process.env?.NODE_ENV === 'development'
+    ) {
+      const isDeferredError = error.message?.includes(
+        'Cannot read properties of undefined'
+      );
+
       if (isDeferredError) {
         console.warn(
           '🔄 InertiaTable: Deferred prop error detected. This usually means the table data is still loading.',
           '\n💡 Consider using Inertia::defer() properly on the server side.',
-          '\n📝 Error details:', error.message
+          '\n📝 Error details:',
+          error.message
         );
         console.error('Full error:', error, errorInfo);
       } else {
@@ -95,10 +101,7 @@ export class ErrorBoundary extends React.Component<
     if (this.state.hasError && this.state.error) {
       const FallbackComponent = this.props.fallback || DefaultErrorFallback;
       return (
-        <FallbackComponent 
-          error={this.state.error} 
-          retry={this.handleRetry} 
-        />
+        <FallbackComponent error={this.state.error} retry={this.handleRetry} />
       );
     }
 

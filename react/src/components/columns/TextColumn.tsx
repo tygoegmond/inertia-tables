@@ -1,6 +1,6 @@
-import * as React from "react";
-import { TableColumn } from "../../types";
-import { Badge } from "../ui/badge";
+import * as React from 'react';
+import { TableColumn } from '../../types';
+import { Badge } from '../ui/badge';
 
 interface TextColumnProps {
   column: TableColumn;
@@ -31,10 +31,15 @@ export function TextColumn({ column, value, record }: TextColumnProps) {
 
   // If badge is enabled, render as Badge component
   if (column.badge) {
-    const variant = (record.meta?.badgeVariant?.[column.key] as "default" | "secondary" | "destructive" | "outline") || "default";
-    
+    const variant =
+      (record.meta?.badgeVariant?.[column.key] as
+        | 'default'
+        | 'secondary'
+        | 'destructive'
+        | 'outline') || 'default';
+
     return (
-      <Badge 
+      <Badge
         variant={variant}
         className={column.copyable ? 'cursor-pointer select-all' : ''}
       >
@@ -45,7 +50,9 @@ export function TextColumn({ column, value, record }: TextColumnProps) {
 
   // Otherwise render as normal text
   return (
-    <div className={`${wrapClass} ${column.copyable ? 'cursor-pointer select-all' : ''}`}>
+    <div
+      className={`${wrapClass} ${column.copyable ? 'cursor-pointer select-all' : ''}`}
+    >
       {formatted}
     </div>
   );

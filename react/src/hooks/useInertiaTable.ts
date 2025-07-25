@@ -1,6 +1,6 @@
-import * as React from "react";
-import { router, usePage } from "@inertiajs/react";
-import { TableResult } from "../types";
+import * as React from 'react';
+import { router, usePage } from '@inertiajs/react';
+import { TableResult } from '../types';
 
 interface UseInertiaTableProps {
   initialSearch?: string;
@@ -13,7 +13,7 @@ interface InertiaTableState {
   searchValue: string;
   setSearchValue: React.Dispatch<React.SetStateAction<string>>;
   handleSearch: (query: string) => void;
-  handleSort: (column: string, direction: 'asc' | 'desc') => void;
+  handleSort: (column: string | null, direction: 'asc' | 'desc' | null) => void;
   handlePageChange: (page: number) => void;
   isNavigating: boolean;
 }
@@ -33,10 +33,15 @@ export function useInertiaTable({
   const tableName = tableState?.name;
   const propName = React.useMemo(() => {
     if (!tableState || !tableName) return null;
-    
+
     // Find which prop contains this table state by matching the table name
     for (const [key, value] of Object.entries(props)) {
-      if (value && typeof value === 'object' && 'name' in value && value.name === tableName) {
+      if (
+        value &&
+        typeof value === 'object' &&
+        'name' in value &&
+        value.name === tableName
+      ) {
         return key;
       }
     }
@@ -47,7 +52,7 @@ export function useInertiaTable({
     (params: Record<string, any>) => {
       pendingRequestsRef.current++;
       setIsNavigating(true);
-      
+
       // Table name is always required now
       if (!tableName) {
         console.error('Table name is required for navigation');
@@ -61,7 +66,7 @@ export function useInertiaTable({
       // Get current URL parameters to preserve other table states
       const currentUrl = new URL(window.location.href);
       const currentParams: Record<string, any> = {};
-      
+
       // Parse existing query parameters
       for (const [key, value] of currentUrl.searchParams.entries()) {
         // Handle nested parameters like "users[search]"
@@ -82,8 +87,8 @@ export function useInertiaTable({
         ...currentParams,
         [tableName]: {
           ...(currentParams[tableName] || {}),
-          ...params
-        }
+          ...params,
+        },
       };
 
       const options: any = {
@@ -107,12 +112,8 @@ export function useInertiaTable({
       if (propName) {
         options.only = [propName];
       }
-      
-      router.get(
-        window.location.pathname,
-        finalParams,
-        options
-      );
+
+      router.get(window.location.pathname, finalParams, options);
     },
     [preserveState, preserveScroll, tableName, propName]
   );
@@ -126,8 +127,13 @@ export function useInertiaTable({
   );
 
   const handleSort = React.useCallback(
-    (column: string, direction: 'asc' | 'desc') => {
-      navigate({ sort: column, direction });
+    (column: string | null, direction: 'asc' | 'desc' | null) => {
+      if (column === null || direction === null) {
+        // Clear sorting
+        navigate({ sort: undefined, direction: undefined });
+      } else {
+        navigate({ sort: column, direction });
+      }
     },
     [navigate]
   );

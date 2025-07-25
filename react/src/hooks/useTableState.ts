@@ -1,33 +1,38 @@
-import * as React from "react";
-import { SortingState } from "@tanstack/react-table";
-import { TableResult } from "../types";
+import * as React from 'react';
+import { SortingState } from '@tanstack/react-table';
+import { TableResult } from '../types';
 
 interface UseTableStateProps {
   result: TableResult | undefined;
-  onSort?: (column: string, direction: 'asc' | 'desc') => void;
+  onSort?: (column: string | null, direction: 'asc' | 'desc' | null) => void;
 }
 
 interface TableState {
   sorting: SortingState;
   setSorting: React.Dispatch<React.SetStateAction<SortingState>>;
-  handleSort: (column: string, direction: 'asc' | 'desc') => void;
+  handleSort: (column: string | null, direction: 'asc' | 'desc' | null) => void;
   isLoading: boolean;
   error: Error | null;
 }
 
-export function useTableState({ result, onSort }: UseTableStateProps): TableState {
+export function useTableState({
+  result,
+  onSort,
+}: UseTableStateProps): TableState {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState<Error | null>(null);
 
   const handleSort = React.useCallback(
-    (column: string, direction: 'asc' | 'desc') => {
+    (column: string | null, direction: 'asc' | 'desc' | null) => {
       try {
         setError(null);
         setIsLoading(true);
         onSort?.(column, direction);
       } catch (err) {
-        setError(err instanceof Error ? err : new Error('Sort operation failed'));
+        setError(
+          err instanceof Error ? err : new Error('Sort operation failed')
+        );
       } finally {
         setIsLoading(false);
       }
@@ -38,10 +43,12 @@ export function useTableState({ result, onSort }: UseTableStateProps): TableStat
   // Sync sorting state with result
   React.useEffect(() => {
     if (result?.sort) {
-      const newSorting: SortingState = Object.entries(result.sort).map(([id, desc]) => ({
-        id,
-        desc: desc === 'desc',
-      }));
+      const newSorting: SortingState = Object.entries(result.sort).map(
+        ([id, desc]) => ({
+          id,
+          desc: desc === 'desc',
+        })
+      );
       setSorting(newSorting);
     }
   }, [result?.sort]);

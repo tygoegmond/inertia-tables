@@ -2,7 +2,6 @@
 
 namespace Egmond\InertiaTables;
 
-use Closure;
 use Illuminate\Database\Eloquent\Builder;
 
 class Table
@@ -19,13 +18,17 @@ class Table
 
     protected ?string $name = null;
 
-    public function query(Builder|Closure $query): static
+    protected array $actions = [];
+
+    protected array $bulkActions = [];
+
+    protected array $headerActions = [];
+
+    protected ?string $tableClass = null;
+
+    public function query(Builder $query): static
     {
-        if ($query instanceof Closure) {
-            $this->query = $query($this->query);
-        } else {
-            $this->query = $query;
-        }
+        $this->query = $query;
 
         return $this;
     }
@@ -102,6 +105,69 @@ class Table
         return $this->name;
     }
 
+    public function actions(array $actions): static
+    {
+        $this->actions = $actions;
+
+        return $this;
+    }
+
+    public function bulkActions(array $bulkActions): static
+    {
+        $this->bulkActions = $bulkActions;
+
+        return $this;
+    }
+
+    public function headerActions(array $headerActions): static
+    {
+        $this->headerActions = $headerActions;
+
+        return $this;
+    }
+
+    public function getActions(): array
+    {
+        return $this->actions;
+    }
+
+    public function getBulkActions(): array
+    {
+        return $this->bulkActions;
+    }
+
+    public function getHeaderActions(): array
+    {
+        return $this->headerActions;
+    }
+
+    public function hasActions(): bool
+    {
+        return ! empty($this->actions);
+    }
+
+    public function hasBulkActions(): bool
+    {
+        return ! empty($this->bulkActions);
+    }
+
+    public function hasHeaderActions(): bool
+    {
+        return ! empty($this->headerActions);
+    }
+
+    public function setTableClass(string $tableClass): static
+    {
+        $this->tableClass = $tableClass;
+
+        return $this;
+    }
+
+    public function getTableClass(): ?string
+    {
+        return $this->tableClass;
+    }
+
     public function build(): TableResult
     {
         if (! $this->query) {
@@ -118,6 +184,14 @@ class Table
             ->paginate($this->perPage);
 
         $builder->setName($this->name);
+
+        if ($this->tableClass) {
+            $builder->setTableClass($this->tableClass);
+        }
+
+        $builder->actions($this->actions);
+        $builder->bulkActions($this->bulkActions);
+        $builder->headerActions($this->headerActions);
 
         foreach ($this->defaultSort as $column => $direction) {
             $builder->sortBy($column, $direction);

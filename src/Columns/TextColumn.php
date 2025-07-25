@@ -69,6 +69,11 @@ class TextColumn extends BaseColumn
         return $this;
     }
 
+    public function isBadgeEnabled(): bool
+    {
+        return $this->badge;
+    }
+
     public function formatValue(mixed $value, array $record): mixed
     {
         if ($value === null) {
@@ -110,13 +115,43 @@ class TextColumn extends BaseColumn
 
     public function toArray(): array
     {
-        return array_merge(parent::toArray(), [
+        // Build raw data without filtering from parent
+        $data = [
+            'key' => $this->getKey(),
+            'label' => $this->getLabel(),
+            'type' => $this->getType(),
+            'visible' => $this->isVisible(),
+            'sortable' => $this->isSortable(),
+            'searchable' => $this->isSearchable(),
+            'searchColumn' => $this->getSearchColumn(),
+            'defaultSort' => $this->getDefaultSortDirection(),
+            'state' => $this->getState(),
             'prefix' => $this->prefix,
             'suffix' => $this->suffix,
             'copyable' => $this->copyable,
             'limit' => $this->limit,
             'wrap' => $this->wrap,
             'badge' => $this->badge,
-        ]);
+        ];
+
+        return $this->filterDefaults($data);
+    }
+
+    protected function filterDefaults(array $data): array
+    {
+        return array_filter($data, function ($value, $key) {
+            // Always include required fields and wrap (React depends on explicit wrap values)
+            if (in_array($key, ['key', 'label', 'type', 'wrap'])) {
+                return true;
+            }
+
+            // For visible field, only include if false (since true is default)
+            if ($key === 'visible') {
+                return $value === false;
+            }
+
+            // Filter out false, null, empty strings, and empty arrays for other fields
+            return $value !== false && $value !== null && $value !== '' && $value !== [];
+        }, ARRAY_FILTER_USE_BOTH);
     }
 }

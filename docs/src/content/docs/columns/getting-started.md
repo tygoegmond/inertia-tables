@@ -3,8 +3,6 @@ title: Getting Started with Columns
 description: Learn about the column system in Inertia Tables and how to configure different column types.
 ---
 
-## Overview
-
 Columns are the fundamental building blocks of your data tables. They define how your data is displayed, formatted, and interacted with. Inertia Tables provides a flexible column system that allows you to customize every aspect of your table's appearance and behavior.
 
 Column classes can be found in the `Egmond\InertiaTables\Columns` namespace. You can put them inside the `$table->columns()` method:

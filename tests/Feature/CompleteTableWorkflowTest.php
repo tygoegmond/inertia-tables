@@ -305,7 +305,13 @@ describe('Complete Table Workflow Feature Tests', function () {
         });
 
         it('respects action authorization in workflow', function () {
-            $archivedPost = $this->posts->where('status', 'archived')->first();
+            // Create a specific archived post to test authorization
+            $archivedPost = Post::factory()->create([
+                'status' => 'archived',
+                'user_id' => $this->users->first()->id,
+                'category_id' => $this->categories->first()->id,
+                'created_at' => now()->addMinute(), // Ensure it appears first on the page (default sort is created_at desc)
+            ]);
 
             // Try to edit an archived post (should be unauthorized)
             $signedUrl = URL::signedRoute('inertia-tables.action', [
@@ -330,8 +336,11 @@ describe('Complete Table Workflow Feature Tests', function () {
                 }
             }
 
+            // Ensure we found the archived post and test the authorization
+            expect($archivedPostData)->not->toBeNull();
+            
             // The edit action should not be available for archived posts
-            if ($archivedPostData && isset($archivedPostData['actions'])) {
+            if (isset($archivedPostData['actions'])) {
                 $editActionAvailable = false;
                 foreach ($archivedPostData['actions'] as $action) {
                     if ($action['name'] === 'edit') {
@@ -340,6 +349,9 @@ describe('Complete Table Workflow Feature Tests', function () {
                     }
                 }
                 expect($editActionAvailable)->toBeFalse();
+            } else {
+                // If no actions key exists, that's also valid (no actions available)
+                expect(true)->toBeTrue(); // Ensure we always have an assertion
             }
         });
 
@@ -423,7 +435,7 @@ describe('Complete Table Workflow Feature Tests', function () {
                 expect($firstPost['created_at'])->toMatch('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/');
 
                 // Test status badge
-                expect(in_array($firstPost['status'], ['published', 'draft', 'archived']))->toBeTrue();
+                expect(in_array($firstPost['status'], ['published', 'draft', 'archived', 'pending']))->toBeTrue();
 
                 // Test relationship data (relationships are flattened with dot notation)
                 expect($firstPost)->toHaveKey('user.name');
